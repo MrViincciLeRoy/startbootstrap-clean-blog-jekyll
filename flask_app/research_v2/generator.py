@@ -480,6 +480,11 @@ author: "Botanical AI Assistant"
         logger.info(f"Focused article generated successfully for {plant_name}")
         return final_article
 
+    def generate_article(self, research_data: List[Dict], plant_name: str, 
+                        include_front_matter: bool = True) -> str:
+        """Backward compatibility method - calls generate_focused_article."""
+        return self.generate_focused_article(research_data, plant_name, include_front_matter)
+
 
 # Alias for backward compatibility - you can import this as ArticleGenerator
 ArticleGenerator = FocusedArticleGenerator
