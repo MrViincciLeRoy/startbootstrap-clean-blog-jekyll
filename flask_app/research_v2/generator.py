@@ -240,8 +240,8 @@ class ExpandedArticleGenerator:
                     
                     summary = self.summarizer(
                         focused_content,
-                        max_length=100,
-                        min_length=40,
+                        max_length=50,
+                        min_length=30,
                         do_sample=True,
                         temperature=0.7
                     )
