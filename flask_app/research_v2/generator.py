@@ -423,6 +423,11 @@ author: "Botanical Research Team"
         logger.info(f"Expanded article generated successfully for {plant_name}")
         return final_article
 
+    def generate_article(self, research_data: List[Dict], plant_name: str, 
+                        include_front_matter: bool = True) -> str:
+        """Backward compatibility method - calls generate_focused_article."""
+        return self.generate_focused_article(research_data, plant_name, include_front_matter)
+
 # Alias for backward compatibility
 ArticleGenerator = ExpandedArticleGenerator
 
@@ -435,14 +440,14 @@ def generate_article(research_data: List[Dict], plant_name: str) -> str:
 def generate_plant_title(plant_name: str) -> str:
     """Generate an engaging title for the plant article (backward compatibility)."""
     title_templates = [
-        f"The Magnificent {plant_name}: South Africa's Iconic Flowering Plant",
-        f"Discovering {plant_name}: A Botanical Treasure of South Africa", 
-        f"{plant_name}: Beauty and Heritage in South African Flora",
-        f"Exploring {plant_name}: Nature's Artistry in South Africa"
+        f"{plant_name}: A Remarkable South African Plant Species",
+        f"Discovering {plant_name}: Botanical Treasures of South Africa", 
+        f"{plant_name}: Unique Adaptations in South African Flora",
+        f"The Fascinating World of {plant_name}: South African Botanical Heritage"
     ]
     return random.choice(title_templates)
 
 def generate_focused_article(research_data: List[Dict], plant_name: str) -> str:
     """Generate a focused article using the improved generator."""
-    generator = FocusedArticleGenerator()
+    generator = ExpandedArticleGenerator()
     return generator.generate_focused_article(research_data, plant_name, include_front_matter=False)
