@@ -199,18 +199,17 @@ def save_article(full_article, plant_name):
     
     return filepath
 
-
 def run():
     """Main function to generate article from incomplete plant in database"""
     try:
-       db_path = os.path.join('research_v3', 'flora_data.db')
+        db_path = os.path.join('research_v3', 'flora_data.db')
 
-       if not os.path.exists(db_path):
+        if not os.path.exists(db_path):
             print(f"❌ Database not found at: {db_path}")
-        # ... error handling
-    
+            # ... error handling
+
         db = FloraDatabase(db_path)
-        #db = FloraDatabase("flora_data.db")
+        # db = FloraDatabase("flora_data.db")
         incomplete_plants = db.get_all_incomplete_plants()
         
         if not incomplete_plants:
