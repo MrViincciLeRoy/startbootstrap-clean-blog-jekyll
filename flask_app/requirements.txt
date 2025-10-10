@@ -61,8 +61,8 @@ pytest>=7.0.0
 pytest-cov>=4.0.0
 
 # Optional: Accelerated transformers (uncomment if using GPU)
-# accelerate>=0.12.0
+accelerate>=0.12.0
 
 # Optional: Additional NLP libraries for enhanced processing
-# spacy>=3.4.0
-# nltk>=3.7
+spacy>=3.4.0
+nltk>=3.7
