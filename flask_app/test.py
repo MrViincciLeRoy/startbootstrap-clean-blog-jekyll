@@ -205,7 +205,7 @@ def run():
     try:
        db_path = os.path.join('research_v3', 'flora_data.db')
 
-        if not os.path.exists(db_path):
+       if not os.path.exists(db_path):
             print(f"❌ Database not found at: {db_path}")
         # ... error handling
     
