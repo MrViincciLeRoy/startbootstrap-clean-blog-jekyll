@@ -340,7 +340,7 @@ def test_setup():
     
     # Test database connection
     try:
-        db = FloraDatabase("flora_data.db")
+        db = FloraDatabase("research_v3/flora_data.db")
         incomplete = db.get_all_incomplete_plants()
         print(f"\n✓ Database connection successful")
         print(f"✓ Found {len(incomplete)} incomplete plants")
