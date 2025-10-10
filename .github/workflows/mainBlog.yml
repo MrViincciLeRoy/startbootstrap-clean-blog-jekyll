@@ -1,0 +1,209 @@
+name: Generate Plant Blog Posts
+
+on:
+  # Run manually via workflow dispatch
+  workflow_dispatch:
+
+  # Run on schedule (weekly on Sundays)
+  schedule:
+    - cron: '0 10 * * 0'  # 10:00 AM UTC every Sunday
+
+  # Run on push to main branch (optional)
+  push:
+    branches: [ main ]
+    paths:
+      - 'research_v3/**'
+      - 'test.py'
+      - 'main.py'
+
+env:
+  # Target repository for blog posts
+  TARGET_REPO: 'MrViincciLeRoy/startbootstrap-clean-blog-jekyll'
+  TARGET_BRANCH: 'master'  # or 'main' ? match your blog repo
+
+jobs:
+  generate-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Cache Hugging Face models
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/huggingface
+        key: ${{ runner.os }}-huggingface-${{ hashFiles('**/requirements.txt', '**/test.py', '**/main.py') }}
+        restore-keys: |
+          ${{ runner.os }}-huggingface-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+
+        if [ -f flask_app/requirements.txt ]; then
+          pip install -r flask_app/requirements.txt
+        elif [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        else
+          pip install Flask transformers wikipedia-api beautifulsoup4 requests torch
+        fi
+
+    - name: Create _posts directory
+      run: mkdir -p _posts
+
+    - name: Generate blog posts
+      run: |
+        # Navigate to flask_app if it exists
+        if [ -d "flask_app" ]; then
+          cd flask_app
+          echo "Working in flask_app directory"
+        fi
+
+        echo "Current directory: $(pwd)"
+        ls -la
+
+        # Run test.py if exists, else main.py
+        if [ -f "test.py" ]; then
+          echo "Running test.py..."
+          python test.py
+        elif [ -f "main.py" ]; then
+          echo "Running main.py..."
+          python main.py
+        else
+          echo "ERROR: Neither test.py nor main.py found!"
+          exit 1
+        fi
+
+    - name: Locate and collect generated posts
+      run: |
+        # Search for posts in likely locations
+        mkdir -p _posts
+
+        # Check current dir and flask_app/_posts
+        if [ -d "flask_app/_posts" ]; then
+          cp flask_app/_posts/*.html flask_app/_posts/*.md _posts/ 2>/dev/null || true
+        fi
+
+        # Also check root _posts (in case script wrote there)
+        if [ -d "./_posts" ] && [ "$(ls -A ./_posts 2>/dev/null)" ]; then
+          cp ./_posts/*.html ./_posts/*.md _posts/ 2>/dev/null || true
+        fi
+
+        # Final check
+        if [ ! -d "_posts" ] || [ -z "$(ls -A _posts 2>/dev/null)" ]; then
+          echo "ERROR: No blog posts were generated in _posts/!"
+          echo "Searching for any .html or .md files..."
+          find . -type f \( -name "*.html" -o -name "*.md" \) -exec ls -l {} \;
+          exit 1
+        fi
+
+        echo "Generated posts:"
+        ls -la _posts/
+
+    - name: Checkout target blog repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ env.TARGET_REPO }}
+        token: ${{ secrets.BLOG_DEPLOY_TOKEN }}
+        path: blog-repo
+        ref: ${{ env.TARGET_BRANCH }}
+        fetch-depth: 0
+
+    - name: Copy posts to blog repository
+      run: |
+        mkdir -p blog-repo/_posts
+        cp _posts/*.html _posts/*.md blog-repo/_posts/ 2>/dev/null || echo "No files to copy"
+
+        echo "Copied to blog repo:"
+        ls -la blog-repo/_posts/
+
+    - name: Configure Git and commit
+      run: |
+        cd blog-repo
+        git config user.name "Plant Bot"
+        git config user.email "miguelmehgoss@gmail.com"
+
+        git add _posts/
+
+        if [ -n "$(git status --porcelain)" ]; then
+          git commit -m "Add new plant blog posts
+
+          Generated automatically by GitHub Actions
+          Workflow: ${{ github.workflow }}
+          Run: ${{ github.run_number }}
+          Timestamp: $(date -u)"
+          
+          git push origin ${{ env.TARGET_BRANCH }}
+          echo "? Successfully pushed new blog posts!"
+        else
+          echo "?? No changes to commit."
+        fi
+
+    - name: Create summary
+      if: always()
+      run: |
+        echo "## Blog Generation Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Target repo:** ${{ env.TARGET_REPO }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Branch:** ${{ env.TARGET_BRANCH }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ -d "_posts" ] && [ "$(ls -A _posts 2>/dev/null)" ]; then
+          echo "**Generated posts:**" >> $GITHUB_STEP_SUMMARY
+          for f in _posts/*; do
+            if [ -f "$f" ]; then
+              size=$(stat -c%s "$f" 2>/dev/null || stat -f%z "$f")
+              echo "- $(basename "$f") (${size} bytes)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+        else
+          echo "**? ERROR:** No posts generated!" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**? Blog:** [View Site](https://${{ github.repository_owner }}.github.io/startbootstrap-clean-blog-jekyll/)" >> $GITHUB_STEP_SUMMARY
+
+  test-jekyll-build:
+    needs: generate-and-deploy
+    if: success()
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout blog repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ env.TARGET_REPO }}
+        token: ${{ secrets.BLOG_DEPLOY_TOKEN }}
+        ref: ${{ env.TARGET_BRANCH }}
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+        bundler-cache: true
+
+    - name: Install Jekyll and build site
+      run: |
+        bundle install
+        bundle exec jekyll build --verbose
+
+    - name: Confirm build success
+      run: |
+        echo "? Jekyll site built successfully!"
+        echo "Recent posts:"
+        find _site -path "*posts*" -name "*.html" | head -5
