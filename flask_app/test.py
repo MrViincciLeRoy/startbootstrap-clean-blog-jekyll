@@ -229,7 +229,7 @@ def run():
 
             # Check if already complete (FIXED LOGIC)
             is_complete = db.check_if_complete(sci_name)
-            if is complete == False:
+            if is_complete == False:
                 print(f"Plant '{sci_name}' is already complete. Skipping.")
                 continue
 
