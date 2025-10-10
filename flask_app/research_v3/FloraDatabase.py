@@ -210,7 +210,58 @@ class FloraDatabase:
         print(f"  With scientific name: {with_sci_name}")
         print(f"  Without scientific name: {without_sci_name}")
         print(f"  Unique families: {families}")
+    def get_full_plant_info(self, scientific_name: str) -> Optional[Dict]:
+        """Get complete information for a plant by scientific name."""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
 
+        cursor.execute("""
+            SELECT *
+            FROM flora_plants
+            WHERE scientific_name = ?
+        """, (scientific_name,))
+
+        result = cursor.fetchone()
+
+        if result:
+            columns = [description[0] for description in cursor.description]
+            plant_info = dict(zip(columns, result))
+            conn.close()
+            return plant_info
+
+        conn.close()
+        return None
+
+    def mark_plant_complete(self, scientific_name: str, complete: bool = True) -> bool:
+        """Mark a plant as complete or incomplete by scientific name.
+        
+        Args:
+            scientific_name: The scientific name of the plant to update
+            complete: True to mark as complete (1), False to mark as incomplete (0)
+            
+        Returns:
+            True if update was successful, False if plant not found
+        """
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE flora_plants
+            SET complete = ?
+            WHERE scientific_name = ?
+        """, (1 if complete else 0, scientific_name))
+
+        rows_affected = cursor.rowcount
+        conn.commit()
+        conn.close()
+
+        if rows_affected > 0:
+            status = "complete" if complete else "incomplete"
+            print(f"Marked '{scientific_name}' as {status}")
+            return True
+        else:
+            print(f"Plant '{scientific_name}' not found")
+            return False
     def print_scientific_names(self, limit: Optional[int] = None):
         """Print scientific names in a formatted way."""
         results = self.get_all_scientific_names()
