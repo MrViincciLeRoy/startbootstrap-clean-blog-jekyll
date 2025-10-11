@@ -229,7 +229,7 @@ def run():
 
             # Check if already complete (FIXED LOGIC)
             is_complete = db.check_if_complete(sci_name)
-            if is_complete == False:
+            if is_complete == True:
                 print(f"Plant '{sci_name}' is already complete. Skipping.")
                 continue
 
@@ -302,7 +302,7 @@ def run():
 
             # Mark as complete in database
             print(f"\n✅ Marking '{plant_name}' as complete in database...")
-            db.mark_plant_complete(plant_name, complete=False)
+            db.mark_plant_complete(plant_name, complete=True)
 
             print(f"\n🎉 SUCCESS! Article generated and saved to {filepath}")
             print(f"📏 Total length: {len(article)} characters")
