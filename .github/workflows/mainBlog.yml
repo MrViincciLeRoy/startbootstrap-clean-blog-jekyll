@@ -20,10 +20,16 @@ env:
   # Target repository for blog posts
   TARGET_REPO: 'MrViincciLeRoy/startbootstrap-clean-blog-jekyll'
   TARGET_BRANCH: 'master'  # or 'main' ? match your blog repo
-
 jobs:
   generate-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      TARGET_REPO: 'MrViincciLeRoy/startbootstrap-clean-blog-jekyll'
+      TARGET_BRANCH: 'master'
+      SERP_API_KEY: ${{ secrets.SERP_API_KEY }}  # ← Add this line
+#jobs:
+  #generate-and-deploy:
+    #runs-on: ubuntu-latest
 
     steps:
     - name: Checkout source repository
