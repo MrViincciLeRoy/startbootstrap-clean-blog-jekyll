@@ -225,8 +225,8 @@ def run():
             sci_name = db.get_scientific_name_by_title(title)
             if not sci_name:
                 print(f"Warning: No scientific name found for title '{title}'. Skipping.")
-                print(f"\n✅ Marking '{plant_name}' as complete in database...")
-                db.mark_plant_complete(plant_name, complete=True)
+                #print(f"\n✅ Marking '{plant_name}' as complete in database...")
+                #db.mark_plant_complete(plant_name, complete=True)
                 continue
 
             # Check if already complete (FIXED LOGIC)
@@ -245,8 +245,8 @@ def run():
                 break  # Found valid data — exit loop
             else:
                 print(f"⚠️ No data found for '{sci_name}'. Trying next plant...")
-                print(f"\n✅ Marking '{plant_name}' as complete in database...")
-                db.mark_plant_complete(plant_name, complete=True)
+                print(f"\n✅ Marking '{sci_name}' as complete in database...")
+                db.mark_plant_complete(sci_name, complete=True)
         else:
             # This runs if the loop completes without breaking
             print("\n❌ No suitable incomplete plant with available data was found.")
