@@ -302,7 +302,7 @@ def run():
 
             # Mark as complete in database
             print(f"\n✅ Marking '{plant_name}' as complete in database...")
-            db.mark_plant_complete(plant_name, complete=False)
+            db.mark_plant_complete(plant_name, complete=True)
 
             print(f"\n🎉 SUCCESS! Article generated and saved to {filepath}")
             print(f"📏 Total length: {len(article)} characters")
