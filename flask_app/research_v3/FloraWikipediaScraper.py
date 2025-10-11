@@ -200,14 +200,14 @@ class FloraWikipediaScraper:
                 infobox_data.get('Species'),
                 infobox_data.get('image'),
                 infobox_data.get('image_caption'),
-                1,  # complete = True
+                0,  # complete = True
                 str(infobox_data)  # Store raw data as JSON string
             ))
         else:
             # Insert URL with complete = False if scraping failed
             cursor.execute('''
                 INSERT OR IGNORE INTO flora_plants (url, complete)
-                VALUES (?, 0)
+                VALUES (?, 1)
             ''', (url,))
 
         conn.commit()
