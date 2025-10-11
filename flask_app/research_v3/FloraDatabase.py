@@ -80,7 +80,7 @@ class FloraDatabase:
         cursor.execute("""
             SELECT id, title, scientific_name, family, genus, url
             FROM flora_plants
-            WHERE complete = 1
+            WHERE complete = 0
             ORDER BY scientific_name
         """)
 
@@ -249,7 +249,7 @@ class FloraDatabase:
             UPDATE flora_plants
             SET complete = ?
             WHERE scientific_name = ?
-        """, (0 if complete else 1, scientific_name))
+        """, (1 if complete else 0, scientific_name))
 
         rows_affected = cursor.rowcount
         conn.commit()
