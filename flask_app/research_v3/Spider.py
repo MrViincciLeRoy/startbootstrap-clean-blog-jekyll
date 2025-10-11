@@ -35,7 +35,7 @@ class EnhancedPlantSpider:
             max_sources: Maximum number of sources to collect (minimum 20)
             add_search_terms: If True, adds 'plant care cultivation botanical' to search
         """
-        self.serpapi_key = serpapi_key
+        self.serpapi_key = os.getenv('SERP_API_KEY')
         self.delay = delay
         self.max_sources = max(20, max_sources)
         self.session = requests.Session()
@@ -677,7 +677,7 @@ def search(name=None, serpapi_key="your_serpapi_key_here"):
     Main search function
     """
     spider = EnhancedPlantSpider(
-        serpapi_key=serpapi_key,
+        serpapi_key=os.getenv('SERP_API_KEY') or serpapi_key,
         delay=1.5,
         max_sources=20
     )
