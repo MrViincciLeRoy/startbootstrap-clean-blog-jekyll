@@ -1,17 +1,16 @@
 
-
-
 import requests
 from bs4 import BeautifulSoup
 import time
-import re
-from urllib.parse import urljoin, urlparse, quote_plus
-from typing import List, Dict, Optional, Set
+from urllib.parse import urlparse
+from typing import List, Dict, Optional
 import json
 from dataclasses import dataclass
 from datetime import datetime
 import logging
-
+import io
+import PyPDF2
+import os
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,384 +24,307 @@ class Source:
     reliability_score: float
 
 class EnhancedPlantSpider:
-    def __init__(self, delay: float = 1.5, max_sources: int = 10, articles_per_search: int = 3):
+    def __init__(self, serpapi_key: str, delay: float = 1.5, max_sources: int = 20, 
+                 add_search_terms: bool = False):
         """
-        Initialize the Enhanced Plant Spider for RAG system
+        Initialize the Enhanced Plant Spider using SerpAPI for search
 
         Args:
+            serpapi_key: Your SerpAPI API key
             delay: Delay between requests in seconds
-            max_sources: Maximum number of sources to collect
-            articles_per_search: Number of articles to extract from each search page
+            max_sources: Maximum number of sources to collect (minimum 20)
+            add_search_terms: If True, adds 'plant care cultivation botanical' to search
         """
+        self.serpapi_key = serpapi_key
         self.delay = delay
-        self.max_sources = max_sources
-        self.articles_per_search = articles_per_search
+        self.max_sources = max(20, max_sources)
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         })
 
-        # Trusted plant information sources with search patterns
-        self.search_sources = {
-            'thespruce.com': {
-                'reliability': 0.75,
-                'search_url': 'https://www.thespruce.com/search?q={query}',
-                'article_selector': 'a[href*="/plants/"], a[href*="/gardening/"]',
-                'title_selector': '.card-title, .comp.card-list__title',
-            },
-            'extension.wisc.edu': {
-                'reliability': 0.85,
-                'search_url': 'https://hort.extension.wisc.edu/articles/?s={query}',
-                'article_selector': 'a[href*="/articles/"]',
-                'title_selector': '.entry-title, h2',
-            },
-            'ces.ncsu.edu': {
-                'reliability': 0.85,
-                'search_url': 'https://plants.ces.ncsu.edu/find_a_plant/?q={query}',
-                'article_selector': 'a[href*="/plants/"]',
-                'title_selector': 'h1, .plant-name',
-                'browse_mode': True  # This site works better with browsing than search
-            },
-            'britannica.com': {
-                'reliability': 0.9,
-                'search_url': 'https://www.britannica.com/search?query={query}',
-                'article_selector': 'a[href*="/plant/"], a[href*="/topic/"]',
-                'title_selector': '.title, h3',
-            },
-            'rhs.org.uk': {
-                'reliability': 0.9,
-                'search_url': 'https://www.rhs.org.uk/search?query={query}',
-                'article_selector': 'a[href*="/plants/"]',
-                'title_selector': '.plant-header__title, h2',
-            },
-            'extension.umn.edu': {
-                'reliability': 0.85,
-                'search_url': 'https://extension.umn.edu/search?q={query}',
-                'article_selector': 'a[href*="/plants"], a[href*="/garden"]',
-                'title_selector': '.search-result-title, h3',
-            }
+        # Domain reliability scores
+        self.domain_reliability = {
+            'en.wikipedia.org': 0.95,
+            'kew.org': 0.95,
+            'powo.science.kew.org': 0.95,
+            'missouribotanicalgarden.org': 0.9,
+            'britannica.com': 0.9,
+            'rhs.org.uk': 0.9,
+            'extension.wisc.edu': 0.85,
+            'ces.ncsu.edu': 0.85,
+            'extension.umn.edu': 0.85,
+            'thespruce.com': 0.75,
+            'plants.usda.gov': 0.9,
+            'plantnet.rbgsyd.nsw.gov.au': 0.85,
+            'up.ac.za': 0.9  # Academic institution
         }
 
-        # Direct reliable sources (non-search)
-        self.direct_sources = {
-            'en.wikipedia.org': {'reliability': 0.95, 'weight': 1.5},
-            'kew.org': {'reliability': 0.95, 'weight': 1.5},
-            'powo.science.kew.org': {'reliability': 0.95, 'weight': 1.5},
-            'missouribotanicalgarden.org': {'reliability': 0.9, 'weight': 1.3},
-        }
+        # Supported document types
+        self.supported_extensions = {'.html', '.htm', '.php', '.asp', '.aspx', '.pdf', '.txt'}
 
-    def get_search_urls_for_plant(self, plant_name: str) -> List[str]:
+    def is_supported_document(self, url: str) -> tuple[bool, str]:
         """
-        Generate search URLs for a plant across different botanical sites
-        """
-        search_urls = []
-        query = quote_plus(plant_name)
-
-        # Add search URLs from known sources
-        for domain, config in self.search_sources.items():
-            search_url = config['search_url'].format(query=query)
-            search_urls.append(search_url)
-
-        # Add direct Wikipedia attempts (these often work)
-        wiki_variations = [
-            f"https://en.wikipedia.org/wiki/{plant_name.replace(' ', '_')}",
-        ]
-
-        # Add genus page if binomial name
-        genus_species = plant_name.split()
-        if len(genus_species) >= 2:
-            genus = genus_species[0]
-            wiki_variations.append(f"https://en.wikipedia.org/wiki/{genus}")
-
-        search_urls.extend(wiki_variations)
-
-        return search_urls
-
-    def extract_article_links_from_search(self, search_url: str, plant_name: str) -> List[Dict[str, str]]:
-        """
-        Extract article links from search result pages
-
+        Check if URL points to a supported document type
+        
         Returns:
-            List of dicts with 'url' and 'title' keys
+            (is_supported, document_type) where document_type is 'html', 'pdf', or 'text'
+        """
+        url_lower = url.lower()
+        
+        # Check for PDF
+        if url_lower.endswith('.pdf') or 'pdf' in url_lower:
+            return True, 'pdf'
+        
+        # Check for text files
+        if url_lower.endswith('.txt'):
+            return True, 'text'
+        
+        # Check for unsupported document types
+        unsupported_extensions = [
+            '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+            '.zip', '.rar', '.tar', '.gz',
+            '.jpg', '.jpeg', '.png', '.gif', '.bmp',
+            '.mp4', '.avi', '.mov', '.mp3', '.wav'
+        ]
+        
+        for ext in unsupported_extensions:
+            if url_lower.endswith(ext):
+                return False, 'unsupported'
+        
+        # Default to HTML for web pages
+        return True, 'html'
+
+    def extract_pdf_content(self, url: str) -> Optional[str]:
+        """
+        Extract text content from a PDF file
+        
+        Args:
+            url: URL of the PDF file
+            
+        Returns:
+            Extracted text content or None if extraction fails
         """
         try:
-            logger.info(f"Processing search page: {search_url}")
-            response = self.session.get(search_url, timeout=15)
+            logger.info(f"Downloading PDF from: {url}")
+            response = self.session.get(url, timeout=30)
             response.raise_for_status()
-
-            soup = BeautifulSoup(response.content, 'html.parser')
-            domain = urlparse(search_url).netloc
-
-            # Remove unwanted elements
-            for element in soup(['script', 'style', 'nav', 'header', 'footer']):
-                element.decompose()
-
-            articles = []
-
-            # Handle different site structures
-            if 'thespruce.com' in domain:
-                articles = self._extract_thespruce_links(soup, search_url, plant_name)
-            elif 'extension.wisc.edu' in domain:
-                articles = self._extract_extension_links(soup, search_url, plant_name)
-            elif 'ces.ncsu.edu' in domain:
-                articles = self._extract_ncsu_links(soup, search_url, plant_name)
-            elif 'britannica.com' in domain:
-                articles = self._extract_britannica_links(soup, search_url, plant_name)
-            elif 'rhs.org.uk' in domain:
-                articles = self._extract_rhs_links(soup, search_url, plant_name)
-            else:
-                # Generic extraction
-                articles = self._extract_generic_search_links(soup, search_url, plant_name)
-
-            # Filter and rank articles
-            filtered_articles = self._filter_relevant_articles(articles, plant_name)
-
-            logger.info(f"Found {len(filtered_articles)} relevant articles from {domain}")
-            return filtered_articles[:self.articles_per_search]
-
+            
+            # Verify it's actually a PDF
+            if 'application/pdf' not in response.headers.get('Content-Type', ''):
+                logger.warning(f"URL doesn't return PDF content: {url}")
+                return None
+            
+            # Read PDF content
+            pdf_file = io.BytesIO(response.content)
+            pdf_reader = PyPDF2.PdfReader(pdf_file)
+            
+            # Extract text from all pages
+            text_parts = []
+            num_pages = len(pdf_reader.pages)
+            logger.info(f"Extracting text from {num_pages} pages")
+            
+            for page_num in range(min(num_pages, 50)):  # Limit to first 50 pages
+                try:
+                    page = pdf_reader.pages[page_num]
+                    text = page.extract_text()
+                    if text and len(text.strip()) > 50:
+                        text_parts.append(text.strip())
+                except Exception as e:
+                    logger.debug(f"Error extracting page {page_num}: {str(e)}")
+                    continue
+            
+            if not text_parts:
+                logger.warning(f"No text extracted from PDF: {url}")
+                return None
+            
+            full_text = "\n\n".join(text_parts)
+            logger.info(f"Successfully extracted {len(full_text)} characters from PDF")
+            return full_text
+            
         except Exception as e:
-            logger.error(f"Error processing search page {search_url}: {str(e)}")
-            return []
+            logger.error(f"Error extracting PDF content from {url}: {str(e)}")
+            return None
 
-    def _extract_thespruce_links(self, soup: BeautifulSoup, base_url: str, plant_name: str) -> List[Dict[str, str]]:
-        """Extract links from The Spruce search results"""
-        articles = []
-
-        # The Spruce uses different selectors for search results
-        selectors = [
-            'a[href*="/plants/"]',
-            'a[href*="/gardening/"]',
-            '.comp.card-list__item a',
-            '.search-results a[href*="thespruce.com"]'
-        ]
-
-        for selector in selectors:
-            links = soup.select(selector)
-            for link in links[:10]:  # Limit to avoid too many
-                href = link.get('href')
-                if href and not href.startswith('javascript:'):
-                    full_url = urljoin(base_url, href)
-                    title = link.get_text(strip=True)
-
-                    # Get title from nearby elements if link text is not descriptive
-                    if not title or len(title) < 10:
-                        parent = link.find_parent()
-                        if parent:
-                            title_elem = parent.find(['h2', 'h3', '.title', '.card-title'])
-                            if title_elem:
-                                title = title_elem.get_text(strip=True)
-
-                    if title and href:
-                        articles.append({'url': full_url, 'title': title})
-
-            if articles:  # If we found articles with this selector, stop trying others
-                break
-
-        return articles
-
-    def _extract_extension_links(self, soup: BeautifulSoup, base_url: str, plant_name: str) -> List[Dict[str, str]]:
-        """Extract links from extension site search results"""
-        articles = []
-
-        # Extension sites often have article lists
-        selectors = [
-            'a[href*="/articles/"]',
-            'a[href*="/plants/"]',
-            '.search-result a',
-            '.entry-title a',
-            'h2 a, h3 a'
-        ]
-
-        for selector in selectors:
-            links = soup.select(selector)
-            for link in links[:8]:
-                href = link.get('href')
-                title = link.get_text(strip=True)
-
-                if href and title:
-                    full_url = urljoin(base_url, href)
-                    articles.append({'url': full_url, 'title': title})
-
-            if articles:
-                break
-
-        return articles
-
-    def _extract_ncsu_links(self, soup: BeautifulSoup, base_url: str, plant_name: str) -> List[Dict[str, str]]:
-        """Extract links from NC State Extension plant database"""
-        articles = []
-
-        # NCSU plant database has specific structure
-        selectors = [
-            'a[href*="/plants/"]',
-            '.plant-list a',
-            '.search-results a',
-            'td a',  # Sometimes in tables
-            '.plant-name a'
-        ]
-
-        for selector in selectors:
-            links = soup.select(selector)
-            for link in links[:10]:
-                href = link.get('href')
-                title = link.get_text(strip=True)
-
-                if href and title and len(title) > 3:
-                    full_url = urljoin(base_url, href)
-                    articles.append({'url': full_url, 'title': title})
-
-        return articles
-
-    def _extract_britannica_links(self, soup: BeautifulSoup, base_url: str, plant_name: str) -> List[Dict[str, str]]:
-        """Extract links from Britannica search results"""
-        articles = []
-
-        # Britannica search result selectors
-        selectors = [
-            'a[href*="/plant/"]',
-            'a[href*="/topic/"]',
-            '.search-results a',
-            '.title a',
-            'h3 a'
-        ]
-
-        for selector in selectors:
-            links = soup.select(selector)
-            for link in links[:6]:
-                href = link.get('href')
-                title = link.get_text(strip=True)
-
-                if href and title:
-                    full_url = urljoin('https://www.britannica.com', href)
-                    articles.append({'url': full_url, 'title': title})
-
-            if articles:
-                break
-
-        return articles
-
-    def _extract_rhs_links(self, soup: BeautifulSoup, base_url: str, plant_name: str) -> List[Dict[str, str]]:
-        """Extract links from RHS search results"""
-        articles = []
-
-        selectors = [
-            'a[href*="/plants/"]',
-            '.search-result a',
-            '.plant-search-result a',
-            'h2 a, h3 a'
-        ]
-
-        for selector in selectors:
-            links = soup.select(selector)
-            for link in links[:8]:
-                href = link.get('href')
-                title = link.get_text(strip=True)
-
-                if href and title:
-                    full_url = urljoin(base_url, href)
-                    articles.append({'url': full_url, 'title': title})
-
-        return articles
-
-    def _extract_generic_search_links(self, soup: BeautifulSoup, base_url: str, plant_name: str) -> List[Dict[str, str]]:
-        """Generic extraction for unknown sites"""
-        articles = []
-
-        # Generic selectors that might work on various sites
-        selectors = [
-            'a[href*="plant"]',
-            '.search-result a',
-            '.result a',
-            'h2 a, h3 a',
-            '.title a',
-            '.entry-title a'
-        ]
-
-        for selector in selectors:
-            links = soup.select(selector)[:15]  # Limit to avoid noise
-            for link in links:
-                href = link.get('href')
-                title = link.get_text(strip=True)
-
-                if href and title and len(title) > 5:
-                    # Skip obvious non-content links
-                    if not any(skip in href.lower() for skip in ['contact', 'about', 'privacy', 'terms']):
-                        full_url = urljoin(base_url, href)
-                        articles.append({'url': full_url, 'title': title})
-
-        return articles
-
-    def _filter_relevant_articles(self, articles: List[Dict[str, str]], plant_name: str) -> List[Dict[str, str]]:
-        """Filter and rank articles by relevance to the plant"""
-        if not articles:
-            return []
-
-        plant_terms = plant_name.lower().split()
-        genus = plant_terms[0] if plant_terms else ""
-
-        scored_articles = []
-        seen_urls = set()
-
-        for article in articles:
-            url = article['url']
-            title = article['title'].lower()
-
-            # Skip duplicates
-            if url in seen_urls:
-                continue
-            seen_urls.add(url)
-
-            # Calculate relevance score
-            score = 0
-
-            # Exact plant name match (highest score)
-            if plant_name.lower() in title:
-                score += 10
-
-            # Genus match
-            if genus and genus in title:
-                score += 5
-
-            # Individual term matches
-            for term in plant_terms:
-                if term in title:
-                    score += 2
-
-            # Plant-related keywords
-            plant_keywords = ['plant', 'flower', 'tree', 'shrub', 'garden', 'cultivation', 'growing']
-            for keyword in plant_keywords:
-                if keyword in title:
-                    score += 1
-
-            # Prefer specific plant pages over general garden advice
-            if any(specific in url.lower() for specific in ['/plants/', '/plant/', '/species/']):
-                score += 3
-
-            scored_articles.append((score, article))
-
-        # Sort by score (highest first) and return articles
-        scored_articles.sort(key=lambda x: x[0], reverse=True)
-        return [article for score, article in scored_articles if score > 0]
-
-    def extract_plant_info(self, url: str) -> Optional[Source]:
+    def extract_text_file(self, url: str) -> Optional[str]:
         """
-        Enhanced plant information extraction with better content detection
+        Extract content from a text file
+        
+        Args:
+            url: URL of the text file
+            
+        Returns:
+            Text content or None if extraction fails
         """
         try:
             response = self.session.get(url, timeout=15)
             response.raise_for_status()
+            
+            # Try to decode with different encodings
+            encodings = ['utf-8', 'latin-1', 'iso-8859-1', 'cp1252']
+            for encoding in encodings:
+                try:
+                    text = response.content.decode(encoding)
+                    if text and len(text.strip()) > 50:
+                        return text.strip()
+                except UnicodeDecodeError:
+                    continue
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error extracting text file from {url}: {str(e)}")
+            return None
 
-            soup = BeautifulSoup(response.content, 'html.parser')
+    def search_serpapi(self, plant_name: str) -> List[Dict[str, str]]:
+        """
+        Search for plant information using SerpAPI
+        
+        Returns:
+            List of dicts with 'url', 'title', and 'snippet' keys
+        """
+        try:
+            logger.info(f"Searching SerpAPI for: {plant_name}")
+            
+            # Construct search query with plant-specific terms
+            query = f"{plant_name} plant site:.za"
+            
+            params = {
+                "q": query,
+                "api_key": self.serpapi_key,
+                "num": self.max_sources + 10,
+                "engine": "google"
+            }
+            
+            response = requests.get("https://serpapi.com/search", params=params, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            
+            results = []
+            organic_results = data.get("organic_results", [])
+            
+            logger.info(f"SerpAPI returned {len(organic_results)} results")
+            
+            for result in organic_results:
+                url = result.get('link', '')
+                
+                # Filter by document type
+                is_supported, doc_type = self.is_supported_document(url)
+                
+                if is_supported:
+                    results.append({
+                        'url': url,
+                        'title': result.get('title', ''),
+                        'snippet': result.get('snippet', ''),
+                        'doc_type': doc_type
+                    })
+                    logger.debug(f"Accepted {doc_type}: {url}")
+                else:
+                    logger.debug(f"Filtered out unsupported document: {url}")
+            
+            # Filter and rank by relevance
+            filtered_results = self._filter_relevant_results(results, plant_name)
+            
+            logger.info(f"Filtered to {len(filtered_results)} relevant results")
+            return filtered_results[:self.max_sources + 5]
+            
+        except Exception as e:
+            logger.error(f"Error searching SerpAPI: {str(e)}")
+            return []
 
-            # Remove unwanted elements
-            for element in soup(['script', 'style', 'nav', 'header', 'footer', 'aside', '.ad', '.advertisement']):
-                element.decompose()
+    def _filter_relevant_results(self, results: List[Dict[str, str]], plant_name: str) -> List[Dict[str, str]]:
+        """Filter and rank search results by relevance"""
+        plant_terms = plant_name.lower().split()
+        genus = plant_terms[0] if plant_terms else ""
+        
+        scored_results = []
+        seen_urls = set()
+        
+        for result in results:
+            url = result['url']
+            title = result['title'].lower()
+            snippet = result.get('snippet', '').lower()
+            doc_type = result.get('doc_type', 'html')
+            
+            # Skip duplicates and unwanted domains
+            if url in seen_urls:
+                continue
+            if any(skip in url.lower() for skip in ['pinterest.com', 'youtube.com', 'amazon.com', 'ebay.com']):
+                continue
+                
+            seen_urls.add(url)
+            
+            # Calculate relevance score
+            score = 0
+            
+            # PDF bonus (academic PDFs are valuable)
+            if doc_type == 'pdf':
+                score += 5
+            
+            # Exact plant name match
+            if plant_name.lower() in title or plant_name.lower() in snippet:
+                score += 10
+            
+            # Genus match
+            if genus and (genus in title or genus in snippet):
+                score += 5
+            
+            # Individual term matches
+            for term in plant_terms:
+                if term in title:
+                    score += 3
+                if term in snippet:
+                    score += 1
+            
+            # Plant-related keywords
+            plant_keywords = ['plant', 'botanical', 'species', 'cultivation', 'growing', 'care', 'garden']
+            for keyword in plant_keywords:
+                if keyword in title or keyword in snippet:
+                    score += 1
+            
+            # Trusted domains get bonus
+            domain = urlparse(url).netloc
+            for trusted_domain in self.domain_reliability.keys():
+                if trusted_domain in domain:
+                    score += 8
+                    break
+            
+            # Prefer specific plant pages
+            if any(specific in url.lower() for specific in ['/plant/', '/species/', '/wiki/']):
+                score += 3
+            
+            scored_results.append((score, result))
+        
+        # Sort by score
+        scored_results.sort(key=lambda x: x[0], reverse=True)
+        return [result for score, result in scored_results if score > 0]
 
-            # Extract title
-            title = self._extract_title(soup, url)
-
-            # Extract main content
-            content = self._extract_content(soup, url)
+    def extract_plant_info(self, url: str, doc_type: str = 'html') -> Optional[Source]:
+        """
+        Extract plant information from a URL based on document type
+        
+        Args:
+            url: URL to extract from
+            doc_type: Type of document ('html', 'pdf', or 'text')
+        """
+        try:
+            if doc_type == 'pdf':
+                content = self.extract_pdf_content(url)
+                title = url.split('/')[-1].replace('.pdf', '').replace('_', ' ').replace('-', ' ').title()
+            elif doc_type == 'text':
+                content = self.extract_text_file(url)
+                title = url.split('/')[-1].replace('.txt', '').replace('_', ' ').replace('-', ' ').title()
+            else:  # html
+                response = self.session.get(url, timeout=15)
+                response.raise_for_status()
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                # Remove unwanted elements
+                for element in soup(['script', 'style', 'nav', 'header', 'footer', 'aside', '.ad', '.advertisement']):
+                    element.decompose()
+                
+                title = self._extract_title(soup, url)
+                content = self._extract_content(soup, url)
 
             if not content or len(content.strip()) < 100:
                 logger.debug(f"Insufficient content from {url} (length: {len(content) if content else 0})")
@@ -412,7 +334,7 @@ class EnhancedPlantSpider:
             domain = urlparse(url).netloc
             reliability_score = self._calculate_reliability(domain, content)
 
-            # Create metadata optimized for RAG system
+            # Create metadata
             metadata = {
                 'source': self._get_source_name(domain, title),
                 'reliability': self._get_reliability_level(reliability_score),
@@ -420,7 +342,8 @@ class EnhancedPlantSpider:
                 'domain': domain,
                 'title': title,
                 'scraped_date': datetime.now().strftime('%Y-%m-%d'),
-                'content_type': self._classify_content_type(content, url)
+                'content_type': self._classify_content_type(content, url),
+                'document_type': doc_type
             }
 
             return Source(
@@ -436,14 +359,12 @@ class EnhancedPlantSpider:
             return None
 
     def _extract_title(self, soup: BeautifulSoup, url: str) -> str:
-        """Enhanced title extraction"""
-        # Try different title selectors in order of preference
+        """Extract page title"""
         selectors = [
             'h1.plant-name',
             'h1.entry-title',
             'h1.title',
             '.plant-header__title',
-            '.plant-title',
             'h1',
             'title'
         ]
@@ -458,17 +379,15 @@ class EnhancedPlantSpider:
         return "Unknown Plant"
 
     def _extract_content(self, soup: BeautifulSoup, url: str) -> str:
-        """Enhanced content extraction with site-specific handling"""
+        """Extract main content based on domain"""
         domain = urlparse(url).netloc
 
         if 'wikipedia.org' in domain:
             return self._extract_wikipedia_content(soup)
         elif 'thespruce.com' in domain:
             return self._extract_thespruce_content(soup)
-        elif 'extension.wisc.edu' in domain or 'extension.' in domain:
+        elif 'extension' in domain:
             return self._extract_extension_content(soup)
-        elif 'ces.ncsu.edu' in domain:
-            return self._extract_ncsu_content(soup)
         elif 'britannica.com' in domain:
             return self._extract_britannica_content(soup)
         elif 'rhs.org.uk' in domain:
@@ -476,19 +395,25 @@ class EnhancedPlantSpider:
         else:
             return self._extract_generic_content(soup)
 
-    def _extract_thespruce_content(self, soup: BeautifulSoup) -> str:
-        """Extract content from The Spruce articles"""
+    def _extract_wikipedia_content(self, soup: BeautifulSoup) -> str:
+        """Extract from Wikipedia"""
         content_parts = []
+        content_div = soup.find('div', {'id': 'mw-content-text'})
+        
+        if content_div:
+            paragraphs = content_div.find_all('p', recursive=True)[:10]
+            for p in paragraphs:
+                text = p.get_text(strip=True)
+                if text and len(text) > 50:
+                    content_parts.append(text)
+        
+        return "\n\n".join(content_parts)
 
-        # The Spruce article structure
-        selectors = [
-            '.comp.mntl-sc-block-html',
-            '.comp.article-content p',
-            '.content-block p',
-            'article p',
-            '.entry-content p'
-        ]
-
+    def _extract_thespruce_content(self, soup: BeautifulSoup) -> str:
+        """Extract from The Spruce"""
+        content_parts = []
+        selectors = ['.comp.mntl-sc-block-html', 'article p', '.entry-content p']
+        
         for selector in selectors:
             elements = soup.select(selector)
             if elements:
@@ -498,21 +423,14 @@ class EnhancedPlantSpider:
                         content_parts.append(text)
                 if len(content_parts) >= 3:
                     break
-
+        
         return "\n\n".join(content_parts)
 
     def _extract_extension_content(self, soup: BeautifulSoup) -> str:
-        """Extract content from extension articles"""
+        """Extract from extension sites"""
         content_parts = []
-
-        selectors = [
-            '.entry-content p',
-            '.article-content p',
-            '.content p',
-            'main p',
-            '#content p'
-        ]
-
+        selectors = ['.entry-content p', '.article-content p', 'main p']
+        
         for selector in selectors:
             elements = soup.select(selector)
             if elements:
@@ -522,76 +440,28 @@ class EnhancedPlantSpider:
                         content_parts.append(text)
                 if content_parts:
                     break
-
-        return "\n\n".join(content_parts)
-
-    def _extract_ncsu_content(self, soup: BeautifulSoup) -> str:
-        """Extract content from NC State plant database"""
-        content_parts = []
-
-        # NCSU specific selectors
-        selectors = [
-            '.plant-description p',
-            '.plant-details p',
-            '.plant-info p',
-            'td',  # Plant details often in tables
-            '.content p',
-            'p'
-        ]
-
-        for selector in selectors:
-            elements = soup.select(selector)
-            if elements:
-                for elem in elements[:12]:
-                    text = elem.get_text(strip=True)
-                    if text and len(text) > 25 and self._is_content_text(text):
-                        content_parts.append(text)
-                if len(content_parts) >= 4:
-                    break
-
-        return "\n\n".join(content_parts)
-
-    def _extract_wikipedia_content(self, soup: BeautifulSoup) -> str:
-        """Extract content from Wikipedia pages"""
-        content_parts = []
-
-        content_div = soup.find('div', {'id': 'mw-content-text'})
-        if content_div:
-            paragraphs = content_div.find_all('p', recursive=True)[:10]
-
-            for p in paragraphs:
-                text = p.get_text(strip=True)
-                if text and len(text) > 50:
-                    content_parts.append(text)
-
+        
         return "\n\n".join(content_parts)
 
     def _extract_britannica_content(self, soup: BeautifulSoup) -> str:
-        """Extract content from Britannica articles"""
+        """Extract from Britannica"""
         content_parts = []
-
         article = soup.find('article') or soup.find('div', class_='article-content')
+        
         if article:
             paragraphs = article.find_all('p')[:8]
             for p in paragraphs:
                 text = p.get_text(strip=True)
                 if text and len(text) > 50 and self._is_content_text(text):
                     content_parts.append(text)
-
+        
         return "\n\n".join(content_parts)
 
     def _extract_rhs_content(self, soup: BeautifulSoup) -> str:
-        """Extract content from RHS articles"""
+        """Extract from RHS"""
         content_parts = []
-
-        selectors = [
-            '.plant-description p',
-            '.plant-summary p',
-            '.content-area p',
-            '.main-content p',
-            'article p'
-        ]
-
+        selectors = ['.plant-description p', '.plant-summary p', 'article p']
+        
         for selector in selectors:
             elements = soup.select(selector)
             if elements:
@@ -601,24 +471,15 @@ class EnhancedPlantSpider:
                         content_parts.append(text)
                 if content_parts:
                     break
-
+        
         return "\n\n".join(content_parts)
 
     def _extract_generic_content(self, soup: BeautifulSoup) -> str:
-        """Enhanced generic content extraction"""
+        """Generic content extraction"""
         content_parts = []
-
-        # Try content-specific selectors first
-        priority_selectors = [
-            'article p',
-            '.entry-content p',
-            '.post-content p',
-            '.content p',
-            '.main-content p',
-            '#content p'
-        ]
-
-        for selector in priority_selectors:
+        selectors = ['article p', '.entry-content p', '.content p', 'main p']
+        
+        for selector in selectors:
             elements = soup.select(selector)
             if elements:
                 for elem in elements[:10]:
@@ -627,8 +488,7 @@ class EnhancedPlantSpider:
                         content_parts.append(text)
                 if len(content_parts) >= 3:
                     break
-
-        # Fallback to all paragraphs
+        
         if not content_parts:
             paragraphs = soup.find_all('p')
             for p in paragraphs[:20]:
@@ -637,49 +497,37 @@ class EnhancedPlantSpider:
                     content_parts.append(text)
                 if len(content_parts) >= 5:
                     break
-
+        
         return "\n\n".join(content_parts[:8])
 
     def _is_content_text(self, text: str) -> bool:
-        """Check if text is actual content vs navigation/ads"""
+        """Check if text is actual content"""
         text_lower = text.lower()
-
-        # Skip navigation, ads, etc.
         skip_phrases = [
             'cookie', 'privacy', 'subscribe', 'newsletter', 'advertisement',
-            'menu', 'navigation', 'share this', 'follow us', 'contact us',
-            'terms of service', 'all rights reserved'
+            'menu', 'navigation', 'share this', 'follow us', 'contact us'
         ]
-
         return not any(phrase in text_lower for phrase in skip_phrases)
 
     def _calculate_reliability(self, domain: str, content: str) -> float:
         """Calculate reliability score"""
         base_score = 0.5
-
-        # Check direct sources
-        if domain in self.direct_sources:
-            base_score = self.direct_sources[domain]['reliability']
-        else:
-            # Check search sources
-            for search_domain, config in self.search_sources.items():
-                if search_domain in domain:
-                    base_score = config['reliability']
-                    break
-
-        # Content quality indicators
+        
+        for known_domain, score in self.domain_reliability.items():
+            if known_domain in domain:
+                base_score = score
+                break
+        
         content_lower = content.lower()
-
         if any(term in content_lower for term in ['scientific name', 'botanical', 'taxonomy']):
             base_score += 0.1
-
         if len(content) > 1000:
             base_score += 0.05
-
+        
         return min(1.0, base_score)
 
     def _get_reliability_level(self, score: float) -> str:
-        """Convert reliability score to level"""
+        """Convert score to level"""
         if score >= 0.9:
             return "very_high"
         elif score >= 0.8:
@@ -689,78 +537,8 @@ class EnhancedPlantSpider:
         else:
             return "low"
 
-    def collect_plant_sources(self, plant_name: str) -> List[Dict]:
-        """
-        Main method to collect sources using enhanced search-based approach
-        """
-        logger.info(f"Starting enhanced collection for: {plant_name}")
-
-        search_urls = self.get_search_urls_for_plant(plant_name)
-
-        all_article_links = []
-        sources = []
-        processed_urls = set()
-        processed_domains = set()
-
-        # Step 1: Extract article links from search pages
-        for search_url in search_urls:
-            if len(all_article_links) >= self.max_sources * 2:  # Get extra links to filter from
-                break
-
-            article_links = self.extract_article_links_from_search(search_url, plant_name)
-            all_article_links.extend(article_links)
-
-            time.sleep(self.delay)
-
-        logger.info(f"Found {len(all_article_links)} total article links")
-
-        # Step 2: Process article links to extract content
-        for article in all_article_links:
-            if len(sources) >= self.max_sources:
-                break
-
-            url = article['url']
-
-            # Skip if already processed
-            if url in processed_urls:
-                continue
-
-            # Limit to 2 articles per domain for diversity
-            domain = urlparse(url).netloc
-            domain_count = sum(1 for s in sources if urlparse(s['metadata']['url']).netloc == domain)
-            if domain_count >= 2:
-                continue
-
-            processed_urls.add(url)
-
-            logger.info(f"Processing article: {article['title'][:50]}...")
-
-            try:
-                source = self.extract_plant_info(url)
-                if source and len(source.text.strip()) > 150:
-                    # Create RAG-optimized source format
-                    rag_source = {
-                        "text": source.text,
-                        "metadata": source.metadata
-                    }
-                    sources.append(rag_source)
-                    logger.info(f"✓ Extracted content from {domain}")
-                else:
-                    logger.debug(f"✗ Insufficient content from {url}")
-
-            except Exception as e:
-                logger.debug(f"✗ Error processing {url}: {str(e)}")
-
-            time.sleep(self.delay)
-
-        # Sort by reliability for RAG system
-        sources.sort(key=lambda x: self._get_rag_sort_score(x['metadata']), reverse=True)
-
-        logger.info(f"Successfully collected {len(sources)} sources for {plant_name}")
-        return sources
-
     def _get_source_name(self, domain: str, title: str) -> str:
-        """Get a clean source name for RAG metadata"""
+        """Get clean source name"""
         source_names = {
             'en.wikipedia.org': 'Wikipedia',
             'www.britannica.com': 'Encyclopædia Britannica',
@@ -772,39 +550,95 @@ class EnhancedPlantSpider:
             'www.kew.org': 'Royal Botanic Gardens, Kew',
             'powo.science.kew.org': 'Plants of the World Online',
             'www.missouribotanicalgarden.org': 'Missouri Botanical Garden',
-            'plants.usda.gov': 'USDA Plants Database',
-            'plantnet.rbgsyd.nsw.gov.au': 'PlantNET'
+            'up.ac.za': 'University of Pretoria'
         }
-
         return source_names.get(domain, title.split(' - ')[0] if ' - ' in title else domain.replace('www.', '').title())
 
     def _classify_content_type(self, content: str, url: str) -> str:
-        """Classify the type of content for RAG context"""
+        """Classify content type"""
         content_lower = content.lower()
-
-        if any(term in content_lower for term in ['scientific name', 'botanical', 'taxonomy', 'genus', 'species']):
+        
+        if any(term in content_lower for term in ['scientific name', 'botanical', 'taxonomy']):
             return 'botanical_reference'
-        elif any(term in content_lower for term in ['growing', 'planting', 'cultivation', 'care', 'garden']):
+        elif any(term in content_lower for term in ['growing', 'planting', 'cultivation', 'care']):
             return 'cultivation_guide'
         elif any(term in content_lower for term in ['native', 'habitat', 'distribution', 'ecology']):
             return 'ecological_information'
-        elif any(term in content_lower for term in ['description', 'appearance', 'characteristics', 'features']):
+        elif any(term in content_lower for term in ['description', 'appearance', 'characteristics']):
             return 'plant_description'
         else:
             return 'general_information'
 
+    def collect_plant_sources(self, plant_name: str) -> List[Dict]:
+        """
+        Main method to collect plant sources using SerpAPI
+        Returns sources in RAG-optimized format
+        """
+        logger.info(f"Starting SerpAPI collection for: {plant_name}")
+        
+        search_results = self.search_serpapi(plant_name)
+        
+        if not search_results:
+            logger.error("No search results from SerpAPI")
+            return []
+        
+        sources = []
+        processed_urls = set()
+        domain_counts = {}
+        
+        for result in search_results:
+            if len(sources) >= self.max_sources:
+                break
+            
+            url = result['url']
+            doc_type = result.get('doc_type', 'html')
+            
+            if url in processed_urls:
+                continue
+            
+            domain = urlparse(url).netloc
+            domain_counts[domain] = domain_counts.get(domain, 0)
+            if domain_counts[domain] >= 3:
+                continue
+            
+            processed_urls.add(url)
+            logger.info(f"Processing [{doc_type}]: {result['title'][:60]}...")
+            
+            try:
+                source = self.extract_plant_info(url, doc_type)
+                
+                if source and len(source.text.strip()) > 150:
+                    rag_source = {
+                        "text": source.text,
+                        "metadata": source.metadata
+                    }
+                    sources.append(rag_source)
+                    domain_counts[domain] += 1
+                    logger.info(f"✓ Extracted from {domain} ({doc_type})")
+                else:
+                    logger.debug(f"✗ Insufficient content from {url}")
+                    
+            except Exception as e:
+                logger.debug(f"✗ Error processing {url}: {str(e)}")
+            
+            time.sleep(self.delay)
+        
+        sources.sort(key=lambda x: self._get_rag_sort_score(x['metadata']), reverse=True)
+        
+        logger.info(f"Successfully collected {len(sources)} sources for {plant_name}")
+        return sources
+
     def _get_rag_sort_score(self, metadata: Dict) -> float:
-        """Get sorting score optimized for RAG system"""
+        """Get sorting score for RAG system"""
         reliability_scores = {
             'very_high': 1.0,
             'high': 0.8,
             'medium': 0.6,
             'low': 0.4
         }
-
+        
         base_score = reliability_scores.get(metadata.get('reliability', 'low'), 0.4)
-
-        # Bonus for specific content types that are more informative
+        
         content_type_bonus = {
             'botanical_reference': 0.2,
             'plant_description': 0.15,
@@ -812,13 +646,17 @@ class EnhancedPlantSpider:
             'ecological_information': 0.1,
             'general_information': 0.0
         }
-
+        
         base_score += content_type_bonus.get(metadata.get('content_type', 'general_information'), 0.0)
-
+        
+        # PDF bonus for academic content
+        if metadata.get('document_type') == 'pdf':
+            base_score += 0.05
+        
         return min(1.0, base_score)
 
     def save_sources_for_rag(self, sources: List[Dict], filename: str, plant_name: str):
-        """Save sources in RAG-optimized format with additional context"""
+        """Save sources in RAG-optimized format"""
         rag_data = {
             "plant_name": plant_name,
             "collection_date": datetime.now().strftime('%Y-%m-%d'),
@@ -829,25 +667,27 @@ class EnhancedPlantSpider:
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(rag_data, f, indent=2, ensure_ascii=False)
 
-        # Also save just the sources array for direct RAG use
         sources_only_filename = filename.replace('.json', '_sources_only.json')
         with open(sources_only_filename, 'w', encoding='utf-8') as f:
             json.dump(sources, f, indent=2, ensure_ascii=False)
 
-# Example usage
-def search(name=None):
-    # Initialize enhanced spider
-    spider = EnhancedPlantSpider(delay=1.5, max_sources=8, articles_per_search=3)
 
-    # Test with Rosa rubiginosa
+def search(name=None, serpapi_key="your_serpapi_key_here"):
+    """
+    Main search function
+    """
+    spider = EnhancedPlantSpider(
+        serpapi_key=serpapi_key,
+        delay=1.5,
+        max_sources=20
+    )
+
     plant_name = name if name else "Rosa rubiginosa"
     sources = spider.collect_plant_sources(plant_name)
 
-    # Save results
     filename = f"{plant_name.replace(' ', '_')}_enhanced_sources.json"
     spider.save_sources_for_rag(sources, filename, plant_name)
 
-    # Print detailed summary
     print(f"\n{'='*60}")
     print(f"ENHANCED PLANT SPIDER RESULTS FOR: {plant_name}")
     print(f"{'='*60}")
@@ -856,10 +696,18 @@ def search(name=None):
 
     for i, source in enumerate(sources, 1):
         metadata = source['metadata']
-        print(f"{i}. {metadata['source']}")
+        doc_type = metadata.get('document_type', 'html')
+        print(f"{i}. {metadata['source']} [{doc_type.upper()}]")
         print(f"   Title: {metadata['title']}")
-        print(f"   Relia7bility: {metadata['reliability']}")
-        print(f"   Content length: {metadata['content_type']} characters")
-        print(f"   URL: {metadata.keys()}")
+        print(f"   Reliability: {metadata['reliability']}")
+        print(f"   Content type: {metadata['content_type']}")
+        print(f"   URL: {metadata['url']}")
+        print()
+    
     return sources
-#data = search()
+
+
+# Example usage
+if __name__ == "__main__":
+    API_KEY = os.getenv('SERP_API_KEY')
+    sources = search("Acanthopsis Harv", serpapi_key=API_KEY)
