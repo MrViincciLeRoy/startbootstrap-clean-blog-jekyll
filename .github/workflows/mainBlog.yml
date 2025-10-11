@@ -12,31 +12,27 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'research_v3/**'
-      - 'test.py'
-      - 'main.py'
+      - 'flask_app/research_v3/**'
+      - 'flask_app/test.py'
+      - 'flask_app/main.py'
 
 env:
   # Target repository for blog posts
   TARGET_REPO: 'MrViincciLeRoy/startbootstrap-clean-blog-jekyll'
-  TARGET_BRANCH: 'master'  # or 'main' ? match your blog repo
+  TARGET_BRANCH: 'master'
+
 jobs:
   generate-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      TARGET_REPO: 'MrViincciLeRoy/startbootstrap-clean-blog-jekyll'
-      TARGET_BRANCH: 'master'
-      SERP_API_KEY: ${{ secrets.SERP_API_KEY }}  # ← Add this line
-#jobs:
-  #generate-and-deploy:
-    #runs-on: ubuntu-latest
-
+    
     steps:
     - name: Checkout source repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.BLOG_DEPLOY_TOKEN }}
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
@@ -72,6 +68,8 @@ jobs:
       run: mkdir -p _posts
 
     - name: Generate blog posts
+      env:
+        SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
       run: |
         # Navigate to flask_app if it exists
         if [ -d "flask_app" ]; then
@@ -120,6 +118,28 @@ jobs:
         echo "Generated posts:"
         ls -la _posts/
 
+    - name: Commit and push updated database
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        
+        # Add the database file if it has changes
+        cd flask_app/research_v3
+        if [ -f flora_data.db ]; then
+          git add flora_data.db
+          
+          # Check if there are changes to commit
+          if ! git diff --cached --quiet; then
+            git commit -m "Update flora database - article generated $(date +'%Y-%m-%d %H:%M:%S UTC')"
+            git push
+            echo "✅ Database updated and pushed successfully!"
+          else
+            echo "ℹ️ No database changes to commit."
+          fi
+        else
+          echo "⚠️ Database file not found at flask_app/research_v3/flora_data.db"
+        fi
+
     - name: Checkout target blog repository
       uses: actions/checkout@v4
       with:
@@ -137,7 +157,7 @@ jobs:
         echo "Copied to blog repo:"
         ls -la blog-repo/_posts/
 
-    - name: Configure Git and commit
+    - name: Configure Git and commit blog posts
       run: |
         cd blog-repo
         git config user.name "Plant Bot"
@@ -154,9 +174,9 @@ jobs:
           Timestamp: $(date -u)"
           
           git push origin ${{ env.TARGET_BRANCH }}
-          echo "? Successfully pushed new blog posts!"
+          echo "✅ Successfully pushed new blog posts!"
         else
-          echo "?? No changes to commit."
+          echo "ℹ️ No changes to commit."
         fi
 
     - name: Create summary
@@ -178,11 +198,11 @@ jobs:
             fi
           done
         else
-          echo "**? ERROR:** No posts generated!" >> $GITHUB_STEP_SUMMARY
+          echo "**❌ ERROR:** No posts generated!" >> $GITHUB_STEP_SUMMARY
         fi
 
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**? Blog:** [View Site](https://${{ github.repository_owner }}.github.io/startbootstrap-clean-blog-jekyll/)" >> $GITHUB_STEP_SUMMARY
+        echo "**🌐 Blog:** [View Site](https://${{ github.repository_owner }}.github.io/startbootstrap-clean-blog-jekyll/)" >> $GITHUB_STEP_SUMMARY
 
   test-jekyll-build:
     needs: generate-and-deploy
@@ -193,9 +213,9 @@ jobs:
     - name: Checkout blog repository
       uses: actions/checkout@v4
       with:
-        repository: ${{ env.TARGET_REPO }}
+        repository: MrViincciLeRoy/startbootstrap-clean-blog-jekyll
         token: ${{ secrets.BLOG_DEPLOY_TOKEN }}
-        ref: ${{ env.TARGET_BRANCH }}
+        ref: master
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
@@ -210,6 +230,6 @@ jobs:
 
     - name: Confirm build success
       run: |
-        echo "? Jekyll site built successfully!"
+        echo "✅ Jekyll site built successfully!"
         echo "Recent posts:"
         find _site -path "*posts*" -name "*.html" | head -5
