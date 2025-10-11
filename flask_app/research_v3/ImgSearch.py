@@ -28,7 +28,7 @@ class HTMLContentFormatter:
     
     def convert_markdown_bold_to_html(self, text: str) -> str:
         """Convert markdown-style bold (**text**) to HTML <strong> tags"""
-        text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+        text = re.sub(r'<br>\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
         return text
     
     def fix_line_breaks(self, text: str) -> str:
