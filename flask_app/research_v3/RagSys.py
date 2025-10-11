@@ -188,6 +188,7 @@ Context:
 Question: {question}
 
 Instructions:
+- You are writing about native South African plants based on context
 - Answer the question based ONLY on the information provided in the context above
 - If the context doesn't contain enough information to answer the question, say so
 - Cite which source(s) you used in your answer
