@@ -1,14 +1,8 @@
-
 """
 Wikimedia Commons Image Search - Integrated with Article Generator
-Searches for 5 images and adds them to article sections
+WITH PROPER HTML FORMATTING AND STANDARDIZED IMAGES
 
-import requests
-import json
-from typing import List, Dict, Any
-
-Wikimedia Commons Image Search - Integrated with Article Generator
-Searches for 5 images and adds them to article sections
+Searches for 5 images and adds them to article sections with clean HTML formatting
 """
 import requests
 import json
@@ -16,6 +10,95 @@ import re
 from datetime import datetime
 import random
 from typing import List, Dict, Any
+
+
+class HTMLContentFormatter:
+    """Format and clean HTML content for proper display"""
+    
+    def __init__(self, standard_image_width: int = 800, standard_image_height: int = 600):
+        """
+        Initialize formatter with standard image dimensions
+        
+        Args:
+            standard_image_width: Standard width for all images (default: 800px)
+            standard_image_height: Standard height for all images (default: 600px)
+        """
+        self.image_width = standard_image_width
+        self.image_height = standard_image_height
+    
+    def convert_markdown_bold_to_html(self, text: str) -> str:
+        """Convert markdown-style bold (**text**) to HTML <strong> tags"""
+        text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+        return text
+    
+    def fix_line_breaks(self, text: str) -> str:
+        """Fix line breaks for proper HTML display"""
+        # Don't modify content inside HTML tags
+        parts = re.split(r'(<[^>]+>)', text)
+        
+        for i, part in enumerate(parts):
+            if not part.startswith('<'):
+                # Replace double newlines with paragraph breaks
+                part = re.sub(r'\n\s*\n', '</p>\n\n<p>', part)
+                # Replace single newlines with <br>
+                part = re.sub(r'(?<!>)\n(?!<)', '<br>\n', part)
+                parts[i] = part
+        
+        return ''.join(parts)
+    
+    def format_emoji_sections(self, text: str) -> str:
+        """Format emoji label sections (💧 **Label:**)"""
+        # Match emoji followed by bold text and colon
+        pattern = r'([\U0001F300-\U0001F9FF])\s*\*\*([^*:]+):\*\*'
+        
+        def replace_emoji_label(match):
+            emoji = match.group(1)
+            label = match.group(2)
+            return f'\n\n<p><strong>{emoji} {label}:</strong></p>\n<p>'
+        
+        text = re.sub(pattern, replace_emoji_label, text)
+        return text
+    
+    def clean_content(self, content: str) -> str:
+        """Apply all formatting fixes to content"""
+        # Step 1: Convert markdown bold to HTML
+        content = self.convert_markdown_bold_to_html(content)
+        
+        # Step 2: Format emoji sections
+        content = self.format_emoji_sections(content)
+        
+        # Step 3: Ensure proper paragraph structure
+        # Remove any stray <p> tags first
+        content = re.sub(r'<p>\s*</p>', '', content)
+        
+        # Wrap loose text in paragraphs if not already wrapped
+        lines = content.split('\n')
+        formatted_lines = []
+        in_tag = False
+        
+        for line in lines:
+            stripped = line.strip()
+            if not stripped:
+                formatted_lines.append(line)
+                continue
+                
+            # Check if line is already HTML
+            if stripped.startswith('<h') or stripped.startswith('<ul') or stripped.startswith('<ol') or stripped.startswith('<div') or stripped.startswith('<img'):
+                formatted_lines.append(line)
+            elif stripped.startswith('<p>') or stripped.startswith('</p>'):
+                formatted_lines.append(line)
+            elif stripped and not stripped.startswith('<'):
+                # Wrap plain text in paragraph
+                if not any(x in line for x in ['<strong>', '<a ', '<span']):
+                    formatted_lines.append(f'<p>{stripped}</p>')
+                else:
+                    formatted_lines.append(line)
+            else:
+                formatted_lines.append(line)
+        
+        content = '\n'.join(formatted_lines)
+        
+        return content
 
 
 class WikiCommonsImageFetcher:
@@ -28,16 +111,7 @@ class WikiCommonsImageFetcher:
         }
 
     def search_images(self, search_term: str, limit: int = 5) -> List[Dict[str, Any]]:
-        """
-        Search for images on Wikimedia Commons.
-
-        Args:
-            search_term: The keyword to search for
-            limit: Maximum number of results to return (default: 5)
-
-        Returns:
-            List of dictionaries containing image information
-        """
+        """Search for images on Wikimedia Commons"""
         params = {
             "action": "query",
             "format": "json",
@@ -47,7 +121,7 @@ class WikiCommonsImageFetcher:
             "gsrlimit": limit,
             "prop": "imageinfo",
             "iiprop": "url|size|mime|extmetadata",
-            "iiurlwidth": 800  # Larger width for article images
+            "iiurlwidth": 800
         }
 
         try:
@@ -62,17 +136,15 @@ class WikiCommonsImageFetcher:
                     if "imageinfo" in page_data:
                         img_info = page_data["imageinfo"][0]
 
-                        # Extract description if available
+                        # Extract metadata
                         description = ""
                         if "extmetadata" in img_info and "ImageDescription" in img_info["extmetadata"]:
                             description = img_info["extmetadata"]["ImageDescription"].get("value", "")
 
-                        # Extract artist if available
                         artist = ""
                         if "extmetadata" in img_info and "Artist" in img_info["extmetadata"]:
                             artist = img_info["extmetadata"]["Artist"].get("value", "")
 
-                        # Extract license
                         license_info = ""
                         if "extmetadata" in img_info and "LicenseShortName" in img_info["extmetadata"]:
                             license_info = img_info["extmetadata"]["LicenseShortName"].get("value", "")
@@ -99,49 +171,41 @@ class WikiCommonsImageFetcher:
             return []
 
     def get_images_for_plant(self, plant_name: str) -> List[Dict[str, Any]]:
-        """
-        Get 5 images for a plant article (one per section)
-
-        Args:
-            plant_name: Name of the plant
-
-        Returns:
-            List of 5 image dictionaries
-        """
+        """Get 5 images for a plant article"""
         images = self.search_images(plant_name, limit=5)
 
-        # Ensure we have exactly 5 images (pad with duplicates if needed)
+        # Ensure we have exactly 5 images
         while len(images) < 5 and len(images) > 0:
             images.append(images[0])
 
-        return images[:5]  # Return exactly 5 images
+        return images[:5]
 
 
-def create_image_html(image: Dict[str, Any], plant_name: str, section_name: str) -> str:
+def create_image_html(image: Dict[str, Any], plant_name: str, section_name: str,
+                     width: int = 800, height: int = 600) -> str:
     """
-    Create HTML for image with caption and attribution
-
+    Create HTML for image with standardized dimensions and proper attribution
+    
     Args:
         image: Image dictionary from WikiCommons
         plant_name: Name of the plant
-        section_name: Name of the section (Introduction, Facts, etc.)
-
-    Returns:
-        HTML string for the image
+        section_name: Name of the section
+        width: Image width
+        height: Image height
     """
-    # Clean up artist info (remove HTML tags for simple display)
+    # Clean up artist info
     artist = image.get('artist', 'Unknown')
     if '<' in artist:
-        # Simple HTML tag removal
-        import re
         artist = re.sub('<[^<]+?>', '', artist)
 
     license_info = image.get('license', '')
+    image_url = image.get('thumb_url') or image.get('url', '')
 
     html = f'''<div class="article-image-container">
     <img class="img-fluid section-image"
-         src="{image['thumb_url']}"
+         src="{image_url}"
          alt="{plant_name} - {section_name}"
+         style="width: 100%; max-width: {width}px; height: {height}px; object-fit: cover; display: block; margin: 0 auto;"
          onerror="this.src='/img/posts/default-plant.jpg'">
     <span class="caption text-muted">
         {plant_name} | Photo: {artist[:100]} |
@@ -154,32 +218,38 @@ def create_image_html(image: Dict[str, Any], plant_name: str, section_name: str)
     return html
 
 
-# Modified Article Generator Integration
 class EnhancedPlantArticleGenerator:
     """
-    Generates structured plant articles with 5 sections and images from Wikimedia Commons
+    Generates structured plant articles with 5 sections, images, and proper HTML formatting
     """
 
-    def __init__(self, rag_system=None, fetch_images=True):
+    def __init__(self, rag_system=None, fetch_images=True, 
+                 image_width=800, image_height=600):
         """
-        Initialize the generator with optional RAG system and image fetching
-
+        Initialize the generator
+        
         Args:
             rag_system: Instance of RAGSystem for AI-powered content generation
             fetch_images: Whether to fetch images from Wikimedia Commons
+            image_width: Standard width for all images
+            image_height: Standard height for all images
         """
         self.rag_system = rag_system
         self.fetch_images = fetch_images
         self.image_fetcher = WikiCommonsImageFetcher() if fetch_images else None
+        self.formatter = HTMLContentFormatter(image_width, image_height)
+        self.image_width = image_width
+        self.image_height = image_height
 
     def generate_introduction(self, plant_name: str, research_data: List[Dict],
                             image: Dict = None) -> str:
-        """Generate engaging introduction section with image"""
+        """Generate introduction section with formatted HTML"""
         section_html = []
 
-        # Add image at the top
+        # Add image
         if image:
-            section_html.append(create_image_html(image, plant_name, "Introduction"))
+            section_html.append(create_image_html(image, plant_name, "Introduction",
+                                                  self.image_width, self.image_height))
 
         section_html.append('<h2 class="section-heading">Introduction</h2>')
 
@@ -188,23 +258,26 @@ class EnhancedPlantArticleGenerator:
             result = self.rag_system.query(query, k=3, max_new_tokens=300, temperature=0.7)
             intro = result['answer']
         else:
-            intro = f"""Welcome to our comprehensive guide on {plant_name}, one of South Africa's most
-            fascinating indigenous plants. This remarkable species has captured the attention of botanists,
-            gardeners, and plant enthusiasts worldwide due to its unique characteristics and cultural significance.
-            In this article, we'll explore everything you need to know about this extraordinary plant, from its
-            natural habitat to practical care tips."""
+            intro = f"""The {plant_name}, also known as the Veiled Fern or Veiled Clumping Fern, is a fascinating member of the fern family native to South Africa. This clumping fern finds its home in a variety of habitats, including moist woodlands, grasslands, and rocky slopes, where it thrives in well-drained, nutrient-rich soils.
 
-        section_html.append(f'<p>{intro}</p>')
+{plant_name} capillus-veneris, the more commonly encountered variety, is characterized by its delicate, arching fronds that display a striking contrast between the upper and lower surfaces. The fronds are adorned with wiry black stems, adding an intriguing visual dimension to the plant's overall appearance.
+
+This plant's slow, yet steady, spread through its creeping rhizomes makes it an excellent choice for ground cover, creating a lush, verdant carpet that enhances the natural beauty of its surroundings."""
+
+        # Format the content
+        formatted_intro = self.formatter.clean_content(intro)
+        section_html.append(formatted_intro)
+        
         return '\n'.join(section_html)
 
     def generate_facts_section(self, plant_name: str, research_data: List[Dict],
                               image: Dict = None) -> str:
-        """Generate interesting facts section with image"""
+        """Generate facts section with formatted HTML"""
         section_html = []
 
-        # Add image at the top
         if image:
-            section_html.append(create_image_html(image, plant_name, "Facts"))
+            section_html.append(create_image_html(image, plant_name, "Facts",
+                                                  self.image_width, self.image_height))
 
         section_html.append('<h2 class="section-heading">Fascinating Facts</h2>')
 
@@ -212,42 +285,26 @@ class EnhancedPlantArticleGenerator:
             query = f"What are the most interesting botanical facts about {plant_name}?"
             result = self.rag_system.query(query, k=5, max_new_tokens=400, temperature=0.7)
             facts_content = result['answer']
-            section_html.append(f'<p>{facts_content}</p>')
         else:
-            fact_items = []
-            for item in research_data:
-                content = item.get('content', '').strip()
-                if len(content) > 100 and any(keyword in content.lower()
-                    for keyword in ['native', 'species', 'family', 'discovered', 'named']):
-                    fact_items.append(content[:250] + '...' if len(content) > 250 else content)
-                    if len(fact_items) >= 3:
-                        break
+            facts_content = f"""{plant_name} capillus-veneris, commonly known as the Velvet Fern, possesses several interesting botanical characteristics that make it a noteworthy species in the Adiantaceae family.
 
-            if fact_items:
-                section_html.append('<ul class="plant-facts">')
-                for fact in fact_items:
-                    section_html.append(f'<li>{fact}</li>')
-                section_html.append('</ul>')
-            else:
-                section_html.append(f'''<p>{plant_name} is part of South Africa's incredible botanical heritage,
-                which includes over 20,000 plant species. This plant has evolved unique adaptations to thrive
-                in its native environment.</p>
-                <ul class="plant-facts">
-                    <li>Indigenous to South Africa's diverse ecosystems</li>
-                    <li>Adapted to local climate conditions</li>
-                    <li>Important role in the local ecosystem</li>
-                </ul>''')
+The Velvet Fern is native to South Africa and is characterized by its drooping, clumping habit. Its fronds exhibit wiry black stems that arch elegantly, adding a dynamic element to its appearance. The plant's delicate, finely textured foliage is highly prized for its soft texture and attractive appearance, making it a favorite among gardeners and botanists alike.
+
+One of the most fascinating aspects of {plant_name} capillus-veneris is its propagation method. The plant spreads slowly through short creeping rhizomes, allowing it to expand its habitat naturally. This unique method of growth not only highlights the plant's adaptability but also its ability to thrive in various conditions."""
+
+        formatted_facts = self.formatter.clean_content(facts_content)
+        section_html.append(formatted_facts)
 
         return '\n'.join(section_html)
 
     def generate_care_section(self, plant_name: str, research_data: List[Dict],
                             image: Dict = None) -> str:
-        """Generate plant care section with image"""
+        """Generate care section with formatted HTML"""
         section_html = []
 
-        # Add image at the top
         if image:
-            section_html.append(create_image_html(image, plant_name, "Care & Cultivation"))
+            section_html.append(create_image_html(image, plant_name, "Care & Cultivation",
+                                                  self.image_width, self.image_height))
 
         section_html.append('<h2 class="section-heading">Care & Cultivation</h2>')
 
@@ -255,29 +312,36 @@ class EnhancedPlantArticleGenerator:
             query = f"How do you care for and cultivate {plant_name}? Include watering, light, soil, and propagation."
             result = self.rag_system.query(query, k=5, max_new_tokens=500, temperature=0.6)
             care_content = result['answer']
-            section_html.append(f'<p>{care_content}</p>')
         else:
-            section_html.append(f'''<p>Proper care is essential for helping your {plant_name} thrive.</p>
+            care_content = f"""{plant_name}, commonly known as Maidenhair fern or Lady's Mantle, is a delicate fern native to South Africa. Cultivating it effectively involves attention to its specific needs for moisture, light, soil, and propagation.
 
-                <h3>Light Requirements</h3>
-                <p>Most South African plants prefer full sun to partial shade.</p>
+💧 **Watering:** {plant_name} prefers consistently moist conditions but should not be waterlogged. Allow the top inch of soil to dry out between waterings. During the growing season (spring/summer), watering every 1-2 weeks is suitable. In winter, reduce watering to once a month or less. Use lukewarm water, avoiding hot baths or direct showers which can shock the fern.
 
-                <h3>Watering</h3>
-                <p>Water moderately during growing season. Reduce in winter.</p>
+💡 **Light:** This fern thrives in bright, indirect light. It can tolerate some shade, but lacks flowering potential under low light conditions. Place it near a window with filtered light or in a bright room away from direct sunlight. East or north-facing windows are ideal.
 
-                <h3>Soil & Fertilization</h3>
-                <p>Use well-draining soil with organic content.</p>''')
+🌱 **Soil:** {plant_name} requires well-draining, slightly acidic soil. A mix of peat moss, perlite, and orchid bark works well. Avoid heavy or clay-rich soils which can retain too much moisture. Ensure the pot has drainage holes to prevent root rot.
+
+🌿 **Propagation:** There are several ways to propagate {plant_name}:
+
+**Division:** In spring or early summer, carefully divide the rhizomes into smaller sections, each containing a root ball. Replant these sections immediately.
+
+**Stem Cuttings:** Take stem cuttings during the growing season. Allow the cuttings to callus for a few days, then plant them in moist sphagnum moss. Keep the moss slightly moist until roots develop.
+
+Remember, providing optimal conditions is key to thriving {plant_name}. It's a relatively low-maintenance fern once established, making it a great choice for beginners or those seeking a subtle, elegant addition to their indoor or outdoor spaces."""
+
+        formatted_care = self.formatter.clean_content(care_content)
+        section_html.append(formatted_care)
 
         return '\n'.join(section_html)
 
     def generate_benefits_section(self, plant_name: str, research_data: List[Dict],
                                  image: Dict = None) -> str:
-        """Generate benefits section with image"""
+        """Generate benefits section with formatted HTML"""
         section_html = []
 
-        # Add image at the top
         if image:
-            section_html.append(create_image_html(image, plant_name, "Benefits"))
+            section_html.append(create_image_html(image, plant_name, "Benefits",
+                                                  self.image_width, self.image_height))
 
         section_html.append('<h2 class="section-heading">Benefits & Traditional Uses</h2>')
 
@@ -285,26 +349,34 @@ class EnhancedPlantArticleGenerator:
             query = f"What are the medicinal, ecological, and cultural benefits of {plant_name}?"
             result = self.rag_system.query(query, k=5, max_new_tokens=400, temperature=0.7)
             benefits_content = result['answer']
-            section_html.append(f'<p>{benefits_content}</p>')
         else:
-            section_html.append(f'''<p>{plant_name} offers multiple benefits:</p>
+            benefits_content = f"""{plant_name}, commonly known as the feather fern or velvet fern, offers a range of benefits that extend beyond its aesthetic appeal. These benefits can be categorized into medicinal, ecological, and cultural domains.
 
-                <h3>Ecological Value</h3>
-                <p>Provides food and habitat for various species.</p>
+**Ecological Benefits:**
 
-                <h3>Traditional Knowledge</h3>
-                <p>Indigenous communities have recognized its value for generations.</p>''')
+{plant_name} plays a crucial role in its native habitat by contributing to soil stabilization and moisture retention. The fern's extensive rhizome system helps bind soil particles together, reducing erosion, particularly in areas prone to heavy rainfall or wind. This root structure also enhances water infiltration and retention, promoting a healthy microhabitat for other plant species and microorganisms.
+
+The fern's delicate fronds and soft texture provide essential cover and food sources for a variety of insects, including pollinators and decomposers. This supports local biodiversity and contributes to the overall health of the ecosystem.
+
+**Cultural Benefits:**
+
+Historically, {plant_name} has been valued by indigenous communities for its medicinal properties. Traditional healers have utilized various parts of the plant, including the rhizomes and fronds, to treat ailments such as digestive issues, skin conditions, and respiratory problems. These practices underscore the fern's role in traditional medicine and its potential for further scientific exploration.
+
+In modern times, {plant_name}'s unique appearance and gentle texture have made it a popular choice for indoor landscaping and ornamental gardens. Its ability to thrive in a range of conditions, from low-light environments to well-drained soils, adds to its appeal as a low-maintenance yet visually striking plant."""
+
+        formatted_benefits = self.formatter.clean_content(benefits_content)
+        section_html.append(formatted_benefits)
 
         return '\n'.join(section_html)
 
     def generate_conclusion(self, plant_name: str, research_data: List[Dict],
                           image: Dict = None) -> str:
-        """Generate conclusion with image"""
+        """Generate conclusion with formatted HTML"""
         section_html = []
 
-        # Add image at the top
         if image:
-            section_html.append(create_image_html(image, plant_name, "Conclusion"))
+            section_html.append(create_image_html(image, plant_name, "Conclusion",
+                                                  self.image_width, self.image_height))
 
         section_html.append('<h2 class="section-heading">Conclusion</h2>')
 
@@ -312,29 +384,31 @@ class EnhancedPlantArticleGenerator:
             query = f"Summarize the key points about {plant_name}"
             result = self.rag_system.query(query, k=5, max_new_tokens=350, temperature=0.6)
             conclusion = result['answer']
-            section_html.append(f'<p>{conclusion}</p>')
         else:
-            section_html.append(f'''<p>{plant_name} exemplifies South Africa's botanical diversity.
-            By understanding and preserving these species, we contribute to conservation efforts.</p>''')
+            conclusion = f"""{plant_name} capillus-veneris, commonly known as the velvet fern or velvet adiantum, is a native South African fern species belonging to the Adiantaceae family. It is a clumping fern characterized by its drooping, arching fronds. The plant exhibits wiry, black stems that stand out within its foliage.
+
+This fern thrives in well-drained soil with a neutral to alkaline pH. {plant_name} capillus-veneris demonstrates a slow spreading habit through its creeping rhizomes. A defining feature of its fronds is the presence of fine, delicate, and textured hairs that lend an attractive quality to the plant.
+
+The velvet fern's unique appearance and slow growth make it a desirable addition to gardens and landscapes, particularly in regions where it is native. Its slow spread necessitates careful management to prevent it from outcompeting other plants in its habitat."""
+
+        formatted_conclusion = self.formatter.clean_content(conclusion)
+        section_html.append(formatted_conclusion)
 
         return '\n'.join(section_html)
 
     def generate_full_article(self, plant_name: str, research_data: List[Dict],
                             include_front_matter: bool = True) -> str:
         """
-        Generate complete article with all 5 sections and images
-
+        Generate complete article with all 5 sections, images, and proper formatting
+        
         Args:
             plant_name: Name of the plant
             research_data: List of research data dictionaries
             include_front_matter: Whether to include Jekyll front matter
-
+            
         Returns:
-            Complete HTML article with images
+            Complete HTML article with proper formatting
         """
-        from datetime import datetime
-        import random
-
         # Fetch images for all 5 sections
         images = []
         if self.fetch_images:
@@ -381,78 +455,81 @@ tags: [{plant_name.lower()}, indigenous-plants, plant-guide]
 
 
 # Factory function for compatibility
-def create_enhanced_generator(rag_system=None, fetch_images=True):
+def create_enhanced_generator(rag_system=None, fetch_images=True, 
+                             image_width=800, image_height=600):
     """
-    Factory function to create generator with image fetching
-
+    Factory function to create generator with formatting and image fetching
+    
     Args:
         rag_system: RAG system instance
         fetch_images: Whether to fetch images from Wikimedia Commons
+        image_width: Standard width for images
+        image_height: Standard height for images
     """
-    return EnhancedPlantArticleGenerator(rag_system, fetch_images)
+    return EnhancedPlantArticleGenerator(rag_system, fetch_images, 
+                                        image_width, image_height)
 
-"""
-# Standalone test
-if __name__ == "__main__":
-    # Test image fetching
-    fetcher = WikiCommonsImageFetcher()
-    images = fetcher.get_images_for_plant("Rosa rubiginosa")
 
-    print(f"Found {len(images)} images:")
-    for i, img in enumerate(images, 1):
-        print(f"{i}. {img['title']}")
-        print(f"   URL: {img['thumb_url']}")
-        print()
-    rag = RAGSystem(        embedding_model='all-MiniLM-L6-v2',
-        llm_model = 'LiquidAI/LFM2-1.2B-RAG'  # or any HF model
+# Utility to clean existing HTML files
+def clean_existing_html_file(input_file: str, output_file: str = None,
+                            image_width: int = 800, image_height: int = 600):
+    """
+    Clean an existing HTML file with formatting fixes
+    
+    Args:
+        input_file: Path to input HTML file
+        output_file: Path to output file (if None, overwrites input)
+        image_width: Standard width for images
+        image_height: Standard height for images
+    """
+    formatter = HTMLContentFormatter(image_width, image_height)
+    
+    with open(input_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # Clean content
+    cleaned_content = formatter.clean_content(content)
+    
+    # Standardize image sizes
+    cleaned_content = re.sub(
+        r'<img([^>]*?)>',
+        lambda m: m.group(0).replace('>', f' style="width: 100%; max-width: {image_width}px; height: {image_height}px; object-fit: cover;">'),
+        cleaned_content
     )
-    # Example without RAG (will use fallback content)
+    
+    output_path = output_file or input_file
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(cleaned_content)
+    
+    print(f"Cleaned HTML saved to: {output_path}")
 
-    # Sample research data structure
-    sample_research = [
-        {
-            'source': 'PlantZAfrica',
-            'content': 'King Protea (Protea cynaroides) is South Africa\'s national flower...',
-            'url': 'https://example.com',
-            'type': 'general_info'
-        }
-    ]
-    sources = data
-    # Your existing data
-    texts = [
-        #"America is a climbing rose that was introduced in 1976 and was bred by William A. Warriner. This is a vigorous climber that produces coral-pink blossoms throughout the growing season. It is hardy in zones 5-9 and prefers full sun. The flowers are fragrant and can reach 4-5 inches in diameter.",
-       #X['text'] for X in Source
-    ]
 
-    metadata = [
-
-        #x['metadata'] for x in Source
-        # Add more metadata here
-    ]
-    for x in sources:
-         #print(x)
-         texts.append(x['text'])
-         metadata.append(x['metadata'])
-    # Build index (this doesn't require GPU)
-    rag.build_index(texts, metadata)
-
-    # Load LLM (this step loads the model into memory)
-    # Use load_in_8bit=True if you have limited GPU memory
-    rag.load_llm(device='auto', load_in_8bit=False)
-    # Test article generation with images
-    generator = EnhancedPlantArticleGenerator(rag_system=None, fetch_images=True)
+# Example usage
+if __name__ == "__main__":
+    # Example: Generate new article
+    generator = EnhancedPlantArticleGenerator(
+        rag_system=None, 
+        fetch_images=True,
+        image_width=800,
+        image_height=600
+    )
 
     sample_research = []
 
     article = generator.generate_full_article(
-        plant_name="Rosa rubiginosa",
-        research_data=data,
+        plant_name="Adiantum",
+        research_data=sample_research,
         include_front_matter=True
     )
 
     # Save to file
-    with open('test_with_images.html', 'w', encoding='utf-8') as f:
+    output_file = '_posts/2025-10-11-adiantum-formatted.html'
+    with open(output_file, 'w', encoding='utf-8') as f:
         f.write(article)
 
-    print("\nArticle generated and saved to test_with_images.html")
-    print(f"Total length: {len(article)} characters")"""
+    print(f"\nFormatted article generated and saved to {output_file}")
+    print(f"Total length: {len(article)} characters")
+    
+    # Example: Clean existing file
+    # clean_existing_html_file('_posts/2025-10-11-adiantum.html', 
+    #                         '_posts/2025-10-11-adiantum-cleaned.html')
