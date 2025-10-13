@@ -322,7 +322,7 @@ def wiki(plant_name=None):
         return [{"text":plant_search.get_full_text(), "metadata" : info }] 
     else:
         print(f"\n✗ Page does not exist for '{plant_name}'")
-        return [{"text": plant_name , "metadata" : "" }] 
+        return [{"text": plant_name , "metadata" : {"url" : "", "source" :"" } }] 
         #exit() 
     
 
