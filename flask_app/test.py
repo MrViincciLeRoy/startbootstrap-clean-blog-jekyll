@@ -275,8 +275,8 @@ def run():
             )
 
             # Prepare texts and metadata
-            texts = []
-            metadata = []
+            texts = [db.get_full_plant_info(plant_name)]
+            metadata = ['Wikipedia']
             for item in data:
                 texts.append(item['text'])
                 metadata.append(item['metadata'])
