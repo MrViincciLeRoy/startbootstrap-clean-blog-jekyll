@@ -347,7 +347,7 @@ Remember, providing optimal conditions is key to thriving {plant_name}. It's a r
 
         if self.rag_system and research_data:
             query = f"What are the medicinal, ecological, and cultural benefits of {plant_name}?"
-            result = self.rag_system.query(query, k=10 max_new_tokens=600, temperature=0.7)
+            result = self.rag_system.query(query, k=10, max_new_tokens=600, temperature=0.7)
             benefits_content = result['answer']
         else:
             benefits_content = f"""{plant_name}, commonly known as the feather fern or velvet fern, offers a range of benefits that extend beyond its aesthetic appeal. These benefits can be categorized into medicinal, ecological, and cultural domains.
