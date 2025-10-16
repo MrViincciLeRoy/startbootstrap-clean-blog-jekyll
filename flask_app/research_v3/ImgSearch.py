@@ -28,7 +28,7 @@ class HTMLContentFormatter:
     
     def convert_markdown_bold_to_html(self, text: str) -> str:
         """Convert markdown-style bold (**text**) to HTML <strong> tags"""
-        text = re.sub(r'<br>\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+        text = re.sub(r'\*\*(.+?)\*\*', r'<br>\n<strong>\1</strong>', text)
         return text
     
     def fix_line_breaks(self, text: str) -> str:
@@ -255,7 +255,7 @@ class EnhancedPlantArticleGenerator:
 
         if self.rag_system and research_data:
             query = f"Write an engaging introduction about {plant_name}, including its origin and significance"
-            result = self.rag_system.query(query, k=5, max_new_tokens=300, temperature=0.7)
+            result = self.rag_system.query(query, k=3, max_new_tokens=200, temperature=0.7)
             intro = result['answer']
         else:
             intro = f"""The {plant_name}, also known as the Veiled Fern or Veiled Clumping Fern, is a fascinating member of the fern family native to South Africa. This clumping fern finds its home in a variety of habitats, including moist woodlands, grasslands, and rocky slopes, where it thrives in well-drained, nutrient-rich soils.
@@ -283,7 +283,7 @@ This plant's slow, yet steady, spread through its creeping rhizomes makes it an 
 
         if self.rag_system and research_data:
             query = f"What are the most interesting botanical facts about {plant_name}?"
-            result = self.rag_system.query(query, k=10, max_new_tokens=600, temperature=0.7)
+            result = self.rag_system.query(query, k=10, max_new_tokens=400, temperature=0.7)
             facts_content = result['answer']
         else:
             facts_content = f"""{plant_name} capillus-veneris, commonly known as the Velvet Fern, possesses several interesting botanical characteristics that make it a noteworthy species in the Adiantaceae family.
@@ -310,7 +310,7 @@ One of the most fascinating aspects of {plant_name} capillus-veneris is its prop
 
         if self.rag_system and research_data:
             query = f"How do you care for and cultivate {plant_name}? Include watering, light, soil, and propagation."
-            result = self.rag_system.query(query, k=10, max_new_tokens=700, temperature=0.6)
+            result = self.rag_system.query(query, k=10, max_new_tokens=500, temperature=0.6)
             care_content = result['answer']
         else:
             care_content = f"""{plant_name}, commonly known as Maidenhair fern or Lady's Mantle, is a delicate fern native to South Africa. Cultivating it effectively involves attention to its specific needs for moisture, light, soil, and propagation.
@@ -347,7 +347,7 @@ Remember, providing optimal conditions is key to thriving {plant_name}. It's a r
 
         if self.rag_system and research_data:
             query = f"What are the medicinal, ecological, and cultural benefits of {plant_name}?"
-            result = self.rag_system.query(query, k=10, max_new_tokens=600, temperature=0.7)
+            result = self.rag_system.query(query, k=10, max_new_tokens=400, temperature=0.7)
             benefits_content = result['answer']
         else:
             benefits_content = f"""{plant_name}, commonly known as the feather fern or velvet fern, offers a range of benefits that extend beyond its aesthetic appeal. These benefits can be categorized into medicinal, ecological, and cultural domains.
@@ -382,7 +382,7 @@ In modern times, {plant_name}'s unique appearance and gentle texture have made i
 
         if self.rag_system and research_data:
             query = f"Summarize the key points about {plant_name}"
-            result = self.rag_system.query(query, k=10, max_new_tokens=350, temperature=0.7)
+            result = self.rag_system.query(query, k=10, max_new_tokens=300, temperature=0.7)
             conclusion = result['answer']
         else:
             conclusion = f"""{plant_name} capillus-veneris, commonly known as the velvet fern or velvet adiantum, is a native South African fern species belonging to the Adiantaceae family. It is a clumping fern characterized by its drooping, arching fronds. The plant exhibits wiry, black stems that stand out within its foliage.
