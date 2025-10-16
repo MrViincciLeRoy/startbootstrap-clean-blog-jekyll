@@ -54,7 +54,7 @@ jobs:
 
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip
+        #python -m pip install --upgrade pip
 
         if [ -f flask_app/requirements.txt ]; then
           pip install -r flask_app/requirements.txt
