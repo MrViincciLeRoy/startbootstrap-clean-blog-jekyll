@@ -198,7 +198,7 @@ jobs:
           
           git commit -m "Add new plant blog posts
 
-Generated automatically by GitHub Actions
+#Generated automatically by GitHub Actions
 Workflow: ${{ github.workflow }}
 Run: ${{ github.run_number }}
 Timestamp: $(date -u)"
