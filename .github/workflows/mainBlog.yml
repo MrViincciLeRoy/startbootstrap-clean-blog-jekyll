@@ -120,9 +120,9 @@ jobs:
           git add flora_data.db
           if ! git diff --cached --quiet; then
             git commit -m "Update flora database - article generated $(date +'%Y-%m-%d %H:%M:%S UTC')"
-            git fetch origin main
-            git rebase origin/main
-            git push origin main
+            git fetch origin master
+            git rebase origin/master 
+            git push origin master
             echo "Database updated and pushed successfully"
           else
             echo "No database changes to commit"
