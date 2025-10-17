@@ -203,7 +203,8 @@ def run():
     """Main function to generate article from incomplete plant in database"""
     try:
         db_path = os.path.join('research_v3', 'flora_data.db')
-
+        Json_path = os.path.join('research_v3', 'article_config.json')
+        
         if not os.path.exists(db_path):
             print(f"❌ Database not found at: {db_path}")
             # ... error handling
@@ -291,7 +292,11 @@ def run():
 
             # Generate article
             print("✍️ Generating article...")
-            generator = EnhancedPlantArticleGenerator(rag_system=rag, fetch_images=True)
+            generator = EnhancedPlantArticleGenerator(
+                rag_system=rag, 
+                fetch_images=True, 
+                config_path=Json_path
+            )
             article = generator.generate_full_article(
                 plant_name=plant_name,
                 research_data=data,
