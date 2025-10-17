@@ -10,14 +10,6 @@ on:
     - cron: '0 10 * * 3'  # 10:00 AM UTC every Wednesday
     - cron: '0 10 * * 5'  # 10:00 AM UTC every Friday
 
-  # Run on push to main branch (optional)
-  push:
-    branches: [ main ]
-    paths:
-      - 'flask_app/research_v3/**'
-      - 'flask_app/test.py'
-      - 'flask_app/main.py'
-
 env:
   # Target repository for blog posts
   TARGET_REPO: 'MrViincciLeRoy/startbootstrap-clean-blog-jekyll'
