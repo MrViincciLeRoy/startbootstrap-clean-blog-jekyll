@@ -389,7 +389,7 @@ class EnhancedPlantArticleGenerator:
         section_html.append(f'<h2 class="section-heading">{section_name}</h2>')
 
         if self.rag_system and research_data and query:
-            result = self.rag_system.query(query, k=10, max_new_tokens=400, temperature=0.5)
+            result = self.rag_system.query(query, k=10, max_new_tokens=400, temperature=0.75)
             content = result['answer']
         else:
             content = default_content or f"Information about {plant_name} for {section_name}."
