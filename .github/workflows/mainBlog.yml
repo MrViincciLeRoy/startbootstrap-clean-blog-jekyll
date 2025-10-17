@@ -1,4 +1,4 @@
-name: New Generate Plant Blog Posts
+name: Generate Plant Blog Posts
 
 on:
   # Run manually via workflow dispatch
@@ -228,11 +228,11 @@ Timestamp: $(date -u)"
             fi
           done
         else
-          echo "**❌ ERROR:** No posts generated!" >> $GITHUB_STEP_SUMMARY
+          echo "**ERROR:** No posts generated!" >> $GITHUB_STEP_SUMMARY
         fi
 
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**🌐 Blog:** [View Site](https://${{ github.repository_owner }}.github.io/startbootstrap-clean-blog-jekyll/)" >> $GITHUB_STEP_SUMMARY
+        echo "**Blog:** [View Site](https://${{ github.repository_owner }}.github.io/startbootstrap-clean-blog-jekyll/)" >> $GITHUB_STEP_SUMMARY
 
   test-jekyll-build:
     needs: generate-and-deploy
