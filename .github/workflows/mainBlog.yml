@@ -31,6 +31,24 @@ jobs:
       with:
         token: ${{ secrets.BLOG_DEPLOY_TOKEN }}
 
+    - name: Free up disk space
+      run: |
+        echo "Available disk space before cleanup:"
+        df -h
+        
+        # Remove unnecessary tools and libraries
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/.ghcup
+        sudo rm -rf /usr/share/swift
+        
+        # Clean apt cache
+        sudo apt-get clean
+        
+        echo "Available disk space after cleanup:"
+        df -h
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -54,15 +72,19 @@ jobs:
 
     - name: Install Python dependencies
       run: |
-        #python -m pip install --upgrade pip
-
+        python -m pip install --upgrade pip
+        
+        # Install with no cache to save space
         if [ -f flask_app/requirements.txt ]; then
-          pip install -r flask_app/requirements.txt
+          pip install --no-cache-dir -r flask_app/requirements.txt
         elif [ -f requirements.txt ]; then
-          pip install -r requirements.txt
+          pip install --no-cache-dir -r requirements.txt
         else
-          pip install Flask transformers wikipedia-api beautifulsoup4 requests torch
+          pip install --no-cache-dir Flask transformers wikipedia-api beautifulsoup4 requests torch
         fi
+        
+        echo "Disk space after installation:"
+        df -h
 
     - name: Create _posts directory
       run: mkdir -p _posts
