@@ -39,12 +39,545 @@
     {
       "title": "Cultivating {plant_name} with Confidence",
       "subtitle": "Expert guidance for growing this beautiful South African native"
+    },
+    {
+      "title": "The Essential Care Guide for {plant_name}",
+      "subtitle": "Learn watering, lighting, and soil requirements for optimal growth"
+    },
+    {
+      "title": "{plant_name} for Beginners",
+      "subtitle": "Start your journey with this beginner-friendly South African plant"
+    },
+    {
+      "title": "Mastering {plant_name} Propagation",
+      "subtitle": "Proven techniques to multiply your plants and expand your collection"
+    },
+    {
+      "title": "{plant_name}: Botany and Beyond",
+      "subtitle": "Explore the scientific classification and fascinating plant family"
+    },
+    {
+      "title": "Transform Your Garden with {plant_name}",
+      "subtitle": "Design inspiration and landscaping ideas for this native species"
+    },
+    {
+      "title": "{plant_name} Health and Pest Management",
+      "subtitle": "Identify and treat common issues to keep your plant thriving"
+    },
+    {
+      "title": "Indoor Growing: Your {plant_name} Success Story",
+      "subtitle": "Create the perfect indoor environment for this exotic plant"
+    },
+    {
+      "title": "{plant_name} Seasonality and Flowering",
+      "subtitle": "Understand blooming cycles and seasonal care requirements"
+    },
+    {
+      "title": "Heirloom and Rare Varieties of {plant_name}",
+      "subtitle": "Discover unusual cultivars and their unique characteristics"
+    },
+    {
+      "title": "The Ethnobotany of {plant_name}",
+      "subtitle": "Historical uses and cultural significance in South Africa"
+    },
+    {
+      "title": "{plant_name} in Contemporary Gardening",
+      "subtitle": "Modern trends and innovative ways to incorporate this plant"
+    },
+    {
+      "title": "Troubleshooting Common {plant_name} Problems",
+      "subtitle": "Solutions for yellowing leaves, stunted growth, and other issues"
+    },
+    {
+      "title": "Creating the Perfect Terrarium with {plant_name}",
+      "subtitle": "Step-by-step guide to designing a contained ecosystem"
+    },
+    {
+      "title": "{plant_name} Companion Planting Guide",
+      "subtitle": "Discover which plants thrive best alongside this species"
+    },
+    {
+      "title": "Harvesting and Utilizing {plant_name}",
+      "subtitle": "Practical applications and sustainable harvesting methods"
+    },
+    {
+      "title": "The Nutritional Profile of {plant_name}",
+      "subtitle": "Benefits and nutritional information for edible varieties"
+    },
+    {
+      "title": "{plant_name} in Landscape Design",
+      "subtitle": "Professional tips for creating stunning garden compositions"
+    },
+    {
+      "title": "Winter Care for {plant_name}",
+      "subtitle": "Protect and maintain your plant through cold seasons"
+    },
+    {
+      "title": "{plant_name}: Container Growing Essentials",
+      "subtitle": "Choose the right pots and containers for successful cultivation"
+    },
+    {
+      "title": "The Evolution of {plant_name} Cultivation",
+      "subtitle": "From wild species to commercially cultivated varieties"
+    },
+    {
+      "title": "Maximizing Blooms: {plant_name} Fertilizing Strategy",
+      "subtitle": "Nutritional schedules for enhanced flowering and growth"
+    },
+    {
+      "title": "{plant_name} and Conservation Efforts",
+      "subtitle": "Supporting sustainable practices and protecting wild populations"
+    },
+    {
+      "title": "Propagating {plant_name} from Seeds",
+      "subtitle": "Complete guide to germination, timing, and seed collection"
+    },
+    {
+      "title": "The Complete {plant_name} Pest Prevention Guide",
+      "subtitle": "Natural and organic methods to protect your plants"
+    },
+    {
+      "title": "{plant_name}: Creating Biodiversity in Your Garden",
+      "subtitle": "Attract pollinators and wildlife with this native plant"
+    },
+    {
+      "title": "Advanced {plant_name} Growing Techniques",
+      "subtitle": "Hydroponics, grafting, and other specialized methods"
+    },
+    {
+      "title": "{plant_name} Toxicity and Safety Information",
+      "subtitle": "Important health and safety considerations for pets and children"
+    },
+    {
+      "title": "Air Quality and {plant_name}: Natural Purification",
+      "subtitle": "How this plant improves indoor air and promotes wellness"
+    },
+    {
+      "title": "{plant_name} Mythologies and Symbolism",
+      "subtitle": "Cultural meanings and folklore surrounding this species"
+    },
+    {
+      "title": "Specimen {plant_name} Cultivation Guide",
+      "subtitle": "Techniques for developing large, impressive plants"
+    },
+    {
+      "title": "Budget-Friendly {plant_name} Growing Tips",
+      "subtitle": "Affordable methods for successful plant propagation"
+    },
+    {
+      "title": "{plant_name} pH and Soil Chemistry Mastery",
+      "subtitle": "Optimize soil conditions for maximum nutrient uptake"
+    },
+    {
+      "title": "Vertical Gardening with {plant_name}",
+      "subtitle": "Space-saving techniques for small gardeners"
+    },
+    {
+      "title": "The {plant_name} Propagation Challenge",
+      "subtitle": "Advanced strategies for difficult-to-propagate varieties"
+    },
+    {
+      "title": "{plant_name} and Traditional Medicine",
+      "subtitle": "Historical remedies and modern scientific research"
+    },
+    {
+      "title": "Creating a {plant_name} Collection Strategy",
+      "subtitle": "Build your plant library with related species and cultivars"
+    },
+    {
+      "title": "Humidity Control for {plant_name} Success",
+      "subtitle": "Techniques for maintaining optimal moisture levels"
+    },
+    {
+      "title": "{plant_name} in Photography: Capturing Beauty",
+      "subtitle": "Tips for photographing your plants like a professional"
+    },
+    {
+      "title": "The Microbiology of {plant_name} Health",
+      "subtitle": "Understanding beneficial microbes and soil biology"
+    },
+    {
+      "title": "Seasonal Pruning and Maintenance for {plant_name}",
+      "subtitle": "Shaping techniques for healthier, more productive plants"
+    },
+    {
+      "title": "{plant_name} and Your Home Decor",
+      "subtitle": "Styling ideas to showcase this beautiful specimen"
+    },
+    {
+      "title": "The Economic Value of Cultivating {plant_name}",
+      "subtitle": "Exploring commercial opportunities and profitability"
+    },
+    {
+      "title": "{plant_name} Genetics and Breeding Basics",
+      "subtitle": "Introduction to plant genetics for home gardeners"
+    },
+    {
+      "title": "Water Conservation: Growing {plant_name} Sustainably",
+      "subtitle": "Drought-tolerant cultivation and efficient watering systems"
+    },
+    {
+      "title": "Succession Planting with {plant_name}",
+      "subtitle": "Timing strategies for continuous harvests and blooms"
+    },
+    {
+      "title": "{plant_name} and Ecosystem Services",
+      "subtitle": "Environmental benefits and ecological importance"
+    },
+    {
+      "title": "The Art of Bonsai {plant_name}",
+      "subtitle": "Miniaturization techniques for this species"
+    },
+    {
+      "title": "Street-Level Urban Gardening with {plant_name}",
+      "subtitle": "Growing thriving plants in concrete jungles"
+    },
+    {
+      "title": "{plant_name} Flowering Failure: Diagnosis and Treatment",
+      "subtitle": "Why your plant won't bloom and how to fix it"
+    },
+    {
+      "title": "The Comprehensive {plant_name} Watering Manual",
+      "subtitle": "Master every aspect of hydration and drainage"
+    },
+    {
+      "title": "{plant_name}: From Seedling to Specimen",
+      "subtitle": "Complete lifecycle management and growth stages"
+    },
+    {
+      "title": "Companion Herbs and {plant_name} Garden Planning",
+      "subtitle": "Creating functional and beautiful integrated gardens"
+    },
+    {
+      "title": "Winter Sowing {plant_name}: Outdoor Propagation",
+      "subtitle": "Hardy germination methods for cold climates"
+    },
+    {
+      "title": "{plant_name} Root Systems and Soil Structure",
+      "subtitle": "Understanding underground architecture for better care"
+    },
+    {
+      "title": "Rooting Hormones and {plant_name} Cuttings",
+      "subtitle": "Chemical and natural methods to boost propagation success"
+    },
+    {
+      "title": "The {plant_name} Family Tree: Related Species",
+      "subtitle": "Botany, classification, and interesting relatives"
+    },
+    {
+      "title": "Lighting Optimization for Indoor {plant_name}",
+      "subtitle": "Grow lights, placement, and photosynthesis strategies"
+    },
+    {
+      "title": "{plant_name} Export and Import Regulations",
+      "subtitle": "Legal considerations for collectors and businesses"
+    },
+    {
+      "title": "Nutritional Deficiencies in {plant_name}",
+      "subtitle": "Identifying and correcting nutrient imbalances"
+    },
+    {
+      "title": "Creating a {plant_name} Botanical Reference",
+      "subtitle": "Documentation and record-keeping for serious gardeners"
+    },
+    {
+      "title": "{plant_name} Root Rot Prevention and Recovery",
+      "subtitle": "Emergency protocols and preventive measures"
+    },
+    {
+      "title": "Seasonal {plant_name} Display Ideas",
+      "subtitle": "Rotating arrangements throughout the year"
+    },
+    {
+      "title": "The Sensory Experience of Growing {plant_name}",
+      "subtitle": "Fragrance, texture, and aesthetic appreciation"
+    },
+    {
+      "title": "{plant_name} in Wetland and Water Gardens",
+      "subtitle": "Aquatic and semi-aquatic cultivation techniques"
+    },
+    {
+      "title": "Companion Mycorrhizal Networks and {plant_name}",
+      "subtitle": "Understanding fungal relationships for plant health"
+    },
+    {
+      "title": "The Historical Distribution of {plant_name}",
+      "subtitle": "Migration, climate zones, and natural habitats"
+    },
+    {
+      "title": "{plant_name} and Micronutrient Management",
+      "subtitle": "Advanced nutrition for peak performance"
+    },
+    {
+      "title": "Grafting Compatibility with {plant_name} Relatives",
+      "subtitle": "Advanced propagation through grafting techniques"
+    },
+    {
+      "title": "Year-Round {plant_name} Care Calendar",
+      "subtitle": "Monthly tasks and seasonal maintenance schedule"
+    },
+    {
+      "title": "Heirloom Seed Saving for {plant_name}",
+      "subtitle": "Preserve genetics and build seed libraries"
+    },
+    {
+      "title": "Climate Adaptation: Growing {plant_name} Anywhere",
+      "subtitle": "Regional strategies for your specific zone"
+    },
+    {
+      "title": "{plant_name} Germination Secrets",
+      "subtitle": "Unlock high germination rates with proven methods"
+    },
+    {
+      "title": "Professional {plant_name} Nursery Operations",
+      "subtitle": "Commercial production scale and efficiency"
+    },
+    {
+      "title": "{plant_name} Dormancy: Seasonal Rest Cycles",
+      "subtitle": "Understanding and inducing dormancy for vigor"
+    },
+    {
+      "title": "Creating Medicinal {plant_name} Preparations",
+      "subtitle": "Teas, tinctures, and traditional preparations"
+    },
+    {
+      "title": "{plant_name} Genetic Diversity and Heirlooms",
+      "subtitle": "Preserving rare varieties and building collections"
+    },
+    {
+      "title": "The Future of {plant_name} Cultivation",
+      "subtitle": "Emerging technologies and research advances"
+    },
+    {
+      "title": "Regenerative Gardening with {plant_name}",
+      "subtitle": "Building soil health while growing this species"
+    },
+    {
+      "title": "Permaculture Integration of {plant_name}",
+      "subtitle": "Designing sustainable food forests and gardens"
+    },
+    {
+      "title": "{plant_name} and Biodynamic Gardening Principles",
+      "subtitle": "Cosmic rhythms and holistic plant care"
+    },
+    {
+      "title": "Companion Planting Chart for {plant_name}",
+      "subtitle": "Visual guide to optimal plant partnerships"
+    },
+    {
+      "title": "{plant_name} Cutting Propagation Mastery",
+      "subtitle": "Detailed techniques for successful cuttings"
+    },
+    {
+      "title": "Hardening Off {plant_name} Seedlings",
+      "subtitle": "Preparing indoor-grown plants for outdoor conditions"
+    },
+    {
+      "title": "{plant_name} Aphid and Mite Control",
+      "subtitle": "Identifying and managing common insect pests"
+    },
+    {
+      "title": "Temperature Stress and {plant_name}",
+      "subtitle": "Protecting plants from heat and cold extremes"
+    },
+    {
+      "title": "Creating {plant_name} Fairy Gardens",
+      "subtitle": "Whimsical miniature garden designs with this plant"
+    },
+    {
+      "title": "Fog and Mist Systems for {plant_name}",
+      "subtitle": "Automated humidity management for tropical varieties"
+    },
+    {
+      "title": "{plant_name} Composting and Recycling",
+      "subtitle": "Sustainable disposal and nutrient recovery"
+    },
+    {
+      "title": "Aquaponics with {plant_name}",
+      "subtitle": "Fish and plant synergy for integrated systems"
+    },
+    {
+      "title": "The {{plant_name}} Color Palette",
+      "subtitle": "Exploring varieties and cultivar color variations"
+    },
+    {
+      "title": "{plant_name} Butterfly and Pollinator Attraction",
+      "subtitle": "Creating habitat for beneficial insects"
+    },
+    {
+      "title": "Tissue Culture Propagation of {plant_name}",
+      "subtitle": "Advanced laboratory techniques for mass production"
+    },
+    {
+      "title": "{plant_name} and Urban Heat Islands",
+      "subtitle": "Cooling effects and microclimate modification"
+    },
+    {
+      "title": "Root Binding and Repotting {plant_name}",
+      "subtitle": "Signs and solutions for outgrowing containers"
+    },
+    {
+      "title": "LED Growing Lights for {plant_name}",
+      "subtitle": "Energy-efficient illumination strategies"
+    },
+    {
+      "title": "{plant_name} Winter Dormancy Strategies",
+      "subtitle": "Inducing and managing seasonal rest periods"
+    },
+    {
+      "title": "The {{plant_name}} Scent Profile",
+      "subtitle": "Aromatic compounds and fragrance appreciation"
+    },
+    {
+      "title": "Companion Animals and {plant_name}",
+      "subtitle": "Growing with livestock and beneficial fauna"
+    },
+    {
+      "title": "{plant_name} and Soil Microbes",
+      "subtitle": "Bacterial and fungal communities in the rhizosphere"
+    },
+    {
+      "title": "Disease-Resistant {plant_name} Varieties",
+      "subtitle": "Selecting genetics for health and resilience"
+    },
+    {
+      "title": "Creating {{plant_name}} Hedges and Screens",
+      "subtitle": "Privacy and windbreak solutions with this species"
+    },
+    {
+      "title": "{plant_name} Leaf Spot Prevention",
+      "subtitle": "Fungal and bacterial disease management"
+    },
+    {
+      "title": "Salinity and {{plant_name}}: Coastal Growing",
+      "subtitle": "Salt tolerance and maritime cultivation"
+    },
+    {
+      "title": "Fermentation and {{plant_name}}",
+      "subtitle": "Creating preserved products and condiments"
+    },
+    {
+      "title": "Stacking {{plant_name}} for Maximum Yield",
+      "subtitle": "Vertical and intensive growing techniques"
+    },
+    {
+      "title": "{{plant_name}} and Biophilic Design",
+      "subtitle": "Wellness benefits of living with this plant"
+    },
+    {
+      "title": "Anaerobic Composting of {{plant_name}} Waste",
+      "subtitle": "Biogas production and sustainable practices"
+    },
+    {
+      "title": "{{plant_name}} Variegation Stabilization",
+      "subtitle": "Maintaining color patterns in ornamental varieties"
+    },
+    {
+      "title": "Spring {{plant_name}} Awakening Protocol",
+      "subtitle": "Transition techniques from winter dormancy"
+    },
+    {
+      "title": "{{plant_name}} and Rainwater Harvesting",
+      "subtitle": "Integrating water collection with plant care"
+    },
+    {
+      "title": "Precision Agriculture for {{plant_name}}",
+      "subtitle": "Data-driven cultivation and smart monitoring"
+    },
+    {
+      "title": "{{plant_name}} Edging and Bordering",
+      "subtitle": "Garden design techniques and aesthetic placement"
+    },
+    {
+      "title": "Scaling {{plant_name}} Production",
+      "subtitle": "From hobby to business: growth strategies"
+    },
+    {
+      "title": "{{plant_name}} and Soil Remediation",
+      "subtitle": "Phytoremediation and environmental restoration"
+    },
+    {
+      "title": "Companion {{plant_name}} Arrangements",
+      "subtitle": "Aesthetic groupings for visual impact"
+    },
+    {
+      "title": "{{plant_name}} Flowering Triggers",
+      "subtitle": "Day length, temperature, and bloom induction"
+    },
+    {
+      "title": "Chemical-Free {{plant_name}} Pest Solutions",
+      "subtitle": "Organic and homemade pest deterrents"
+    },
+    {
+      "title": "{{plant_name}} and Mycorrhizal Inoculation",
+      "subtitle": "Introducing beneficial fungi for enhanced growth"
+    },
+    {
+      "title": "Shade Gardening with {{plant_name}}",
+      "subtitle": "Low-light varieties and adaptation strategies"
+    },
+    {
+      "title": "{{plant_name}} Intensive Cultivation Methods",
+      "subtitle": "Maximum output from minimal space"
+    },
+    {
+      "title": "Nitrogen Fixation and {{plant_name}}",
+      "subtitle": "Legume companions and soil enrichment"
+    },
+    {
+      "title": "{{plant_name}} Cold Hardiness Rating",
+      "subtitle": "Understanding USDA zones and frost tolerance"
+    },
+    {
+      "title": "Ornamental {{plant_name}} Display Techniques",
+      "subtitle": "Showcasing plant structure and foliage"
+    },
+    {
+      "title": "{{plant_name}} and Weather Prediction",
+      "subtitle": "Traditional plant behavior indicators"
+    },
+    {
+      "title": "Substrate Innovation for {{plant_name}}",
+      "subtitle": "Alternative growing media and potting mixes"
+    },
+    {
+      "title": "{{plant_name}} Branching and Architecture",
+      "subtitle": "Natural forms and intentional shaping"
+    },
+    {
+      "title": "Seasonal Nutrition for {{plant_name}}",
+      "subtitle": "Adapting feeding schedules year-round"
+    },
+    {
+      "title": "{{plant_name}} Cellular Structure",
+      "subtitle": "Microscopic anatomy and plant physiology"
+    },
+    {
+      "title": "Heritage {{plant_name}} Preservation",
+      "subtitle": "Maintaining historical varieties and lineages"
+    },
+    {
+      "title": "Green Walls and {{plant_name}}",
+      "subtitle": "Living installations and living art"
+    },
+    {
+      "title": "{{plant_name}} Bioaccumulation Research",
+      "subtitle": "Metal uptake and environmental monitoring"
+    },
+    {
+      "title": "Companion Testing for {{plant_name}}",
+      "subtitle": "Allelopathy and growth relationships"
+    },
+    {
+      "title": "{{plant_name}} and Circadian Rhythms",
+      "subtitle": "Plant responses to day-night cycles"
     }
   ],
   "image_settings": {
     "width": 800,
     "height": 600,
-    "default_fallback": "/img/posts/default-plant.jpg"
+    "image_url": "https://commons.wikimedia.org/wiki/File:Willow_Trees_by_Pieter_Wenning.jpeg",
+    "default_fallback": "https://commons.wikimedia.org/wiki/File:Willow_Trees_by_Pieter_Wenning.jpeg"
   },
   "content_cleaning": {
     "remove_source_markers": true,
