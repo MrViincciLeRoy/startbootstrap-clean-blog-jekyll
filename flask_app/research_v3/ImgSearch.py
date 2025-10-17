@@ -389,7 +389,7 @@ class EnhancedPlantArticleGenerator:
         section_html.append(f'<h2 class="section-heading">{section_name}</h2>')
 
         if self.rag_system and research_data and query:
-            result = self.rag_system.query(query, k=10, max_new_tokens=400, temperature=0.7)
+            result = self.rag_system.query(query, k=10, max_new_tokens=400, temperature=0.5)
             content = result['answer']
         else:
             content = default_content or f"Information about {plant_name} for {section_name}."
@@ -423,7 +423,7 @@ layout: post
 title: "{heading['title']}"
 subtitle: "{heading['subtitle']}"
 date: {date.strftime('%Y-%m-%d %H:%M:%S')}
-background: '/img/posts/{random.randint(1, 6):02d}.jpg'
+background: 'https://commons.wikimedia.org/wiki/File:Willow_Trees_by_Pieter_Wenning.jpeg'
 categories: [South African Plants, Botany, Plant Care]
 tags: [{plant_name.lower()}, indigenous-plants, plant-guide]
 ---
