@@ -14,7 +14,7 @@ address: "South Africa"
 
 # Theme Selection
 # Options: 'default' or 'theme1'
-active_theme: theme1
+active_theme: default 
 
 # Theme1 Customization
 theme1:
