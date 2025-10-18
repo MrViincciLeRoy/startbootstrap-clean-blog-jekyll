@@ -7,7 +7,7 @@
 {% if page.url contains 'contact' %}
   <!-- Form Validation -->
   <script src="{{"/assets/vendor/startbootstrap-clean-blog/js/jqBootstrapValidation.js" | relative_url }}"></script>
-  <!-- Send Form -->
+  <!-- Send Form with FormSubmit -->
   <script>
     $(function () {
 
@@ -30,21 +30,26 @@
           }
           $this = $("#sendMessageButton");
           $this.prop("disabled", true); // Disable submit button until AJAX call is complete to prevent duplicate messages
+          
           $.ajax({
-            url: "//formspree.io/{{ site.email }}",
-            type: "POST",
+            url: "https://formsubmit.co/ajax/{{ site.email }}",
+            method: "POST",
+            dataType: "json",
+            accepts: 'application/json',
             data: {
               name: name,
               phone: phone,
               email: email,
-              message: message
+              message: message,
+              _subject: "New Contact Form Submission from " + name,
+              _captcha: "false"
             },
             cache: false,
             success: function () {
               // Success message
               $('#success').html("<div class='alert alert-success'>");
               $('#success > .alert-success').html("<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;").append("</button>");
-              $('#success > .alert-success').append("<strong>Your message has been sent. </strong>");
+              $('#success > .alert-success').append("<strong>Your message has been sent successfully! </strong>");
               $('#success > .alert-success').append('</div>');
               //clear all fields
               $('#contactForm').trigger("reset");
@@ -53,7 +58,7 @@
               // Fail message
               $('#success').html("<div class='alert alert-danger'>");
               $('#success > .alert-danger').html("<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;").append("</button>");
-              $('#success > .alert-danger').append($("<strong>").text("Sorry " + firstName + ", it seems that my mail server is not responding. Please try again later!"));
+              $('#success > .alert-danger').append($("<strong>").text("Sorry " + firstName + ", it seems that there was an error sending your message. Please try again later!"));
               $('#success > .alert-danger').append('</div>');
               //clear all fields
               $('#contactForm').trigger("reset");
