@@ -63,6 +63,9 @@
             color: var(--primary);
             margin-bottom: 0.75rem;
         }
+        .action-card.ai-card i {
+            color: #8b5cf6;
+        }
         .action-card h6 {
             font-weight: 600;
             margin-bottom: 0.5rem;
@@ -166,6 +169,13 @@
                                 <i class="fas fa-cog"></i>
                                 <h6>Edit Config</h6>
                                 <p>Update site settings and metadata</p>
+                            </a>
+
+                            <!-- AI Settings -->
+                            <a href="{{ url_for('edit_ai_settings') }}" class="action-card ai-card">
+                                <i class="fas fa-brain"></i>
+                                <h6>AI Settings</h6>
+                                <p>Configure article generation models</p>
                             </a>
 
                             <!-- Edit Home About -->
