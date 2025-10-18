@@ -11,6 +11,7 @@ import os
 import yaml
 import base64
 import json
+import re
 from github import Github, GithubException
 from dotenv import load_dotenv
 
@@ -185,6 +186,22 @@ class GitHubRepoManager:
         fm += '---\n\n'
         return fm + body
     
+    def extract_content_section(self, content, section_id):
+        """Extract a specific content section by ID (e.g., 'about', 'intro')"""
+        # Pattern to match <!-- Section Name --> content <!-- /Section Name -->
+        pattern = rf'<!-- {section_id} -->(.*?)<!-- /{section_id} -->'
+        match = re.search(pattern, content, re.DOTALL)
+        if match:
+            return match.group(1).strip()
+        return None
+    
+    def update_content_section(self, content, section_id, new_section_content):
+        """Update a specific content section"""
+        pattern = rf'(<!-- {section_id} -->)(.*?)(<!-- /{section_id} -->)'
+        replacement = rf'\1\n{new_section_content}\n\3'
+        updated = re.sub(pattern, replacement, content, flags=re.DOTALL)
+        return updated
+    
     def trigger_workflow(self, workflow_name='mainBlog.yml'):
         """Trigger GitHub Actions workflow"""
         try:
@@ -256,9 +273,9 @@ def edit_config():
     gh = get_github_manager()
     
     if request.method == 'POST':
-        # Get author field - if empty, use HAA[B] for auto-generated
+        # Get author field - if empty, use spaces for auto-generated
         author_input = request.form.get('author', '').strip()
-        author_value = author_input if author_input else '             HAA[B]'
+        author_value = author_input if author_input else ' ' * 13 + 'HAA[B]'
         
         # Build config dictionary from form
         config_dict = {
@@ -296,6 +313,106 @@ def edit_config():
         config = {}
     
     return render_template('edit_config.html', config=config)
+
+# ============================================================================
+# CONTENT EDITING ROUTES
+# ============================================================================
+
+@app.route('/edit-home-about', methods=['GET', 'POST'])
+@login_required
+def edit_home_about():
+    """Edit the About section on the homepage"""
+    gh = get_github_manager()
+    
+    if request.method == 'POST':
+        new_content = request.form.get('about_content', '')
+        
+        file_data = gh.get_file_content('_layouts/home.html')
+        if not file_data:
+            flash('Could not load home layout', 'error')
+            return redirect(url_for('dashboard'))
+        
+        # Update the about section
+        updated_content = gh.update_content_section(
+            file_data['content'],
+            'about-section',
+            new_content
+        )
+        
+        commit_msg = f"Update home about section - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        if gh.update_file('_layouts/home.html', updated_content, commit_msg, file_data['sha']):
+            flash('Homepage about section updated successfully!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Error updating homepage', 'error')
+    
+    # GET request - load current content
+    file_data = gh.get_file_content('_layouts/home.html')
+    if not file_data:
+        flash('Could not load home layout', 'error')
+        return redirect(url_for('dashboard'))
+    
+    about_content = gh.extract_content_section(file_data['content'], 'about-section')
+    if not about_content:
+        # If section doesn't exist with markers, extract the About section manually
+        about_match = re.search(r'<h1><u>About</u></h1>\s*<p>(.*?)</p>', file_data['content'], re.DOTALL)
+        about_content = about_match.group(1) if about_match else ""
+    
+    return render_template('edit_content.html',
+                         content_type='Home About Section',
+                         content=about_content,
+                         file_type='home')
+
+
+@app.route('/edit-about-page', methods=['GET', 'POST'])
+@login_required
+def edit_about_page():
+    """Edit the About page content"""
+    gh = get_github_manager()
+    
+    if request.method == 'POST':
+        title = request.form.get('title', 'About Our Blog')
+        description = request.form.get('description', '')
+        new_content = request.form.get('page_content', '')
+        sha = request.form.get('sha', '')
+        
+        if not sha:
+            flash('Missing file information', 'error')
+            return redirect(url_for('edit_about_page'))
+        
+        # Build front matter
+        front_matter = {
+            'layout': 'page',
+            'title': title,
+            'description': description,
+            'background': request.form.get('background', '/img/bg-about.jpg')
+        }
+        
+        # Create full content
+        full_content = gh.create_front_matter(front_matter, new_content)
+        
+        # Update file
+        commit_msg = f"Update about page - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        if gh.update_file('about.html', full_content, commit_msg, sha):
+            flash('About page updated successfully!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Error updating about page', 'error')
+    
+    # GET request - load page for editing
+    page_file = gh.get_file_content('about.html')
+    
+    if not page_file:
+        flash('About page not found', 'error')
+        return redirect(url_for('dashboard'))
+    
+    front_matter, body = gh.parse_front_matter(page_file['content'])
+    
+    return render_template('edit_about_page.html',
+                         front_matter=front_matter,
+                         body=body,
+                         sha=page_file['sha'])
+
 # ============================================================================
 # POST ROUTES
 # ============================================================================
