@@ -371,7 +371,7 @@ def edit_post(post_path):
             return redirect(url_for('edit_page', page_path=page_path))
     
     # GET request - load page for editing
-    page_file = gh.get_file_content(page_path)
+    #page_file = gh.get_file_content(page_path)
     
     if not page_file:
         flash('Page not found', 'error')
