@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: blog-dashboard
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: REPO_NAME
+        sync: false
+      - key: BRANCH
+        value: main
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
