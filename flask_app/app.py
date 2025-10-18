@@ -343,14 +343,14 @@ def edit_ai_settings():
     if request.method == 'POST':
         # Collect settings from form
         settings = {
-            'include_front_matter': request.form.get('include_front_matter') == 'true',
-            'fetch_images': request.form.get('fetch_images') == 'true',
+            'include_front_matter': 'include_front_matter' in request.form,  # Check if key exists
+            'fetch_images': 'fetch_images' in request.form,                   # Check if key exists
             'embedding_model': request.form.get('embedding_model', 'all-MiniLM-L6-v2'),
             'llm_model': request.form.get('llm_model', 'LiquidAI/LFM2-1.2B-RAG'),
             'config_path': request.form.get('config_path', 'research_v3/article_config.json'),
             'database_path': request.form.get('database_path', 'research_v3/flora_data.db'),
             'device': request.form.get('device', 'cpu'),
-            'load_in_8bit': request.form.get('load_in_8bit') == 'true',
+            'load_in_8bit': 'load_in_8bit' in request.form,                  # Check if key exists
             'max_articles_per_run': int(request.form.get('max_articles_per_run', 1))
         }
         
@@ -375,7 +375,6 @@ def edit_ai_settings():
     current_settings = ai_settings.load_settings()
     
     return render_template('edit_ai_settings.html', config=current_settings)
-
 @app.route('/api/ai-settings')
 @login_required
 def get_ai_settings_api():
