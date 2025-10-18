@@ -6,8 +6,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["HRMF AI Assistant [Bot]"]
   spec.email         = ["mmehgoss@gmail.com"]
 
-  spec.summary       = "A simple blog theme based on Bootstrap 4 by Start Bootstrap."
-  spec.homepage      = "https://github.com/StartBootstrap/startbootstrap-clean-blog-jekyll"
+  spec.summary       = "Heritage Road Map Foundation - Botanical research on South African indigenous plants and medicinal plants" 
+  spec.homepage      = "https://github.com/MrViincciLeRoy/startbootstrap-clean-blog-jekyll"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").select { |f| f.match(%r{^(assets|_layouts|_includes|_sass|LICENSE|README)}i) }
