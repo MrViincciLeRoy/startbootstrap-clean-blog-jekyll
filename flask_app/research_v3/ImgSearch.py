@@ -118,7 +118,8 @@ class ContentCleaner:
         
         # Remove serpapi JSON references
         text = re.sub(r':\s*\{[^}]*serpapi[^}]*\}', '', text)
-        
+        text = re.sub(r"^Source: \[[0-9a-fA-F]+\]\n", "", text, flags=re.MULTILINE)
+
         return text
     
     def convert_markdown_to_html(self, text: str) -> str:
@@ -129,7 +130,7 @@ class ContentCleaner:
         text = re.sub(r'^#\s+(.+)$', r'<h2>\1</h2>', text, flags=re.MULTILINE)
         
         # Convert bold **text** to <strong>
-        text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+        text = re.sub(r'\*\*(.+?)\*\*', r'<br><strong>\1</strong>', text)
         
         # Convert italic *text* to <em>
         text = re.sub(r'\*([^*]+?)\*', r'<em>\1</em>', text)
