@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .header { background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .header h1 { margin-bottom: 10px; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input[type="text"],
+        input[type="url"],
+        textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+        }
+        textarea { min-height: 400px; resize: vertical; font-family: 'Courier New', monospace; }
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        textarea:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+        .button-group { display: flex; gap: 10px; margin-top: 20px; }
+        button, .btn { padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .alert { padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .form-card { background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .help-text { font-size: 12px; color: #666; margin-top: 5px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Edit Page</h1>
+            <p style="color: #666;">Path: <code>{{ page_path }}</code></p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="form-card">
+            <div class="form-group">
+                <label for="title">Page Title *</label>
+                <input type="text" id="title" name="title" value="{{ front_matter.title or '' }}" required>
+                <div class="help-text">The title of your page</div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description" value="{{ front_matter.description or '' }}">
+                <div class="help-text">Brief description for SEO</div>
+            </div>
+
+            <div class="form-group">
+                <label for="background">Background Image URL</label>
+                <input type="url" id="background" name="background" value="{{ front_matter.background or '/img/bg-about.jpg' }}">
+                <div class="help-text">URL to the background image</div>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Page Content (HTML/Markdown) *</label>
+                <textarea id="content" name="content" required>{{ body or '' }}</textarea>
+                <div class="help-text">Your page content. Supports HTML and Markdown.</div>
+            </div>
+
+            <!-- Hidden SHA field for update -->
+            <input type="hidden" name="sha" value="{{ sha or '' }}">
+
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">Save Page</button>
+                <a href="{{ url_for('list_pages') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+
+        <div class="form-card" style="background: #f9f9f9; border: 1px solid #e9ecef;">
+            <h3>Front Matter (Auto-generated)</h3>
+            <pre style="background: #fff; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px;">---
+layout: page
+title: {{ front_matter.title or 'Page Title' }}
+description: {{ front_matter.description or 'Page Description' }}
+background: {{ front_matter.background or '/img/bg-about.jpg' }}
+---</pre>
+        </div>
+    </div>
+</body>
+</html>
