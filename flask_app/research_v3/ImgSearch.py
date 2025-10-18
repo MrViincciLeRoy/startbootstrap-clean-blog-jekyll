@@ -1,6 +1,6 @@
 """
 Enhanced Plant Article Generator with JSON Configuration
-Includes heading rotation and better content cleaning
+Includes heading rotation, robust content cleaning, and markdown to HTML conversion
 """
 import requests
 import json
@@ -113,7 +113,91 @@ class ContentCleaner:
         # Remove "Ref: [alphanumeric]"
         text = re.sub(r'Ref:\s*\[[a-zA-Z0-9]+\]', '', text)
         
+        # Remove URLs in parentheses like ((https://...))
+        text = re.sub(r'\(\(https?://[^\)]+\)\)', '', text)
+        
+        # Remove serpapi JSON references
+        text = re.sub(r':\s*\{[^}]*serpapi[^}]*\}', '', text)
+        
         return text
+    
+    def convert_markdown_to_html(self, text: str) -> str:
+        """Convert markdown syntax to HTML"""
+        # Convert headers (## Header -> <h3>Header</h3>)
+        text = re.sub(r'^###\s+(.+)$', r'<h3>\1</h3>', text, flags=re.MULTILINE)
+        text = re.sub(r'^##\s+(.+)$', r'<h3>\1</h3>', text, flags=re.MULTILINE)
+        text = re.sub(r'^#\s+(.+)$', r'<h2>\1</h2>', text, flags=re.MULTILINE)
+        
+        # Convert bold **text** to <strong>
+        text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+        
+        # Convert italic *text* to <em>
+        text = re.sub(r'\*([^*]+?)\*', r'<em>\1</em>', text)
+        
+        # Convert unordered lists (starting with * or -)
+        lines = text.split('\n')
+        in_list = False
+        new_lines = []
+        
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith(('* ', '- ')):
+                if not in_list:
+                    new_lines.append('<ul>')
+                    in_list = True
+                content = stripped[2:].strip()
+                new_lines.append(f'<li>{content}</li>')
+            else:
+                if in_list:
+                    new_lines.append('</ul>')
+                    in_list = False
+                new_lines.append(line)
+        
+        if in_list:
+            new_lines.append('</ul>')
+        
+        text = '\n'.join(new_lines)
+        
+        return text
+    
+    def remove_non_paragraph_content(self, text: str) -> str:
+        """Remove lines that don't look like proper paragraph content"""
+        lines = text.split('\n')
+        cleaned_lines = []
+        
+        for line in lines:
+            stripped = line.strip()
+            
+            # Keep HTML tags
+            if stripped.startswith('<'):
+                cleaned_lines.append(line)
+                continue
+            
+            # Skip empty lines (but preserve them for spacing)
+            if not stripped:
+                cleaned_lines.append(line)
+                continue
+            
+            # Remove lines that are just metadata or JSON-like content
+            if any(pattern in stripped for pattern in [
+                "{'id':", '{"id":', 'serpapi.com', 'json_endpoint',
+                'raw_html_file', 'created_at', 'processed_at',
+                'total_time_taken', 'google_ai_mode_url', 'status',
+                'json_endpoint', 'raw_html_file'
+            ]):
+                continue
+            
+            # Remove lines that start with colons (metadata)
+            if stripped.startswith(':'):
+                continue
+            
+            # Remove very short lines that aren't part of sentences
+            if len(stripped) < 20 and not any(c in stripped for c in '.!?'):
+                continue
+            
+            cleaned_lines.append(line)
+        
+        return '\n'.join(cleaned_lines)
     
     def remove_incomplete_paragraphs(self, text: str) -> str:
         """Remove incomplete sentences and paragraphs"""
@@ -132,6 +216,11 @@ class ContentCleaner:
                 cleaned_paragraphs.append(para)
                 continue
             
+            # Keep HTML blocks
+            if '<h2>' in para or '<h3>' in para or '<ul>' in para or '<li>' in para:
+                cleaned_paragraphs.append(para)
+                continue
+            
             # Clean the paragraph
             para = para.strip()
             
@@ -140,7 +229,7 @@ class ContentCleaner:
                 continue
             
             # Check if paragraph ends properly (with punctuation)
-            if para and not para[-1] in '.!?":)]':
+            if para and not para[-1] in '.!?":)]>':
                 # Try to find last complete sentence
                 sentences = re.split(r'[.!?]+\s+', para)
                 if len(sentences) > 1:
@@ -151,7 +240,7 @@ class ContentCleaner:
                     continue
             
             # Check if paragraph starts with incomplete sentence
-            if para and para[0].islower() and not para.startswith(('e.g.', 'i.e.')):
+            if para and para[0].islower() and not para.startswith(('e.g.', 'i.e.')) and not para.startswith('<'):
                 # Try to find first complete sentence
                 match = re.search(r'[.!?]\s+([A-Z])', para)
                 if match:
@@ -178,8 +267,17 @@ class ContentCleaner:
     
     def clean_content(self, text: str) -> str:
         """Apply all cleaning operations"""
+        # Remove citations and URLs first
         text = self.remove_citations(text)
         text = self.clean_source_markers(text)
+        
+        # Convert markdown to HTML
+        text = self.convert_markdown_to_html(text)
+        
+        # Remove non-paragraph content
+        text = self.remove_non_paragraph_content(text)
+        
+        # Remove incomplete paragraphs
         text = self.remove_incomplete_paragraphs(text)
         
         # Remove multiple blank lines
@@ -187,6 +285,9 @@ class ContentCleaner:
         
         # Remove trailing whitespace
         text = '\n'.join(line.rstrip() for line in text.split('\n'))
+        
+        # Clean up extra spaces
+        text = re.sub(r' {2,}', ' ', text)
         
         return text.strip()
 
@@ -199,11 +300,6 @@ class HTMLContentFormatter:
         self.image_height = image_settings.get("height", 600)
         self.default_image = image_settings.get("default_fallback", "/img/posts/default-plant.jpg")
         self.cleaner = content_cleaner
-    
-    def convert_markdown_bold_to_html(self, text: str) -> str:
-        """Convert markdown-style bold (**text**) to HTML <strong> tags"""
-        text = re.sub(r'\*\*(.+?)\*\*', r'<br>\n<strong>\1</strong>', text)
-        return text
     
     def format_emoji_sections(self, text: str) -> str:
         """Format emoji label sections (💧 **Label:**)"""
@@ -219,13 +315,10 @@ class HTMLContentFormatter:
     
     def clean_content(self, content: str) -> str:
         """Apply all formatting fixes to content"""
-        # First apply content cleaning
+        # First apply content cleaning (this now includes markdown conversion)
         content = self.cleaner.clean_content(content)
         
-        # Convert markdown bold to HTML
-        content = self.convert_markdown_bold_to_html(content)
-        
-        # Format emoji sections
+        # Format emoji sections (after markdown conversion)
         content = self.format_emoji_sections(content)
         
         # Ensure proper paragraph structure
@@ -241,11 +334,16 @@ class HTMLContentFormatter:
                 continue
             
             # Check if line is already HTML
-            if stripped.startswith(('<h', '<ul', '<ol', '<div', '<img', '<p>', '</p>', '<br')):
+            if stripped.startswith(('<h', '<ul', '<ol', '<div', '<img', '<p>', '</p>', '<br', '<li', '</ul>', '</ol>')):
+                formatted_lines.append(line)
+            elif stripped.startswith('</'):  # Closing tags
                 formatted_lines.append(line)
             elif stripped and not stripped.startswith('<'):
-                # Wrap plain text in paragraph
-                if not any(x in line for x in ['<strong>', '<a ', '<span']):
+                # Wrap plain text in paragraph (but not if it contains HTML tags)
+                if '<strong>' in line or '<em>' in line or '<a ' in line:
+                    # Line contains inline HTML, wrap it
+                    formatted_lines.append(f'<p>{stripped}</p>')
+                elif len(stripped) > 30:  # Only wrap substantial text
                     formatted_lines.append(f'<p>{stripped}</p>')
                 else:
                     formatted_lines.append(line)
@@ -253,6 +351,9 @@ class HTMLContentFormatter:
                 formatted_lines.append(line)
         
         content = '\n'.join(formatted_lines)
+        
+        # Remove empty paragraphs again
+        content = re.sub(r'<p>\s*</p>', '', content)
         
         return content
 
