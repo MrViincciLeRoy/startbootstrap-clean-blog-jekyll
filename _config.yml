@@ -1,25 +1,10 @@
-title:              HRMF Blog
-email:              mmehgoss@gmail.com 
-description:        Heritage Road Map Foundation - Botanical research on South African indigenous plants and medicinal plants
-author:             HAA[B] 
-baseurl:            "/startbootstrap-clean-blog-jekyll"
-url:                "https://startbootstrap.github.io"
-
-# Social Profiles
-twitter_username:   
-github_username:    
-facebook_username:  
-instagram_username:  
-linkedin_username:
-
-# Add your google-analytics ID here to activate google analytics
-google_analytics:   UA-XXXXXXXXX-X # out your google-analytics code
-
-# Build settings
-markdown:           kramdown
-paginate:           10
-paginate_path:      "/posts/page:num/"
-plugins:
-  - jekyll-feed
-  - jekyll-paginate
-  - jekyll-sitemap ## Uncomment this line to silently generate a sitemaps.org compliant sitemap for your Jekyll site
+baseurl: /startbootstrap-clean-blog-jekyll
+description: Heritage RoadMap Foundation - Botanical research on South African indigenous
+  plants and medicinal plants
+email: mmehgoss@gmail.com
+google_analytics: UA-XXXXXXXXX-X
+markdown: kramdown
+paginate: 10
+paginate_path: /posts/page:num/
+title: HRF Blog
+url: https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/
