@@ -1,34 +1,5 @@
-<!DOCTYPE html>
-<html>
-
 {% if site.active_theme == 'theme1' %}
-  
-  {% include head.html %}
-  
-  <body>
-    {% include theme1-navbar.html %}
-    <main class="main">
-      {{ content }}
-    </main>
-    {% include theme1-footer.html %}
-    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
-      <i class="bi bi-arrow-up-short"></i>
-    </a>
-    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/theme1-main.js"></script>
-  </body>
-
+  {% include_relative theme1-home.html %}
 {% else %}
-
-  {% include head.html %}
-  
-  <body>
-    {% include navbar.html %}
-    {{ content }}
-    {% include footer.html %}
-    {% include scripts.html %}
-  </body>
-
+  {% include_relative home.html %}
 {% endif %}
-
-</html>
