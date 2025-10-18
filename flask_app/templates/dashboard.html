@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        body { background: #f8fafc; }
+        .navbar { background: var(--primary); }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .sync-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fab fa-github"></i> Blog Dashboard
+            </a>
+            <div class="d-flex align-items-center text-white">
+                <span class="sync-indicator me-2"></span>
+                <span class="me-3">Synced with GitHub</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Dashboard</h2>
+            <form method="POST" action="{{ url_for('trigger_generation') }}">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-magic"></i> Trigger Article Generation
+                </button>
+            </form>
+        </div>
+
+        <!-- Stats -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3" style="font-size: 2rem; color: var(--primary);">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0">{{ total_posts }}</h3>
+                            <small class="text-muted">Total Posts</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3" style="font-size: 2rem; color: var(--success);">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0">{{ pages|length }}</h3>
+                            <small class="text-muted">Pages</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3" style="font-size: 2rem; color: var(--warning);">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0" id="commit-sha">...</h3>
+                            <small class="text-muted">Latest Commit</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Quick Actions</h5>
+                        <div class="btn-group" role="group">
+                            <a href="{{ url_for('edit_config') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-cog"></i> Edit Config
+                            </a>
+                            <a href="{{ url_for('list_pages') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-file"></i> Manage Pages
+                            </a>
+                            <a href="{{ url_for('list_posts') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-newspaper"></i> All Posts
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Posts -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Posts</h5>
+                <a href="{{ url_for('list_posts') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for post in posts %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">{{ post.name }}</h6>
+                        <small class="text-muted">{{ (post.size / 1024)|round(1) }} KB</small>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('view_post', post_path=post.path) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a href="{{ url_for('edit_post', post_path=post.path) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fetch latest commit info
+        fetch('/api/sync-check')
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('commit-sha').textContent = data.latest_commit.sha;
+                }
+            });
+    </script>
+</body>
+</html>
