@@ -1,91 +1,54 @@
-<!-- ================================================================ -->
-<!-- FILE: flask_app/templates/edit_content.html -->
-<!-- ================================================================ -->
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit {{ content_type }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <style>
-        :root {
-            --primary: #2563eb;
-        }
-        body { background: #f8fafc; }
-        .navbar { background: var(--primary); }
-        .editor-container { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        textarea { font-family: 'Courier New', monospace; font-size: 0.95rem; min-height: 400px; }
-        .help-text { font-size: 0.85rem; color: #6b7280; }
-        .section-header { border-bottom: 2px solid var(--primary); padding-bottom: 1rem; margin-bottom: 1.5rem; }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
-                <i class="fas fa-chevron-left"></i> Back to Dashboard
-            </a>
-            <span class="text-white">Edit {{ content_type }}</span>
-        </div>
-    </nav>
+{% block title %}Edit {{ content_type }} - Blog Management{% endblock %}
+{% block page_title %}Edit {{ content_type }}{% endblock %}
 
-    <div class="container mt-4 mb-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+{% block content %}
+<style>
+    .form-card { background: white; padding: 2rem; border-radius: 8px; }
+    .help-text { font-size: 0.875rem; color: #6c757d; margin-top: 0.5rem; }
+    textarea { font-family: 'Courier New', monospace; min-height: 400px; }
+</style>
 
-        <div class="editor-container p-4">
-            <div class="section-header">
-                <h3 class="mb-0">{{ content_type }}</h3>
-                <p class="help-text mt-2">Edit the content below. Use HTML or Markdown formatting.</p>
-            </div>
+<div class="mb-4">
+    <h2 class="mb-1">{{ content_type }}</h2>
+    <small class="text-muted">Edit and save your content</small>
+</div>
 
-            <form method="POST" id="contentForm">
-                <div class="form-group mb-3">
-                    <label for="about_content" class="form-label"><strong>Content</strong></label>
-                    <textarea 
-                        class="form-control" 
-                        id="about_content" 
-                        name="about_content" 
-                        required
-                        placeholder="Enter your content here...">{{ content }}</textarea>
-                    <div class="help-text mt-2">
-                        <i class="fas fa-info-circle"></i> You can use HTML tags, paragraphs (&lt;p&gt;), headings, and more.
-                    </div>
-                </div>
-
-                <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i> Cancel
-                    </a>
-                </div>
-            </form>
-        </div>
-
-        <div class="mt-4 p-3 bg-light rounded">
-            <h6 class="mb-2"><i class="fas fa-lightbulb"></i> Formatting Tips</h6>
+<div class="form-card">
+    <form method="POST" id="contentForm">
+        <div class="form-group mb-3">
+            <label for="about_content" class="form-label"><strong>Content *</strong></label>
+            <textarea class="form-control" id="about_content" name="about_content" required 
+                      placeholder="Enter your content here...">{{ content }}</textarea>
             <div class="help-text">
-                <p class="mb-1"><strong>Paragraphs:</strong> &lt;p&gt;Your text here&lt;/p&gt;</p>
-                <p class="mb-1"><strong>Bold:</strong> &lt;strong&gt;text&lt;/strong&gt;</p>
-                <p class="mb-1"><strong>Line break:</strong> &lt;br&gt;</p>
+                <i class="fas fa-info-circle"></i> You can use HTML tags: 
+                &lt;p&gt;, &lt;h3&gt;, &lt;h4&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;li&gt;, and more.
             </div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+        <!-- Form Actions -->
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Tips Section -->
+<div class="mt-4 p-3 bg-light rounded">
+    <h6 class="mb-2"><i class="fas fa-lightbulb"></i> Formatting Tips</h6>
+    <div class="help-text">
+        <p class="mb-2"><strong>Paragraphs:</strong> &lt;p&gt;Your text&lt;/p&gt;</p>
+        <p class="mb-2"><strong>Headings:</strong> &lt;h3&gt;Heading&lt;/h3&gt; or &lt;h4&gt;Subheading&lt;/h4&gt;</p>
+        <p class="mb-2"><strong>Bold:</strong> &lt;strong&gt;text&lt;/strong&gt;</p>
+        <p class="mb-2"><strong>Lists:</strong> &lt;ul&gt;&lt;li&gt;Item&lt;/li&gt;&lt;/ul&gt;</p>
+        <p class="mb-2"><strong>Horizontal line:</strong> &lt;hr&gt;</p>
+    </div>
+</div>
+
+{% endblock %}

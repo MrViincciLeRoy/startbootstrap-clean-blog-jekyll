@@ -1,96 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Post</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background: #f8fafc; }
-        .navbar { background: #2563eb; }
-        .preview-container {
-            background: white;
-            border-radius: 8px;
-            padding: 2rem;
-        }
-        .front-matter {
-            background: #f1f5f9;
-            padding: 1rem;
-            border-radius: 8px;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.9rem;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
-                <i class="fab fa-github"></i> Blog Dashboard
-            </a>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
-    <div class="container mt-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('list_posts') }}">Posts</a></li>
-                <li class="breadcrumb-item active">View</li>
-            </ol>
-        </nav>
+{% block title %}{{ front_matter.title }} - Blog Management{% endblock %}
+{% block page_title %}{{ front_matter.title }}{% endblock %}
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>{{ front_matter.title }}</h2>
-            <div class="btn-group">
-                <a href="{{ url_for('edit_post', post_path=post_path) }}" class="btn btn-primary">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
-                <button class="btn btn-danger" onclick="deletePost()">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>
-        </div>
+{% block content %}
+<style>
+    .post-meta {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    .meta-item i {
+        color: #0d6efd;
+        width: 20px;
+    }
+    .content-preview {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        line-height: 1.8;
+    }
+</style>
 
-        <!-- Front Matter -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Front Matter</h5>
-            </div>
-            <div class="card-body">
-                <div class="front-matter">
-                    <strong>Layout:</strong> {{ front_matter.layout }}<br>
-                    <strong>Title:</strong> {{ front_matter.title }}<br>
-                    <strong>Subtitle:</strong> {{ front_matter.subtitle }}<br>
-                    <strong>Date:</strong> {{ front_matter.date }}<br>
-                    <strong>Categories:</strong> {{ front_matter.categories|join(', ') }}<br>
-                    <strong>Tags:</strong> {{ front_matter.tags|join(', ') }}<br>
-                    <strong>Background:</strong> {{ front_matter.background }}
-                </div>
-            </div>
-        </div>
-
-        <!-- Content Preview -->
-        <div class="preview-container">
-            <h4 class="mb-3">Content Preview</h4>
-            <div class="content">
-                {{ body|safe }}
-            </div>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">{{ front_matter.title }}</h2>
+        <small class="text-muted">{{ post_path }}</small>
     </div>
+    <div class="btn-group" role="group">
+        <a href="{{ url_for('edit_post', post_path=post_path) }}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <button class="btn btn-danger" onclick="deletePost()">
+            <i class="fas fa-trash"></i> Delete
+        </button>
+    </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function deletePost() {
-            if (confirm('Delete this post?\n\nThis will commit the deletion to GitHub.')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '{{ url_for("delete_post", post_path=post_path) }}';
-                document.body.appendChild(form);
-                form.submit();
-            }
+<!-- Post Metadata -->
+<div class="post-meta">
+    {% if front_matter %}
+        {% if front_matter.layout %}
+        <div class="meta-item">
+            <i class="fas fa-layer-group"></i>
+            <strong>Layout:</strong> {{ front_matter.layout }}
+        </div>
+        {% endif %}
+        {% if front_matter.date %}
+        <div class="meta-item">
+            <i class="fas fa-calendar"></i>
+            <strong>Date:</strong> {{ front_matter.date }}
+        </div>
+        {% endif %}
+        {% if front_matter.description %}
+        <div class="meta-item">
+            <i class="fas fa-align-left"></i>
+            <strong>Description:</strong> {{ front_matter.description }}
+        </div>
+        {% endif %}
+        {% if front_matter.categories %}
+        <div class="meta-item">
+            <i class="fas fa-tag"></i>
+            <strong>Categories:</strong> 
+            {% if front_matter.categories is iterable and front_matter.categories is not string %}
+                {{ front_matter.categories|join(', ') }}
+            {% else %}
+                {{ front_matter.categories }}
+            {% endif %}
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- Content Preview -->
+<div class="content-preview">
+    {{ body|safe }}
+</div>
+
+<script>
+    function deletePost() {
+        const title = "{{ front_matter.title|escape }}";
+        if (confirm(`Delete "${title}"?\n\nThis action will commit the deletion to GitHub.`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url_for("delete_post", post_path=post_path) }}';
+            document.body.appendChild(form);
+            form.submit();
         }
-    </script>
-</body>
-</html>
+    }
+</script>
+{% endblock %}

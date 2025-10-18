@@ -1,69 +1,72 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Pages</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        .header { background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { color: #333; }
-        .nav { display: flex; gap: 10px; margin-bottom: 20px; }
-        .nav a, .btn { padding: 10px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
-        .nav a:hover, .btn:hover { background: #0056b3; }
-        .page-list { background: white; border-radius: 5px; overflow: hidden; }
-        .page-item { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .page-item:last-child { border-bottom: none; }
-        .page-info h3 { color: #333; margin-bottom: 5px; }
-        .page-info p { color: #666; font-size: 12px; }
-        .page-actions { display: flex; gap: 10px; }
-        .btn-small { padding: 8px 12px; font-size: 12px; text-decoration: none; display: inline-block; border-radius: 3px; }
-        .btn-edit { background: #28a745; color: white; }
-        .btn-edit:hover { background: #218838; }
-        .btn-delete { background: #dc3545; color: white; }
-        .btn-delete:hover { background: #c82333; }
-        .empty { text-align: center; padding: 40px; color: #666; }
-        .alert { padding: 15px; background: #d4edda; color: #155724; border-radius: 4px; margin-bottom: 20px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Pages</h1>
-            <a href="{{ url_for('dashboard') }}" class="btn">Back to Dashboard</a>
-        </div>
+{% extends "base.html" %}
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+{% block title %}All Pages - Blog Management{% endblock %}
+{% block page_title %}All Pages{% endblock %}
 
-        {% if pages %}
-            <div class="page-list">
-                {% for page in pages %}
-                    <div class="page-item">
-                        <div class="page-info">
-                            <h3>{{ page.name }}</h3>
-                            <p>Path: {{ page.path }}</p>
-                        </div>
-                        <div class="page-actions">
-                            <a href="{{ url_for('edit_page', page_path=page.path) }}" class="btn-small btn-edit">Edit</a>
-                            <form method="POST" action="{{ url_for('delete_page', page_path=page.path) }}" style="display: inline;" onsubmit="return confirm('Delete this page?');">
-                                <button type="submit" class="btn-small btn-delete">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty">
-                <p>No pages found</p>
-            </div>
-        {% endif %}
+{% block content %}
+<style>
+    .page-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    .page-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    .page-info h5 {
+        margin: 0 0 0.5rem 0;
+        font-weight: 600;
+    }
+    .page-info small {
+        color: #6c757d;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">All Pages</h2>
+        <small class="text-muted">Total: {{ pages|length }} pages</small>
     </div>
-</body>
-  </html>
+</div>
+
+{% if pages %}
+    {% for page in pages %}
+    <div class="page-card">
+        <div class="page-info">
+            <h5>
+                <i class="fas fa-file-alt text-info"></i> {{ page.name }}
+            </h5>
+            <small>
+                <i class="fas fa-folder"></i> {{ page.path }}
+            </small>
+        </div>
+        <div class="btn-group btn-group-sm">
+            <a href="{{ url_for('edit_page', page_path=page.path) }}" 
+               class="btn btn-outline-primary" title="Edit page">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <form method="POST" action="{{ url_for('delete_page', page_path=page.path) }}" 
+                  style="display: inline;" 
+                  onsubmit="return confirm('Delete this page?');">
+                <button type="submit" class="btn btn-outline-danger" title="Delete page">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted">No pages found</p>
+    </div>
+{% endif %}
+
+{% endblock %}
