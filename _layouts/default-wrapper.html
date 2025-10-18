@@ -1,0 +1,5 @@
+{% if site.active_theme == 'theme1' %}
+  {% include_relative theme1-default.html %}
+{% else %}
+  {% include_relative default.html %}
+{% endif %}
