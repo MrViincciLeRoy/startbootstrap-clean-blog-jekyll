@@ -414,10 +414,19 @@ def list_pages():
     pages = gh.list_pages()
     return render_template('list_pages.html', pages=pages)
 
-@app.route('/page/<path:page_path>/edit', methods=['GET', 'POST'])
+
+
+
+@app.route('/post/<path:post_path>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_page(page_path):
+def edit_post(post_path):
+    """Edit a blog post"""
     gh = get_github_manager()
+    post_file = gh.get_file_content(post_path)
+    
+    if not post_file:
+        flash('Post not found', 'error')
+        return redirect(url_for('list_posts'))
     
     if request.method == 'POST':
         title = request.form.get('title')
@@ -425,40 +434,49 @@ def edit_page(page_path):
         content = request.form.get('content')
         sha = request.form.get('sha')
         
+        # VALIDATION - Check if we have required fields
+        if not title or not content or not sha:
+            flash('Missing required fields (title, content, or sha)', 'error')
+            return redirect(url_for('edit_post', post_path=post_path))
+        
         # Build front matter
         front_matter = {
-            'layout': 'page',
+            'layout': 'post',
             'title': title,
-            'description': description,
-            'background': request.form.get('background', '/img/bg-about.jpg')
+            'date': request.form.get('date', datetime.now().strftime('%Y-%m-%d')),
         }
+        
+        # Add optional fields if provided
+        if description:
+            front_matter['description'] = description
+        
+        if request.form.get('categories'):
+            front_matter['categories'] = request.form.get('categories')
         
         # Create full content
         full_content = gh.create_front_matter(front_matter, content)
         
         # Update file
-        commit_msg = f"Update page: {title} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-        if gh.update_file(page_path, full_content, commit_msg, sha):
-            flash('Page updated successfully!', 'success')
-            return redirect(url_for('list_pages'))
+        commit_msg = f"Update post: {title} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        if gh.update_file(post_path, full_content, commit_msg, sha):
+            flash('Post updated successfully!', 'success')
+            return redirect(url_for('list_posts'))
         else:
-            flash('Error updating page', 'error')
+            flash('Error updating post', 'error')
+            return redirect(url_for('edit_post', post_path=post_path))
     
-    # GET request - load page for editing
-    page_file = gh.get_file_content(page_path)
+    # GET request - load post for editing
+    front_matter, body = gh.parse_front_matter(post_file['content'])
     
-    if not page_file:
-        flash('Page not found', 'error')
-        return redirect(url_for('list_pages'))
+    # IMPORTANT: Make sure front_matter is a dict, not None
+    if front_matter is None:
+        front_matter = {}
     
-    front_matter, body = gh.parse_front_matter(page_file['content'])
-    
-    return render_template('edit_page.html',
-                         page_path=page_path,
+    return render_template('edit_post.html',
+                         post_path=post_path,
                          front_matter=front_matter,
                          body=body,
-                         sha=page_file['sha'])
-
+                         sha=post_file['sha'])
 # ============================================================================
 # WORKFLOW TRIGGER ROUTES
 # ============================================================================
