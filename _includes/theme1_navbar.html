@@ -1,0 +1,240 @@
+<header id="header" class="header d-flex align-items-center fixed-top">
+  <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+
+    <!-- Logo -->
+    <a href="{{ '/' | relative_url }}" class="logo d-flex align-items-center me-auto me-xl-0">
+      <!-- Uncomment and add your logo image if you have one -->
+      <!-- <img src="assets/img/logo.png" alt="{{ site.title }}"> -->
+      <div class="logo-icon">
+        <i class="bi bi-flower1"></i>
+      </div>
+      <div class="logo-text">
+        <h1 class="sitename mb-0">{{ site.title | truncatewords: 3 }}</h1>
+        <small class="tagline">Indigenous Plant Research</small>
+      </div>
+    </a>
+
+    <!-- Main Navigation -->
+    <nav id="navmenu" class="navmenu">
+      <ul>
+        <li>
+          <a href="{{ '/' | relative_url }}" class="{% if page.url == '/' %}active{% endif %}">
+            <i class="bi bi-house-door"></i>
+            <span>Home</span>
+          </a>
+        </li>
+        
+        <li>
+          <a href="{{ '/about' | relative_url }}" class="{% if page.url contains 'about' %}active{% endif %}">
+            <i class="bi bi-info-circle"></i>
+            <span>About</span>
+          </a>
+        </li>
+        
+        <li>
+          <a href="{{ '/research' | relative_url }}" class="{% if page.url contains 'research' %}active{% endif %}">
+            <i class="bi bi-journal-medical"></i>
+            <span>Research</span>
+          </a>
+        </li>
+        
+        <li>
+          <a href="{{ '/posts' | relative_url }}" class="{% if page.url contains 'posts' or page.url contains '20' %}active{% endif %}">
+            <i class="bi bi-journal-text"></i>
+            <span>Articles</span>
+          </a>
+        </li>
+        
+        <!-- Resources Dropdown -->
+        <li class="dropdown">
+          <a href="#" class="{% if page.url contains 'plant-database' or page.url contains 'cultivation' or page.url contains 'medicinal' or page.url contains 'conservation' %}active{% endif %}">
+            <span>Resources</span>
+            <i class="bi bi-chevron-down toggle-dropdown"></i>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="{{ '/plant-database' | relative_url }}">
+                <i class="bi bi-flower1"></i>
+                <div class="menu-item-content">
+                  <strong>Plant Database</strong>
+                  <small>Browse our collection of indigenous species</small>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="{{ '/cultivation-guides' | relative_url }}">
+                <i class="bi bi-book"></i>
+                <div class="menu-item-content">
+                  <strong>Cultivation Guides</strong>
+                  <small>Learn how to grow native plants</small>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="{{ '/medicinal-uses' | relative_url }}">
+                <i class="bi bi-heart-pulse"></i>
+                <div class="menu-item-content">
+                  <strong>Medicinal Uses</strong>
+                  <small>Traditional and modern applications</small>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="{{ '/conservation' | relative_url }}">
+                <i class="bi bi-shield-check"></i>
+                <div class="menu-item-content">
+                  <strong>Conservation</strong>
+                  <small>Protecting endangered species</small>
+                </div>
+              </a>
+            </li>
+            <li class="dropdown-divider"></li>
+            <li>
+              <a href="{{ '/gallery' | relative_url }}">
+                <i class="bi bi-images"></i>
+                <div class="menu-item-content">
+                  <strong>Photo Gallery</strong>
+                  <small>Visual documentation of our research</small>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        
+        <!-- Community Dropdown -->
+        <li class="dropdown">
+          <a href="#">
+            <span>Community</span>
+            <i class="bi bi-chevron-down toggle-dropdown"></i>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="{{ '/events' | relative_url }}">
+                <i class="bi bi-calendar-event"></i>
+                <div class="menu-item-content">
+                  <strong>Events</strong>
+                  <small>Workshops and field trips</small>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="{{ '/volunteers' | relative_url }}">
+                <i class="bi bi-people"></i>
+                <div class="menu-item-content">
+                  <strong>Volunteer</strong>
+                  <small>Join our research team</small>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="{{ '/partnerships' | relative_url }}">
+                <i class="bi bi-handshake"></i>
+                <div class="menu-item-content">
+                  <strong>Partnerships</strong>
+                  <small>Collaborate with us</small>
+                </div>
+              </a>
+            </li>
+            <li class="dropdown-divider"></li>
+            <li>
+              <a href="{{ '/newsletter' | relative_url }}">
+                <i class="bi bi-envelope-paper"></i>
+                <div class="menu-item-content">
+                  <strong>Newsletter</strong>
+                  <small>Stay updated with our research</small>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </li>
+        
+        <li>
+          <a href="{{ '/contact' | relative_url }}" class="{% if page.url contains 'contact' %}active{% endif %}">
+            <i class="bi bi-envelope"></i>
+            <span>Contact</span>
+          </a>
+        </li>
+      </ul>
+      
+      <!-- Mobile Navigation Toggle -->
+      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions d-flex align-items-center">
+      
+      <!-- Search Button -->
+      <button class="search-btn" type="button" data-bs-toggle="modal" data-bs-target="#searchModal" aria-label="Search">
+        <i class="bi bi-search"></i>
+      </button>
+      
+      <!-- Theme Toggle (Optional) -->
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
+        <i class="bi bi-moon-stars"></i>
+      </button>
+      
+      <!-- Dashboard/Login Button -->
+      <a class="btn-getstarted" href="https://flask-dashboard-q9pv.onrender.com">
+        <i class="bi bi-speedometer2"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
+
+  </div>
+  
+  <!-- Progress Bar -->
+  <div class="reading-progress-bar" id="readingProgressBar"></div>
+</header>
+
+<!-- Search Modal -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="searchModalLabel">
+          <i class="bi bi-search"></i> Search Articles
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{{ '/search' | relative_url }}" method="get" class="search-form">
+          <div class="input-group input-group-lg">
+            <span class="input-group-text bg-transparent border-end-0">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="search" name="q" class="form-control border-start-0" placeholder="Search for articles, plants, research topics..." required>
+            <button class="btn btn-primary" type="submit">Search</button>
+          </div>
+        </form>
+        
+        <!-- Quick Links -->
+        <div class="quick-links mt-4">
+          <h6 class="text-muted mb-3">Popular Topics</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{{ '/tag/medicinal-plants' | relative_url }}" class="badge-link">Medicinal Plants</a>
+            <a href="{{ '/tag/conservation' | relative_url }}" class="badge-link">Conservation</a>
+            <a href="{{ '/tag/cultivation' | relative_url }}" class="badge-link">Cultivation</a>
+            <a href="{{ '/tag/ecology' | relative_url }}" class="badge-link">Ecology</a>
+            <a href="{{ '/tag/indigenous' | relative_url }}" class="badge-link">Indigenous Species</a>
+            <a href="{{ '/tag/research' | relative_url }}" class="badge-link">Research</a>
+          </div>
+        </div>
+        
+        <!-- Recent Articles -->
+        <div class="recent-searches mt-4">
+          <h6 class="text-muted mb-3">Recent Articles</h6>
+          <ul class="list-unstyled">
+            {% for post in site.posts limit: 3 %}
+            <li class="mb-2">
+              <a href="{{ post.url | prepend: site.baseurl | replace: '//', '/' }}" class="d-flex align-items-center text-decoration-none">
+                <i class="bi bi-journal-text text-primary me-2"></i>
+                <span>{{ post.title | truncate: 50 }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

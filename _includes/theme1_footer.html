@@ -1,0 +1,162 @@
+<footer id="footer" class="footer position-relative dark-background">
+
+  <div class="container footer-top">
+    <div class="row gy-4">
+      
+      <!-- About Section -->
+      <div class="col-lg-4 col-md-12 footer-about">
+        <a href="{{ '/' | relative_url }}" class="logo d-flex align-items-center mb-3">
+          <i class="bi bi-flower1 me-2" style="font-size: 2rem;"></i>
+          <span class="sitename">{{ site.title }}</span>
+        </a>
+        <p class="footer-description">{{ site.description }}</p>
+        
+        <!-- Newsletter Signup -->
+        <div class="newsletter-signup mt-4">
+          <h5 class="mb-3">Stay Updated</h5>
+          <form action="#" method="post" class="newsletter-form">
+            <div class="input-group">
+              <input type="email" class="form-control" placeholder="Your email address" required>
+              <button class="btn btn-primary" type="submit">
+                <i class="bi bi-send"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Social Links -->
+        <div class="social-links d-flex mt-4">
+          {% if site.twitter_username %}
+          <a href="https://twitter.com/{{ site.twitter_username }}" aria-label="Twitter">
+            <i class="bi bi-twitter-x"></i>
+          </a>
+          {% endif %}
+          {% if site.facebook_username %}
+          <a href="https://www.facebook.com/{{ site.facebook_username }}" aria-label="Facebook">
+            <i class="bi bi-facebook"></i>
+          </a>
+          {% endif %}
+          {% if site.instagram_username %}
+          <a href="https://instagram.com/{{ site.instagram_username }}" aria-label="Instagram">
+            <i class="bi bi-instagram"></i>
+          </a>
+          {% endif %}
+          {% if site.linkedin_username %}
+          <a href="https://www.linkedin.com/in/{{ site.linkedin_username }}" aria-label="LinkedIn">
+            <i class="bi bi-linkedin"></i>
+          </a>
+          {% endif %}
+          {% if site.github_username %}
+          <a href="https://github.com/{{ site.github_username }}" aria-label="GitHub">
+            <i class="bi bi-github"></i>
+          </a>
+          {% endif %}
+          {% if site.email %}
+          <a href="mailto:{{ site.email }}" aria-label="Email">
+            <i class="bi bi-envelope"></i>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-lg-2 col-6 footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/' | relative_url }}">Home</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/about' | relative_url }}">About Us</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/research' | relative_url }}">Research</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/posts' | relative_url }}">Articles</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/contact' | relative_url }}">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Resources -->
+      <div class="col-lg-2 col-6 footer-links">
+        <h4>Resources</h4>
+        <ul>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/plant-database' | relative_url }}">Plant Database</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/cultivation-guides' | relative_url }}">Cultivation Guides</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/medicinal-uses' | relative_url }}">Medicinal Uses</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/conservation' | relative_url }}">Conservation</a></li>
+          <li><i class="bi bi-chevron-right"></i> <a href="{{ '/gallery' | relative_url }}">Photo Gallery</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact & Legal -->
+      <div class="col-lg-4 col-md-12 footer-contact">
+        <h4>Get In Touch</h4>
+        
+        <div class="contact-info">
+          {% if site.address %}
+          <div class="info-item d-flex mb-3">
+            <i class="bi bi-geo-alt flex-shrink-0"></i>
+            <div>
+              <p>{{ site.address }}</p>
+            </div>
+          </div>
+          {% endif %}
+          
+          {% if site.phone %}
+          <div class="info-item d-flex mb-3">
+            <i class="bi bi-telephone flex-shrink-0"></i>
+            <div>
+              <p><a href="tel:{{ site.phone }}">{{ site.phone }}</a></p>
+            </div>
+          </div>
+          {% endif %}
+          
+          {% if site.email %}
+          <div class="info-item d-flex mb-3">
+            <i class="bi bi-envelope flex-shrink-0"></i>
+            <div>
+              <p><a href="mailto:{{ site.email }}">{{ site.email }}</a></p>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Legal Links -->
+        <div class="legal-links mt-4">
+          <h5 class="mb-3">Legal</h5>
+          <ul class="list-unstyled">
+            <li><a href="{{ '/privacy-policy' | relative_url }}">Privacy Policy</a></li>
+            <li><a href="{{ '/terms-of-service' | relative_url }}">Terms of Service</a></li>
+            <li><a href="{{ '/disclaimer' | relative_url }}">Research Disclaimer</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="container footer-bottom">
+    <div class="row align-items-center">
+      <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+        <p class="copyright mb-0">
+          &copy; {{ 'now' | date: "%Y" }} <strong class="sitename">{{ site.title }}</strong>. All Rights Reserved.
+        </p>
+      </div>
+      <div class="col-md-6 text-center text-md-end">
+        <div class="credits">
+          <a href="https://flask-dashboard-q9pv.onrender.com" class="dashboard-link">
+            <i class="bi bi-speedometer2"></i> Dashboard Login
+          </a>
+          <span class="mx-2">|</span>
+          <a href="{{ '/sitemap.xml' | relative_url }}">Sitemap</a>
+          <span class="mx-2">|</span>
+          <a href="{{ '/feed.xml' | relative_url }}">RSS Feed</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back to Top Button (optional styling) -->
+  <div class="footer-wave">
+    <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+      <path fill="rgba(255,255,255,0.05)" d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,58.7C960,64,1056,64,1152,58.7C1248,53,1344,43,1392,37.3L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"></path>
+    </svg>
+  </div>
+
+</footer>
