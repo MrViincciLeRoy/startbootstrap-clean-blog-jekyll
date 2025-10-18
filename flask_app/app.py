@@ -381,8 +381,8 @@ def edit_page(page_path):
                          front_matter=front_matter,
                          body=body,
                          sha=page_file['sha'])
-@app.route('/post/<path:post_path>/edit', methods=['GET', 'POST'])
-@login_required
+#@app.route('/post/<path:post_path>/edit', methods=['GET', 'POST'])
+#@login_required
 def old_edit_post(post_path):
     gh = get_github_manager()
     
