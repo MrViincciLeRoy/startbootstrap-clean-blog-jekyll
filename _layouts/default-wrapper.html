@@ -1,5 +1,10 @@
 {% if site.active_theme == 'theme1' %}
-  {% include_relative theme1-default.html %}
+  <!DOCTYPE html>
+  <html lang="en">
+  {% include theme1-navbar.html %}
+  {{ content }}
+  {% include theme1-footer.html %}
+  </html>
 {% else %}
   {% include_relative default.html %}
 {% endif %}
