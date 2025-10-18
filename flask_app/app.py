@@ -250,13 +250,16 @@ def dashboard():
 # ============================================================================
 # CONFIGURATION ROUTES
 # ============================================================================
-
 @app.route('/config', methods=['GET', 'POST'])
 @login_required
 def edit_config():
     gh = get_github_manager()
     
     if request.method == 'POST':
+        # Get author field - if empty, use HAA[B] for auto-generated
+        author_input = request.form.get('author', '').strip()
+        author_value = author_input if author_input else 'HAA[B]'
+        
         # Build config dictionary from form
         config_dict = {
             'title': request.form.get('title'),
@@ -264,6 +267,7 @@ def edit_config():
             'description': request.form.get('description'),
             'baseurl': request.form.get('baseurl'),
             'url': request.form.get('url'),
+            'author': author_value,
             'twitter_username': request.form.get('twitter_username'),
             'github_username': request.form.get('github_username'),
             'facebook_username': request.form.get('facebook_username'),
@@ -292,7 +296,6 @@ def edit_config():
         config = {}
     
     return render_template('edit_config.html', config=config)
-
 # ============================================================================
 # POST ROUTES
 # ============================================================================
