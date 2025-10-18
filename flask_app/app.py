@@ -325,7 +325,7 @@ def view_post(post_path):
 
 @app.route('/post/<path:page_path>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_page(page_path):
+def edit_post(page_path):
     gh = get_github_manager()
     
     if request.method == 'POST':
