@@ -321,100 +321,6 @@ def view_post(post_path):
                          front_matter=front_matter,
                          body=body,
                          sha=post_file['sha'])
-# FIXED VERSION OF THE PROBLEMATIC ROUTE
-
-@app.route('/post/<path:page_path>/edit', methods=['GET', 'POST'])
-@login_required
-def edit_post(post_path):
-    gh = get_github_manager()
-    page_path = gh.get_file_content(post_path)
-    
-    if not post_path:
-        flash('Post not found', 'error')
-        return redirect(url_for('list_posts'))
-    
-    #front_matter, body = gh.parse_front_matter(post_file['content'])
-    
-    if request.method == 'POST':
-        title = request.form.get('title')
-        description = request.form.get('description')
-        content = request.form.get('content')
-        sha = request.form.get('sha')
-        
-        # VALIDATION - Check if we have required fields
-        if not title or not content or not sha:
-            flash('Missing required fields (title, content, or sha)', 'error')
-            return redirect(url_for('edit_page', page_path=page_path))
-        
-        # Build front matter
-        front_matter = {
-            'layout': 'page',
-            'title': title,
-            'description': description,
-            'background': request.form.get('background', '/img/bg-about.jpg')
-        }
-        
-        # Remove empty description to keep front matter clean
-        if not description:
-            del front_matter['description']
-        
-        # Create full content
-        full_content = gh.create_front_matter(front_matter, content)
-        
-        # Update file
-        commit_msg = f"Update page: {title} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-        if gh.update_file(page_path, full_content, commit_msg, sha):
-            flash('Page updated successfully!', 'success')
-            return redirect(url_for('list_pages'))
-        else:
-            flash('Error updating page', 'error')
-            return redirect(url_for('edit_page', page_path=page_path))
-    
-    # GET request - load page for editing
-    #page_file = gh.get_file_content(page_path)
-    
-    if not page_file:
-        flash('Page not found', 'error')
-        return redirect(url_for('list_pages'))
-    
-    front_matter, body = gh.parse_front_matter(page_file['content'])
-    
-    # IMPORTANT: Make sure front_matter is a dict, not None
-    if front_matter is None:
-        front_matter = {}
-    
-    return render_template('edit_page.html',
-                         page_path=page_path,
-                         front_matter=front_matter,
-                         body=body,
-                         sha=page_file['sha'])
-
-
-@app.route('/post/<path:post_path>/delete', methods=['POST'])
-@login_required
-def delete_post(post_path):
-    gh = get_github_manager()
-    
-    commit_msg = f"Delete post: {post_path} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-    if gh.delete_file(post_path, commit_msg):
-        flash('Post deleted successfully!', 'success')
-    else:
-        flash('Error deleting post', 'error')
-    
-    return redirect(url_for('list_posts'))
-
-# ============================================================================
-# PAGE ROUTES
-# ============================================================================
-
-@app.route('/pages')
-@login_required
-def list_pages():
-    gh = get_github_manager()
-    pages = gh.list_pages()
-    return render_template('list_pages.html', pages=pages)
-
-
 
 
 @app.route('/post/<path:post_path>/edit', methods=['GET', 'POST'])
@@ -477,6 +383,77 @@ def edit_post(post_path):
                          front_matter=front_matter,
                          body=body,
                          sha=post_file['sha'])
+
+
+@app.route('/post/<path:post_path>/delete', methods=['POST'])
+@login_required
+def delete_post(post_path):
+    gh = get_github_manager()
+    
+    commit_msg = f"Delete post: {post_path} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+    if gh.delete_file(post_path, commit_msg):
+        flash('Post deleted successfully!', 'success')
+    else:
+        flash('Error deleting post', 'error')
+    
+    return redirect(url_for('list_posts'))
+
+# ============================================================================
+# PAGE ROUTES
+# ============================================================================
+
+@app.route('/pages')
+@login_required
+def list_pages():
+    gh = get_github_manager()
+    pages = gh.list_pages()
+    return render_template('list_pages.html', pages=pages)
+
+@app.route('/page/<path:page_path>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_page(page_path):
+    gh = get_github_manager()
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        content = request.form.get('content')
+        sha = request.form.get('sha')
+        
+        # Build front matter
+        front_matter = {
+            'layout': 'page',
+            'title': title,
+            'description': description,
+            'background': request.form.get('background', '/img/bg-about.jpg')
+        }
+        
+        # Create full content
+        full_content = gh.create_front_matter(front_matter, content)
+        
+        # Update file
+        commit_msg = f"Update page: {title} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        if gh.update_file(page_path, full_content, commit_msg, sha):
+            flash('Page updated successfully!', 'success')
+            return redirect(url_for('list_pages'))
+        else:
+            flash('Error updating page', 'error')
+    
+    # GET request - load page for editing
+    page_file = gh.get_file_content(page_path)
+    
+    if not page_file:
+        flash('Page not found', 'error')
+        return redirect(url_for('list_pages'))
+    
+    front_matter, body = gh.parse_front_matter(page_file['content'])
+    
+    return render_template('edit_page.html',
+                         page_path=page_path,
+                         front_matter=front_matter,
+                         body=body,
+                         sha=page_file['sha'])
+
 # ============================================================================
 # WORKFLOW TRIGGER ROUTES
 # ============================================================================
