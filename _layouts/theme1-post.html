@@ -1,0 +1,321 @@
+---
+layout: theme1-default
+---
+
+<!-- Post Header -->
+<section class="post-header section gradient-background">
+  <div class="overlay"></div>
+  <div class="container position-relative">
+    <div class="row">
+      <div class="col-lg-10 mx-auto">
+        <div class="post-heading text-center" data-aos="fade-up">
+          
+          <!-- Category Badge -->
+          <div class="post-category mb-3">
+            {% if page.category %}
+              <span class="category-badge">
+                <i class="bi bi-tag"></i>
+                {{ page.category }}
+              </span>
+            {% else %}
+              <span class="category-badge">
+                <i class="bi bi-journal-medical"></i>
+                Research Article
+              </span>
+            {% endif %}
+          </div>
+          
+          <!-- Post Title -->
+          <h1 class="display-4 fw-bold text-white mb-4">{{ page.title }}</h1>
+          
+          <!-- Subtitle -->
+          {% if page.subtitle %}
+          <p class="lead text-white-75 mb-4">{{ page.subtitle }}</p>
+          {% endif %}
+          
+          <!-- Post Meta -->
+          <div class="post-meta-info d-flex flex-wrap justify-content-center align-items-center gap-3">
+            <div class="meta-item">
+              <i class="bi bi-person-circle"></i>
+              <span>{% if page.author %}{{ page.author }}{% else %}{{ site.author }}{% endif %}</span>
+            </div>
+            <span class="meta-divider">•</span>
+            <div class="meta-item">
+              <i class="bi bi-calendar3"></i>
+              <span>{{ page.date | date: '%B %d, %Y' }}</span>
+            </div>
+            <span class="meta-divider">•</span>
+            <div class="meta-item">
+              <i class="bi bi-clock"></i>
+              <span>{% include read_time.html content=page.content %}</span>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Wave Divider -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#ffffff" d="M0,50 C240,100 480,0 720,50 C960,100 1200,0 1440,50 L1440,100 L0,100 Z"></path>
+    </svg>
+  </div>
+</section>
+
+<!-- Post Content -->
+<article class="post-content section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-10 col-xl-8 mx-auto">
+        
+        <!-- Featured Image (if exists) -->
+        {% if page.image %}
+        <div class="featured-image mb-5" data-aos="fade-up">
+          <img src="{{ page.image }}" alt="{{ page.title }}" class="img-fluid rounded-4 shadow-lg">
+          {% if page.image_caption %}
+          <p class="image-caption text-center text-muted mt-3 small">{{ page.image_caption }}</p>
+          {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- Article Body -->
+        <div class="article-body" data-aos="fade-up" data-aos-delay="100">
+          {{ content }}
+        </div>
+
+        <!-- Tags -->
+        {% if page.tags %}
+        <div class="post-tags mt-5 pt-4 border-top" data-aos="fade-up" data-aos-delay="200">
+          <h5 class="mb-3">
+            <i class="bi bi-tags"></i> Tags
+          </h5>
+          <div class="d-flex flex-wrap gap-2">
+            {% for tag in page.tags %}
+            <a href="{{ '/tag/' | append: tag | slugify | relative_url }}" class="tag-badge">
+              {{ tag }}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <hr class="my-5">
+
+        <!-- Disclaimer Box -->
+        <div class="alert alert-warning border-0 shadow-sm" role="alert" data-aos="fade-up">
+          <div class="d-flex align-items-start gap-3">
+            <div class="alert-icon">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>
+              <h5 class="alert-heading mb-2">
+                <i class="bi bi-info-circle"></i> Research Disclaimer
+              </h5>
+              <p class="mb-0">
+                ⚠️ Our research might contain some errors as it's ongoing scientific study. Please double-check 
+                the information you find and consult with botanical experts for critical applications. This content 
+                is for educational and research purposes only. Always verify plant identification before any use.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-5">
+
+        <!-- Share Section -->
+        <div class="share-section text-center py-4" data-aos="fade-up" data-aos-delay="300">
+          <h4 class="mb-4">
+            <i class="bi bi-share"></i> Share This Article
+          </h4>
+          <div class="share-buttons d-flex flex-wrap justify-content-center gap-3">
+            <a href="https://twitter.com/intent/tweet?text={{ page.title | uri_escape }}&url={{ page.url | absolute_url | uri_escape }}" 
+               class="btn btn-outline-primary" 
+               target="_blank" 
+               rel="noopener noreferrer">
+              <i class="bi bi-twitter-x"></i>
+              <span>Twitter</span>
+            </a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ page.url | absolute_url | uri_escape }}" 
+               class="btn btn-outline-primary" 
+               target="_blank" 
+               rel="noopener noreferrer">
+              <i class="bi bi-facebook"></i>
+              <span>Facebook</span>
+            </a>
+            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ page.url | absolute_url | uri_escape }}&title={{ page.title | uri_escape }}" 
+               class="btn btn-outline-primary" 
+               target="_blank" 
+               rel="noopener noreferrer">
+              <i class="bi bi-linkedin"></i>
+              <span>LinkedIn</span>
+            </a>
+            <a href="mailto:?subject={{ page.title | uri_escape }}&body=Check out this article: {{ page.url | absolute_url | uri_escape }}" 
+               class="btn btn-outline-primary">
+              <i class="bi bi-envelope"></i>
+              <span>Email</span>
+            </a>
+            <button class="btn btn-outline-primary" onclick="copyToClipboard('{{ page.url | absolute_url }}')">
+              <i class="bi bi-link-45deg"></i>
+              <span>Copy Link</span>
+            </button>
+          </div>
+        </div>
+
+        <hr class="my-5">
+
+        <!-- Author Bio (Optional) -->
+        {% if page.author_bio %}
+        <div class="author-bio p-4 rounded-4 bg-light" data-aos="fade-up" data-aos-delay="400">
+          <div class="d-flex gap-4 align-items-start">
+            {% if page.author_image %}
+            <img src="{{ page.author_image }}" alt="{{ page.author }}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+            {% else %}
+            <div class="author-avatar rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: var(--primary-color); color: white; font-size: 2rem;">
+              <i class="bi bi-person"></i>
+            </div>
+            {% endif %}
+            <div class="flex-grow-1">
+              <h5 class="mb-2">About {% if page.author %}{{ page.author }}{% else %}{{ site.author }}{% endif %}</h5>
+              <p class="text-muted mb-0">{{ page.author_bio }}</p>
+            </div>
+          </div>
+        </div>
+        <hr class="my-5">
+        {% endif %}
+
+        <!-- Post Navigation -->
+        <div class="post-navigation" data-aos="fade-up" data-aos-delay="200">
+          <div class="row g-3">
+            
+            {% if page.previous.url %}
+            <div class="col-md-6">
+              <a href="{{ page.previous.url | prepend: site.baseurl | replace: '//', '/' }}" class="nav-link prev-post">
+                <div class="nav-direction">
+                  <i class="bi bi-arrow-left"></i>
+                  <span>Previous Article</span>
+                </div>
+                <div class="nav-title">{{ page.previous.title }}</div>
+                {% if page.previous.date %}
+                <div class="nav-date">{{ page.previous.date | date: '%B %d, %Y' }}</div>
+                {% endif %}
+              </a>
+            </div>
+            {% else %}
+            <div class="col-md-6">
+              <div class="nav-link disabled">
+                <div class="nav-direction text-muted">
+                  <i class="bi bi-x-circle"></i>
+                  <span>No Previous Article</span>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            
+            {% if page.next.url %}
+            <div class="col-md-6">
+              <a href="{{ page.next.url | prepend: site.baseurl | replace: '//', '/' }}" class="nav-link next-post text-md-end">
+                <div class="nav-direction">
+                  <span>Next Article</span>
+                  <i class="bi bi-arrow-right"></i>
+                </div>
+                <div class="nav-title">{{ page.next.title }}</div>
+                {% if page.next.date %}
+                <div class="nav-date">{{ page.next.date | date: '%B %d, %Y' }}</div>
+                {% endif %}
+              </a>
+            </div>
+            {% else %}
+            <div class="col-md-6">
+              <div class="nav-link disabled text-md-end">
+                <div class="nav-direction text-muted">
+                  <span>No Next Article</span>
+                  <i class="bi bi-x-circle"></i>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- Related Posts -->
+<section class="related-posts section light-background">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-10 col-xl-8 mx-auto">
+        
+        <div class="text-center mb-5" data-aos="fade-up">
+          <h3 class="mb-3">
+            <i class="bi bi-journal-bookmark"></i>
+            Related Research Articles
+          </h3>
+          <p class="text-muted">Continue exploring our botanical research and indigenous plant studies</p>
+        </div>
+        
+        <div class="row g-4">
+          {% assign related_posts = site.posts | where_exp: "post", "post.url != page.url" | limit: 3 %}
+          {% for post in related_posts %}
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ forloop.index | times: 100 }}">
+            <div class="related-card h-100">
+              <div class="card-icon">
+                <i class="bi bi-journal-text"></i>
+              </div>
+              <h5>
+                <a href="{{ post.url | prepend: site.baseurl | replace: '//', '/' }}">
+                  {{ post.title }}
+                </a>
+              </h5>
+              {% if post.subtitle %}
+              <p class="card-excerpt">{{ post.subtitle | truncate: 80 }}</p>
+              {% else %}
+              <p class="card-excerpt">{{ post.excerpt | strip_html | truncatewords: 15 }}</p>
+              {% endif %}
+              <div class="card-meta">
+                <span class="date">
+                  <i class="bi bi-calendar3"></i>
+                  {{ post.date | date: '%b %d, %Y' }}
+                </span>
+                <span class="read-time">
+                  <i class="bi bi-clock"></i>
+                  {% include read_time.html content=post.content %}
+                </span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="400">
+          <a href="{{ '/posts' | relative_url }}" class="btn btn-primary">
+            <i class="bi bi-grid"></i>
+            View All Articles
+          </a>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Back to Top Button -->
+<a href="#header" class="back-to-top d-flex align-items-center justify-content-center smooth-scroll">
+  <i class="bi bi-arrow-up-short"></i>
+</a>
+
+<!-- Copy Link Script -->
+<script>
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    alert('Link copied to clipboard!');
+  }, function(err) {
+    console.error('Could not copy text: ', err);
+  });
+}
+</script>

@@ -1,0 +1,107 @@
+---
+layout: theme1-default
+---
+
+<!-- Page Header -->
+<section class="page-header section {% if page.dark_header %}dark-background{% else %}gradient-background{% endif %}">
+  <div class="overlay"></div>
+  <div class="container position-relative">
+    <div class="row">
+      <div class="col-lg-10 mx-auto text-center">
+        <div class="page-heading" data-aos="fade-up">
+          {% if page.badge %}
+          <span class="section-badge animate-badge">
+            <i class="bi bi-star-fill"></i>
+            {{ page.badge }}
+          </span>
+          {% endif %}
+          
+          <h1 class="display-3 fw-bold mb-3">{{ page.title }}</h1>
+          
+          {% if page.description %}
+          <p class="lead text-white-75 mx-auto" style="max-width: 700px;">{{ page.description }}</p>
+          {% endif %}
+          
+          <!-- Breadcrumb Navigation -->
+          <nav aria-label="breadcrumb" class="mt-4">
+            <ol class="breadcrumb justify-content-center">
+              <li class="breadcrumb-item"><a href="{{ '/' | relative_url }}">Home</a></li>
+              {% if page.parent %}
+              <li class="breadcrumb-item"><a href="{{ page.parent_url | relative_url }}">{{ page.parent }}</a></li>
+              {% endif %}
+              <li class="breadcrumb-item active" aria-current="page">{{ page.title }}</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Decorative Elements -->
+    <div class="header-decorations">
+      <div class="decoration-circle circle-1"></div>
+      <div class="decoration-circle circle-2"></div>
+      <div class="decoration-circle circle-3"></div>
+    </div>
+  </div>
+  
+  <!-- Wave Divider -->
+  <div class="wave-divider">
+    <svg viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#ffffff" d="M0,50 C240,100 480,0 720,50 C960,100 1200,0 1440,50 L1440,100 L0,100 Z"></path>
+    </svg>
+  </div>
+</section>
+
+<!-- Page Content -->
+<section class="page-content section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-10 mx-auto">
+        <div class="content-wrapper" data-aos="fade-up" data-aos-delay="100">
+          {{ content }}
+        </div>
+        
+        <!-- Page Actions (if specified) -->
+        {% if page.show_cta %}
+        <div class="page-cta text-center mt-5 pt-5" data-aos="fade-up" data-aos-delay="200">
+          <div class="cta-box">
+            <h3 class="mb-3">{{ page.cta_title | default: "Ready to Get Started?" }}</h3>
+            <p class="mb-4">{{ page.cta_description | default: "Join our community and explore indigenous plant research." }}</p>
+            <a href="{{ page.cta_link | default: '/contact' | relative_url }}" class="btn btn-primary btn-lg">
+              {{ page.cta_button | default: "Contact Us" }}
+              <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Related Content (Optional) -->
+{% if page.show_related %}
+<section class="related-content section light-background">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-10 mx-auto">
+        <h3 class="text-center mb-5" data-aos="fade-up">Related Resources</h3>
+        <div class="row g-4">
+          {% assign related_posts = site.posts | limit: 3 %}
+          {% for post in related_posts %}
+          <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ forloop.index | times: 100 }}">
+            <div class="resource-card h-100">
+              <div class="card-icon">
+                <i class="bi bi-journal-text"></i>
+              </div>
+              <h5><a href="{{ post.url | prepend: site.baseurl | replace: '//', '/' }}">{{ post.title }}</a></h5>
+              <p class="text-muted small">{{ post.date | date: '%B %d, %Y' }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
