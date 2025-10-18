@@ -130,7 +130,7 @@ class ContentCleaner:
         text = re.sub(r'^#\s+(.+)$', r'<h2>\1</h2>', text, flags=re.MULTILINE)
         
         # Convert bold **text** to <strong>
-        text = re.sub(r'\*\*(.+?)\*\*', r'<br><br>\n<strong>\1</strong>', text)
+        text = re.sub(r'\*\*(.+?)\*\*', r'<br>\n<strong>\1</strong>', text)
         
         # Convert italic *text* to <em>
         text = re.sub(r'\*([^*]+?)\*', r'<em>\1</em>', text)
