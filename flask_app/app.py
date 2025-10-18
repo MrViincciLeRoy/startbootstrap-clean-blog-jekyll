@@ -270,17 +270,20 @@ def dashboard():
                          posts=posts[:10],  # Show last 10 posts
                          pages=pages,
                          total_posts=len(posts))
-
-# ============================================================================
-# ============================================================================
+        
+    
+    
+    
+    # ============================================================================
 # AI SETTINGS MANAGEMENT
 # ============================================================================
 
 class AISettingsManager:
-    """Manages AI article generation settings"""
+    """Manages AI article generation settings stored in GitHub repo"""
     
     def __init__(self, config_file=AI_CONFIG_FILE):
         self.config_file = config_file
+        self.github_path = '.ai_settings.json'  # Path in GitHub repo
         self.defaults = {
             'include_front_matter': True,
             'fetch_images': True,
@@ -293,74 +296,84 @@ class AISettingsManager:
             'max_articles_per_run': 1
         }
     
+    def load_settings_from_github(self, gh_manager):
+        """Load AI settings from GitHub repo"""
+        try:
+            file_data = gh_manager.get_file_content(self.github_path)
+            if file_data:
+                settings = json.loads(file_data['content'])
+                # Merge with defaults to ensure all keys exist
+                return {**self.defaults, **settings}, file_data
+            else:
+                print(f"Settings file not found at {self.github_path}, using defaults")
+                return self.defaults.copy(), None
+        except Exception as e:
+            print(f"Error loading AI settings from GitHub: {e}")
+            return self.defaults.copy(), None
+    
     def load_settings(self):
-        """Load AI settings from file or return defaults"""
+        """Load AI settings from local file (fallback)"""
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r') as f:
                     settings = json.load(f)
-                    # Merge with defaults to ensure all keys exist
                     return {**self.defaults, **settings}
             except Exception as e:
-                print(f"Error loading AI settings: {e}")
+                print(f"Error loading local AI settings: {e}")
                 return self.defaults.copy()
         return self.defaults.copy()
     
-    def save_settings(self, settings):
-        """Save AI settings to file with proper validation and error handling"""
+    def save_settings_to_github(self, settings, gh_manager, file_data=None):
+        """Save AI settings to GitHub repo"""
         try:
-            # Ensure config directory exists
-            config_dir = os.path.dirname(self.config_file)
-            if config_dir and not os.path.exists(config_dir):
-                os.makedirs(config_dir, exist_ok=True)
-                print(f"Created directory: {config_dir}")
-            
-            # Validate all settings are present
+            # Validate and prepare settings
             validated_settings = {}
             for key in self.defaults:
                 if key in settings:
                     validated_settings[key] = settings[key]
                 else:
-                    # Use existing value or default if missing
-                    existing = self.load_settings()
-                    validated_settings[key] = existing.get(key, self.defaults[key])
+                    validated_settings[key] = self.defaults[key]
             
-            # Write to file
-            with open(self.config_file, 'w') as f:
-                json.dump(validated_settings, f, indent=2)
+            # Convert to JSON
+            json_content = json.dumps(validated_settings, indent=2)
             
-            print(f"✓ Settings saved successfully to {self.config_file}")
-            print(f"  Content: {validated_settings}")
+            # Determine if creating new file or updating existing
+            sha = file_data['sha'] if file_data else None
+            commit_msg = f"Update AI settings - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
             
-            # Verify the file was written
-            if os.path.exists(self.config_file):
-                file_size = os.path.getsize(self.config_file)
-                print(f"  File size: {file_size} bytes")
+            # Save to GitHub
+            if gh_manager.update_file(self.github_path, json_content, commit_msg, sha):
+                print(f"✓ AI settings saved to GitHub: {self.github_path}")
                 return True
             else:
-                print(f"✗ File not found after save: {self.config_file}")
+                print(f"✗ Failed to save AI settings to GitHub")
                 return False
                 
-        except PermissionError as e:
-            print(f"✗ Permission denied writing to {self.config_file}: {e}")
-            return False
-        except IOError as e:
-            print(f"✗ IO Error saving AI settings: {e}")
-            return False
         except Exception as e:
-            print(f"✗ Unexpected error saving AI settings: {e}")
+            print(f"✗ Error saving AI settings to GitHub: {e}")
             return False
     
     def get_setting(self, key, default=None):
-        """Get a specific setting"""
+        """Get a specific setting from local file"""
         settings = self.load_settings()
         return settings.get(key, default or self.defaults.get(key))
     
-    def update_setting(self, key, value):
+    def update_setting(self, key, value, gh_manager=None):
         """Update a single setting"""
-        settings = self.load_settings()
-        settings[key] = value
-        return self.save_settings(settings)
+        if gh_manager:
+            settings, file_data = self.load_settings_from_github(gh_manager)
+            settings[key] = value
+            return self.save_settings_to_github(settings, gh_manager, file_data)
+        else:
+            settings = self.load_settings()
+            settings[key] = value
+            try:
+                with open(self.config_file, 'w') as f:
+                    json.dump(settings, f, indent=2)
+                return True
+            except Exception as e:
+                print(f"Error updating setting locally: {e}")
+                return False
 
 
 # Initialize settings manager
@@ -368,17 +381,18 @@ ai_settings = AISettingsManager()
 
 
 # ============================================================================
-# AI SETTINGS ROUTES (UPDATED)
+# AI SETTINGS ROUTES
 # ============================================================================
 
 @app.route('/ai-settings', methods=['GET', 'POST'])
 @login_required
 def edit_ai_settings():
     """Edit AI article generation settings"""
+    gh = get_github_manager()
     
     if request.method == 'POST':
         try:
-            # Collect settings from form - checkboxes use 'in' operator
+            # Collect settings from form
             settings = {
                 'include_front_matter': 'include_front_matter' in request.form,
                 'fetch_images': 'fetch_images' in request.form,
@@ -391,7 +405,7 @@ def edit_ai_settings():
                 'max_articles_per_run': int(request.form.get('max_articles_per_run', 1))
             }
             
-            print(f"Form data received: {settings}")
+            print(f"[AI Settings] Form data received: {settings}")
             
             # Validate settings
             valid_devices = ['cpu', 'cuda', 'mps']
@@ -403,25 +417,28 @@ def edit_ai_settings():
                 flash('Max articles per run must be between 1 and 10', 'error')
                 return redirect(url_for('edit_ai_settings'))
             
-            # Save settings
-            if ai_settings.save_settings(settings):
-                flash('✓ AI settings updated successfully!', 'success')
+            # Load current file from GitHub to get SHA
+            current_settings, file_data = ai_settings.load_settings_from_github(gh)
+            
+            # Save settings to GitHub
+            if ai_settings.save_settings_to_github(settings, gh, file_data):
+                flash('✓ AI settings updated and committed to repository!', 'success')
                 return redirect(url_for('edit_ai_settings'))
             else:
-                flash('✗ Error saving AI settings to file', 'error')
+                flash('✗ Error saving AI settings to repository', 'error')
                 return redirect(url_for('edit_ai_settings'))
                 
         except ValueError as e:
             flash(f'Invalid input: {str(e)}', 'error')
             return redirect(url_for('edit_ai_settings'))
         except Exception as e:
-            print(f"Unexpected error in edit_ai_settings: {e}")
+            print(f"[AI Settings] Unexpected error: {e}")
             flash(f'Unexpected error: {str(e)}', 'error')
             return redirect(url_for('edit_ai_settings'))
     
-    # GET request - load current settings
-    current_settings = ai_settings.load_settings()
-    print(f"Loading settings for display: {current_settings}")
+    # GET request - load current settings from GitHub
+    current_settings, file_data = ai_settings.load_settings_from_github(gh)
+    print(f"[AI Settings] Loaded for display: {current_settings}")
     
     return render_template('edit_ai_settings.html', config=current_settings)
 
@@ -430,7 +447,8 @@ def edit_ai_settings():
 @login_required
 def get_ai_settings_api():
     """API endpoint to get current AI settings"""
-    settings = ai_settings.load_settings()
+    gh = get_github_manager()
+    settings, _ = ai_settings.load_settings_from_github(gh)
     return jsonify({
         'status': 'success',
         'settings': settings
@@ -450,13 +468,17 @@ def get_ai_setting_api(key):
     if key not in valid_keys:
         return jsonify({'status': 'error', 'message': 'Invalid setting key'}), 400
     
-    value = ai_settings.get_setting(key)
+    gh = get_github_manager()
+    settings, _ = ai_settings.load_settings_from_github(gh)
+    value = settings.get(key, ai_settings.defaults.get(key))
     return jsonify({
         'status': 'success',
         'key': key,
         'value': value
     })
-
+    
+    
+    
 # ============================================================================
 # CONFIGURATION ROUTES
 # ============================================================================
