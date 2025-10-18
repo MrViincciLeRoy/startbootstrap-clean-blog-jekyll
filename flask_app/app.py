@@ -511,7 +511,7 @@ def trigger_generation():
     """Trigger GitHub Actions workflow to generate new articles"""
     gh = get_github_manager()
     
-    if gh.trigger_workflow('generate-articles.yml'):
+    if gh.trigger_workflow('mainBlog.yml'):
         flash('Article generation workflow triggered! Check GitHub Actions for progress.', 'success')
     else:
         flash('Error triggering workflow. Check GitHub Actions settings.', 'error')
