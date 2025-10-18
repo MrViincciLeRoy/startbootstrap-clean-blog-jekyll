@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Configuration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .header { background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .header h1 { margin-bottom: 10px; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input[type="text"],
+        input[type="email"],
+        input[type="url"],
+        textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+        }
+        textarea { min-height: 200px; resize: vertical; }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="url"]:focus,
+        textarea:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+        .button-group { display: flex; gap: 10px; margin-top: 20px; }
+        button, .btn { padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+        .alert { padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .form-card { background: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .form-card h3 { margin-bottom: 20px; color: #333; }
+        .help-text { font-size: 12px; color: #666; margin-top: 5px; }
+        .section-title { font-size: 16px; font-weight: bold; color: #333; margin-top: 20px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e9ecef; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Blog Configuration</h1>
+            <p style="color: #666;">Edit your Jekyll _config.yml settings</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="form-card">
+            <h3>Site Information</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="title">Site Title *</label>
+                    <input type="text" id="title" name="title" value="{{ config.get('title', '') or '' }}" required>
+                    <div class="help-text">The main title of your blog</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ config.get('email', '') or '' }}">
+                    <div class="help-text">Your contact email</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Site Description</label>
+                <textarea id="description" name="description">{{ config.get('description', '') or '' }}</textarea>
+                <div class="help-text">A brief description of your blog for SEO</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="baseurl">Base URL</label>
+                    <input type="text" id="baseurl" name="baseurl" value="{{ config.get('baseurl', '') or '' }}" placeholder="/blog">
+                    <div class="help-text">Subpath where your blog is hosted (e.g., /blog)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="url">Full Site URL</label>
+                    <input type="url" id="url" name="url" value="{{ config.get('url', '') or '' }}" placeholder="https://example.com">
+                    <div class="help-text">Complete URL of your site</div>
+                </div>
+            </div>
+
+            <div class="section-title">Social Media</div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="twitter_username">Twitter Username</label>
+                    <input type="text" id="twitter_username" name="twitter_username" value="{{ config.get('twitter_username', '') or '' }}" placeholder="@username">
+                    <div class="help-text">Your Twitter handle (without @)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="github_username">GitHub Username</label>
+                    <input type="text" id="github_username" name="github_username" value="{{ config.get('github_username', '') or '' }}">
+                    <div class="help-text">Your GitHub profile username</div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="facebook_username">Facebook Username</label>
+                    <input type="text" id="facebook_username" name="facebook_username" value="{{ config.get('facebook_username', '') or '' }}">
+                    <div class="help-text">Your Facebook page username</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="instagram_username">Instagram Username</label>
+                    <input type="text" id="instagram_username" name="instagram_username" value="{{ config.get('instagram_username', '') or '' }}">
+                    <div class="help-text">Your Instagram handle (without @)</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="linkedin_username">LinkedIn Profile</label>
+                <input type="text" id="linkedin_username" name="linkedin_username" value="{{ config.get('linkedin_username', '') or '' }}">
+                <div class="help-text">Your LinkedIn profile ID or URL</div>
+            </div>
+
+            <div class="section-title">Analytics & Tracking</div>
+
+            <div class="form-group">
+                <label for="google_analytics">Google Analytics ID</label>
+                <input type="text" id="google_analytics" name="google_analytics" value="{{ config.get('google_analytics', '') or '' }}" placeholder="UA-XXXXXXXXX-X">
+                <div class="help-text">Your Google Analytics tracking ID</div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">Save Configuration</button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+
+        <div class="form-card" style="background: #f9f9f9; border: 1px solid #e9ecef;">
+            <h3>Current Configuration</h3>
+            <p style="color: #666; margin-bottom: 10px;">This is how your _config.yml will be saved:</p>
+            <pre style="background: #fff; padding: 15px; border-radius: 3px; overflow-x: auto; font-size: 12px; max-height: 300px; overflow-y: auto;">{% if config %}{% for key, value in config.items() %}{{ key }}: {{ value }}
+{% endfor %}{% else %}# Configuration will appear here after saving{% endif %}</pre>
+        </div>
+    </div>
+</body>
+  </html>
