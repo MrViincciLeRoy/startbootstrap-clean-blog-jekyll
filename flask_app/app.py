@@ -54,7 +54,7 @@ def load_user(username):
         return User(username)
     return None
 
-@app.route('/')
+@app.route('/pages/test')
 def test():
     return render_template('index2.html')
 
