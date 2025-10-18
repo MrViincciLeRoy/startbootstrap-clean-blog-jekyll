@@ -12,6 +12,7 @@ import yaml
 import base64
 import json
 import re
+from pathlib import Path
 from github import Github, GithubException
 from dotenv import load_dotenv
 
@@ -24,6 +25,9 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-secret-key')
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 REPO_NAME = os.getenv('REPO_NAME')  # e.g., "username/blog-repo"
 BRANCH = os.getenv('BRANCH', 'master')
+
+# AI Settings Configuration
+AI_CONFIG_FILE = os.getenv('AI_CONFIG_FILE', '.ai_settings.json')
 
 # Simple user storage (use database in production)
 USERS = {
@@ -48,6 +52,69 @@ def load_user(username):
     if username in USERS:
         return User(username)
     return None
+
+# ============================================================================
+# AI SETTINGS MANAGEMENT
+# ============================================================================
+
+class AISettingsManager:
+    """Manages AI article generation settings"""
+    
+    def __init__(self, config_file=AI_CONFIG_FILE):
+        self.config_file = config_file
+        self.defaults = {
+            'include_front_matter': True,
+            'fetch_images': True,
+            'embedding_model': 'all-MiniLM-L6-v2',
+            'llm_model': 'LiquidAI/LFM2-1.2B-RAG',
+            'config_path': 'research_v3/article_config.json',
+            'database_path': 'research_v3/flora_data.db',
+            'device': 'cpu',
+            'load_in_8bit': False,
+            'max_articles_per_run': 1
+        }
+    
+    def load_settings(self):
+        """Load AI settings from file or return defaults"""
+        if os.path.exists(self.config_file):
+            try:
+                with open(self.config_file, 'r') as f:
+                    settings = json.load(f)
+                    # Merge with defaults to ensure all keys exist
+                    return {**self.defaults, **settings}
+            except Exception as e:
+                print(f"Error loading AI settings: {e}")
+                return self.defaults.copy()
+        return self.defaults.copy()
+    
+    def save_settings(self, settings):
+        """Save AI settings to file"""
+        try:
+            # Validate settings before saving
+            for key in settings:
+                if key not in self.defaults:
+                    continue
+            
+            with open(self.config_file, 'w') as f:
+                json.dump(settings, f, indent=2)
+            return True
+        except Exception as e:
+            print(f"Error saving AI settings: {e}")
+            return False
+    
+    def get_setting(self, key, default=None):
+        """Get a specific setting"""
+        settings = self.load_settings()
+        return settings.get(key, default or self.defaults.get(key))
+    
+    def update_setting(self, key, value):
+        """Update a single setting"""
+        settings = self.load_settings()
+        settings[key] = value
+        return self.save_settings(settings)
+
+# Initialize settings manager
+ai_settings = AISettingsManager()
 
 # ============================================================================
 # GITHUB INTEGRATION
@@ -265,8 +332,84 @@ def dashboard():
                          total_posts=len(posts))
 
 # ============================================================================
+# AI SETTINGS ROUTES
+# ============================================================================
+
+@app.route('/ai-settings', methods=['GET', 'POST'])
+@login_required
+def edit_ai_settings():
+    """Edit AI article generation settings"""
+    
+    if request.method == 'POST':
+        # Collect settings from form
+        settings = {
+            'include_front_matter': request.form.get('include_front_matter') == 'true',
+            'fetch_images': request.form.get('fetch_images') == 'true',
+            'embedding_model': request.form.get('embedding_model', 'all-MiniLM-L6-v2'),
+            'llm_model': request.form.get('llm_model', 'LiquidAI/LFM2-1.2B-RAG'),
+            'config_path': request.form.get('config_path', 'research_v3/article_config.json'),
+            'database_path': request.form.get('database_path', 'research_v3/flora_data.db'),
+            'device': request.form.get('device', 'cpu'),
+            'load_in_8bit': request.form.get('load_in_8bit') == 'true',
+            'max_articles_per_run': int(request.form.get('max_articles_per_run', 1))
+        }
+        
+        # Validate settings
+        valid_devices = ['cpu', 'cuda', 'mps']
+        if settings['device'] not in valid_devices:
+            flash('Invalid device selected', 'error')
+            return redirect(url_for('edit_ai_settings'))
+        
+        if not 1 <= settings['max_articles_per_run'] <= 10:
+            flash('Max articles per run must be between 1 and 10', 'error')
+            return redirect(url_for('edit_ai_settings'))
+        
+        # Save settings
+        if ai_settings.save_settings(settings):
+            flash('AI settings updated successfully!', 'success')
+            return redirect(url_for('edit_ai_settings'))
+        else:
+            flash('Error saving AI settings', 'error')
+    
+    # GET request - load current settings
+    current_settings = ai_settings.load_settings()
+    
+    return render_template('edit_ai_settings.html', config=current_settings)
+
+@app.route('/api/ai-settings')
+@login_required
+def get_ai_settings_api():
+    """API endpoint to get current AI settings"""
+    settings = ai_settings.load_settings()
+    return jsonify({
+        'status': 'success',
+        'settings': settings
+    })
+
+@app.route('/api/ai-settings/<key>')
+@login_required
+def get_ai_setting_api(key):
+    """API endpoint to get a specific AI setting"""
+    valid_keys = [
+        'include_front_matter', 'fetch_images', 'embedding_model',
+        'llm_model', 'config_path', 'database_path', 'device',
+        'load_in_8bit', 'max_articles_per_run'
+    ]
+    
+    if key not in valid_keys:
+        return jsonify({'status': 'error', 'message': 'Invalid setting key'}), 400
+    
+    value = ai_settings.get_setting(key)
+    return jsonify({
+        'status': 'success',
+        'key': key,
+        'value': value
+    })
+
+# ============================================================================
 # CONFIGURATION ROUTES
 # ============================================================================
+
 @app.route('/config', methods=['GET', 'POST'])
 @login_required
 def edit_config():
@@ -581,13 +724,38 @@ def edit_page(page_path):
 @app.route('/trigger-generation', methods=['POST'])
 @login_required
 def trigger_generation():
-    """Trigger GitHub Actions workflow to generate new articles"""
+    """Trigger GitHub Actions workflow with AI settings"""
     gh = get_github_manager()
     
-    if gh.trigger_workflow('mainBlog.yml'):
-        flash('Article generation workflow triggered! Check GitHub Actions for progress.', 'success')
-    else:
-        flash('Error triggering workflow. Check GitHub Actions settings.', 'error')
+    # Get current AI settings
+    settings = ai_settings.load_settings()
+    
+    # Create a workflow config file that GitHub Actions can read
+    try:
+        workflow_config = {
+            'timestamp': datetime.now().isoformat(),
+            'triggered_by': current_user.username,
+            'ai_settings': settings
+        }
+        
+        # Save config locally for GH Actions to read
+        config_path = 'workflow_config.json'
+        with open(config_path, 'w') as f:
+            json.dump(workflow_config, f, indent=2)
+        
+        if gh.trigger_workflow('mainBlog.yml'):
+            device_info = settings.get('device', 'cpu')
+            model_info = settings.get('llm_model', 'LiquidAI/LFM2-1.2B-RAG')
+            flash(
+                f'Article generation workflow triggered! '
+                f'(Device: {device_info}, Model: {model_info})',
+                'success'
+            )
+        else:
+            flash('Error triggering workflow. Check GitHub Actions settings.', 'error')
+    except Exception as e:
+        print(f"Error in trigger_generation: {e}")
+        flash(f'Error triggering workflow: {str(e)}', 'error')
     
     return redirect(url_for('dashboard'))
 
@@ -644,4 +812,5 @@ if __name__ == '__main__':
     
     print(f"Dashboard connected to: {REPO_NAME}")
     print(f"Branch: {BRANCH}")
+    print(f"AI Settings file: {AI_CONFIG_FILE}")
     app.run(debug=True, host='0.0.0.0', port=5001)
