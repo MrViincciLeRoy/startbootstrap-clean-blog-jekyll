@@ -283,7 +283,9 @@ class AISettingsManager:
     
     def __init__(self, config_file=AI_CONFIG_FILE):
         self.config_file = config_file
-        self.github_path = '.ai_settings.json'  # Path in GitHub repo
+        Ai_path = os.path.join('research_v3', '.ai_settings.json')
+        
+        self.github_path = Ai_path # Path in GitHub repo
         self.defaults = {
             'include_front_matter': True,
             'fetch_images': True,
