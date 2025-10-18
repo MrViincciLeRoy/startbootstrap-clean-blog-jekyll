@@ -323,7 +323,7 @@ def view_post(post_path):
                          sha=post_file['sha'])
 # FIXED VERSION OF THE PROBLEMATIC ROUTE
 
-@app.route('/page/<path:page_path>/edit', methods=['GET', 'POST'])
+@app.route('/post/<path:page_path>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_page(page_path):
     gh = get_github_manager()
