@@ -1,260 +1,406 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #2563eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-        }
-        body { background: #f8fafc; }
-        .navbar { background: var(--primary); }
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border-left: 4px solid var(--primary);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .sync-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .action-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        .action-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-            text-decoration: none;
-            color: inherit;
-        }
-        .action-card i {
-            font-size: 2rem;
-            color: var(--primary);
-            margin-bottom: 0.75rem;
-        }
-        .action-card.ai-card i {
-            color: #8b5cf6;
-        }
-        .action-card h6 {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        .action-card p {
-            font-size: 0.85rem;
-            color: #6b7280;
-            margin: 0;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
-                <i class="fab fa-github"></i> Blog Dashboard
-            </a>
-            <div class="d-flex align-items-center text-white">
-                <span class="sync-indicator me-2"></span>
-                <span class="me-3">Synced with GitHub</span>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </div>
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Blog Management{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #0d6efd;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .stat-card.posts { border-left-color: #0d6efd; }
+    .stat-card.pages { border-left-color: #198754; }
+    .stat-card.commit { border-left-color: #6f42c1; }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: white;
+    }
+    
+    .stat-card.posts .stat-icon { background: #e7f1ff; color: #0d6efd; }
+    .stat-card.pages .stat-icon { background: #d1e7dd; color: #198754; }
+    .stat-card.commit .stat-icon { background: #e2d5f5; color: #6f42c1; }
+    
+    .stat-info h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        color: #212529;
+    }
+    
+    .stat-info p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .action-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .action-card:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+        transform: translateY(-4px);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .action-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .action-card:nth-child(1) .action-icon { background: #e7f1ff; color: #0d6efd; }
+    .action-card:nth-child(2) .action-icon { background: #f3e5f5; color: #8b5cf6; }
+    .action-card:nth-child(3) .action-icon { background: #fff3cd; color: #ff9800; }
+    .action-card:nth-child(4) .action-icon { background: #f0f4ff; color: #4f46e5; }
+    .action-card:nth-child(5) .action-icon { background: #d1e7dd; color: #198754; }
+    .action-card:nth-child(6) .action-icon { background: #cfe2ff; color: #0d6efd; }
+    .action-card:nth-child(7) .action-icon { background: #f8d7da; color: #dc3545; }
+    
+    .action-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #212529;
+    }
+    
+    .action-description {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin: 0;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        margin-top: 2rem;
+        color: #212529;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-title i {
+        color: #0d6efd;
+    }
+    
+    .posts-list {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    
+    .posts-list .list-group-item {
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .posts-list .list-group-item:last-child {
+        border-bottom: none;
+    }
+    
+    .posts-list .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .post-info h6 {
+        font-weight: 600;
+        margin: 0 0 0.25rem 0;
+        color: #212529;
+    }
+    
+    .post-info small {
+        color: #6c757d;
+    }
+    
+    .post-actions {
+        display: flex;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+    
+    .sync-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #d1e7dd;
+        color: #0f5132;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .sync-dot {
+        width: 8px;
+        height: 8px;
+        background: #198754;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    
+    .trigger-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .trigger-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header with Trigger Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-0">Dashboard</h1>
+            <small class="text-muted">Manage your blog content and settings</small>
         </div>
-    </nav>
-
-    <div class="container mt-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Dashboard</h2>
-            <form method="POST" action="{{ url_for('trigger_generation') }}">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-magic"></i> Trigger Article Generation
+        <div class="d-flex align-items-center gap-2">
+            <span class="sync-badge">
+                <span class="sync-dot"></span>
+                Synced with GitHub
+            </span>
+            <form method="POST" action="{{ url_for('trigger_generation') }}" class="m-0">
+                <button type="submit" class="trigger-btn">
+                    <i class="fas fa-magic me-2"></i>Trigger Article Generation
                 </button>
             </form>
         </div>
+    </div>
 
-        <!-- Stats -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="me-3" style="font-size: 2rem; color: var(--primary);">
-                            <i class="fas fa-newspaper"></i>
-                        </div>
-                        <div>
-                            <h3 class="mb-0">{{ total_posts }}</h3>
-                            <small class="text-muted">Total Posts</small>
-                        </div>
-                    </div>
-                </div>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card posts">
+            <div class="stat-icon">
+                <i class="fas fa-newspaper"></i>
             </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="me-3" style="font-size: 2rem; color: var(--success);">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <div>
-                            <h3 class="mb-0">{{ pages|length }}</h3>
-                            <small class="text-muted">Pages</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="me-3" style="font-size: 2rem; color: var(--warning);">
-                            <i class="fab fa-github"></i>
-                        </div>
-                        <div>
-                            <h3 class="mb-0" id="commit-sha">...</h3>
-                            <small class="text-muted">Latest Commit</small>
-                        </div>
-                    </div>
-                </div>
+            <div class="stat-info">
+                <h3>{{ total_posts }}</h3>
+                <p>Total Blog Posts</p>
             </div>
         </div>
-
-        <!-- Quick Actions -->
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Quick Actions</h5>
-                        <div class="action-grid">
-                            <!-- Edit Config -->
-                            <a href="{{ url_for('edit_config') }}" class="action-card">
-                                <i class="fas fa-cog"></i>
-                                <h6>Edit Config</h6>
-                                <p>Update site settings and metadata</p>
-                            </a>
-
-                            <!-- AI Settings -->
-                            <a href="{{ url_for('edit_ai_settings') }}" class="action-card ai-card">
-                                <i class="fas fa-brain"></i>
-                                <h6>AI Settings</h6>
-                                <p>Configure article generation models</p>
-                            </a>
-
-                            <!-- Edit Home About -->
-                            <a href="{{ url_for('edit_home_about') }}" class="action-card">
-                                <i class="fas fa-home"></i>
-                                <h6>Edit Homepage About</h6>
-                                <p>Update the about section on home page</p>
-                            </a>
-
-                            <!-- Edit About Page -->
-                            <a href="{{ url_for('edit_about_page') }}" class="action-card">
-                                <i class="fas fa-file-alt"></i>
-                                <h6>Edit About Page</h6>
-                                <p>Update the full about page content</p>
-                            </a>
-
-                            <!-- View Site -->
-                            <a href="https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/" class="action-card">
-                                <i class="fas fa-external-link-alt"></i>
-                                <h6>View Site</h6>
-                                <p>Visit your live blog site</p>
-                            </a>
-
-                            <!-- All Posts -->
-                            <a href="{{ url_for('list_posts') }}" class="action-card">
-                                <i class="fas fa-newspaper"></i>
-                                <h6>All Posts</h6>
-                                <p>Browse and manage all blog posts</p>
-                            </a>
-
-                            <!-- All Pages -->
-                            <a href="{{ url_for('test') }}" class="action-card">
-                                <i class="fas fa-list"></i>
-                                <h6>Test</h6>
-                                <p>Browse and manage all pages</p>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        
+        <div class="stat-card pages">
+            <div class="stat-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ pages|length }}</h3>
+                <p>Pages</p>
             </div>
         </div>
-
-        <!-- Recent Posts -->
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Recent Posts</h5>
-                <a href="{{ url_for('list_posts') }}" class="btn btn-sm btn-outline-primary">View All</a>
+        
+        <div class="stat-card commit">
+            <div class="stat-icon">
+                <i class="fab fa-github"></i>
             </div>
-            <div class="list-group list-group-flush">
-                {% for post in posts %}
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="mb-1">{{ post.name }}</h6>
-                        <small class="text-muted">{{ (post.size / 1024)|round(1) }} KB</small>
-                    </div>
-                    <div>
-                        <a href="{{ url_for('view_post', post_path=post.path) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                        <a href="{{ url_for('edit_post', post_path=post.path) }}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="stat-info">
+                <h3 id="commit-sha">...</h3>
+                <p>Latest Commit</p>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Fetch latest commit info
-        fetch('/api/sync-check')
-            .then(r => r.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    document.getElementById('commit-sha').textContent = data.latest_commit.sha;
-                }
-            });
-    </script>
-</body>
-</html>
+    <!-- Quick Actions Section -->
+    <div class="section-title">
+        <i class="fas fa-bolt"></i>Quick Actions
+    </div>
+    
+    <div class="action-grid">
+        <!-- Edit Config -->
+        <a href="{{ url_for('edit_config') }}" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div class="action-title">Edit Blog Config</div>
+            <p class="action-description">Update site title, description, and metadata</p>
+        </a>
+
+        <!-- AI Settings -->
+        <a href="{{ url_for('edit_ai_settings') }}" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="action-title">AI Settings</div>
+            <p class="action-description">Configure article generation models and parameters</p>
+        </a>
+
+        <!-- Edit Home About -->
+        <a href="{{ url_for('edit_home_about') }}" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-home"></i>
+            </div>
+            <div class="action-title">Homepage About Section</div>
+            <p class="action-description">Update the about section on homepage</p>
+        </a>
+
+        <!-- Edit About Page -->
+        <a href="{{ url_for('edit_about_page') }}" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="action-title">About Page</div>
+            <p class="action-description">Edit the full about page content and details</p>
+        </a>
+
+        <!-- All Posts -->
+        <a href="{{ url_for('list_posts') }}" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <div class="action-title">All Blog Posts</div>
+            <p class="action-description">Browse, edit, and manage all blog posts</p>
+        </a>
+
+        <!-- All Pages -->
+        <a href="{{ url_for('list_pages') }}" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-layer-group"></i>
+            </div>
+            <div class="action-title">All Pages</div>
+            <p class="action-description">Manage all custom pages on your site</p>
+        </a>
+
+        <!-- View Live Site -->
+        <a href="https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/" target="_blank" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-external-link-alt"></i>
+            </div>
+            <div class="action-title">View Live Site</div>
+            <p class="action-description">Visit your published blog (opens in new tab)</p>
+        </a>
+    </div>
+
+    <!-- Recent Posts Section -->
+    <div class="section-title">
+        <i class="fas fa-history"></i>Recent Posts
+    </div>
+    
+    <div class="posts-list">
+        {% if posts %}
+            {% for post in posts %}
+            <div class="list-group-item">
+                <div class="post-info flex-grow-1">
+                    <h6>{{ post.name }}</h6>
+                    <small>{{ (post.size / 1024)|round(1) }} KB • {{ post.path }}</small>
+                </div>
+                <div class="post-actions">
+                    <a href="{{ url_for('view_post', post_path=post.path) }}" class="btn btn-sm btn-outline-info" title="View">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{{ url_for('edit_post', post_path=post.path) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('delete_post', post_path=post.path) }}" style="display: inline;" onclick="return confirm('Delete this post?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="list-group-item text-center text-muted py-5">
+                <i class="fas fa-inbox me-2"></i>No posts found
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- View All Posts Link -->
+    <div class="text-center mt-3">
+        <a href="{{ url_for('list_posts') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-right me-2"></i>View All Posts
+        </a>
+    </div>
+</div>
+
+<script>
+    // Fetch latest commit info
+    fetch('/api/sync-check')
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('commit-sha').textContent = data.latest_commit.sha;
+            }
+        })
+        .catch(err => console.log('Could not fetch commit info:', err));
+</script>
+{% endblock %}
