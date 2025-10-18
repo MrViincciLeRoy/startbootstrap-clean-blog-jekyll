@@ -423,7 +423,7 @@ layout: post
 title: "{heading['title']}"
 subtitle: "{heading['subtitle']}"
 date: {date.strftime('%Y-%m-%d %H:%M:%S')}
-background: 'https://commons.wikimedia.org/wiki/File:Willow_Trees_by_Pieter_Wenning.jpeg'
+background: '/img/posts/{random.randint(1, 17):02d}.jpg'
 categories: [South African Plants, Botany, Plant Care]
 tags: [{plant_name.lower()}, indigenous-plants, plant-guide]
 ---
