@@ -1,5 +1,18 @@
+
 {% if site.active_theme == 'theme1' %}
-  {% include_relative theme1-post.html %}
+
+---
+layout: theme1-post
+---
+
+{{ content }}
+
 {% else %}
-  {% include_relative post.html %}
+
+---
+layout: post
+---
+
+{{ content }}
+
 {% endif %}
