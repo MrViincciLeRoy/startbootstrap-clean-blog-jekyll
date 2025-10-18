@@ -258,7 +258,7 @@ def edit_config():
     if request.method == 'POST':
         # Get author field - if empty, use HAA[B] for auto-generated
         author_input = request.form.get('author', '').strip()
-        author_value = author_input if author_input else 'HAA[B]'
+        author_value = author_input if author_input else '             HAA[B]'
         
         # Build config dictionary from form
         config_dict = {
