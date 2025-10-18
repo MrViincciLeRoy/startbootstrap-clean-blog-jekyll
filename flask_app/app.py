@@ -27,7 +27,8 @@ REPO_NAME = os.getenv('REPO_NAME')  # e.g., "username/blog-repo"
 BRANCH = os.getenv('BRANCH', 'master')
 
 # AI Settings Configuration
-AI_CONFIG_FILE = os.getenv('AI_CONFIG_FILE', '.ai_settings.json')
+
+AI_CONFIG_FILE = os.getenv('AI_CONFIG_FILE', 'research_v3/.ai_settings.json')
 
 # Simple user storage (use database in production)
 USERS = {
@@ -53,68 +54,7 @@ def load_user(username):
         return User(username)
     return None
 
-# ============================================================================
-# AI SETTINGS MANAGEMENT
-# ============================================================================
 
-class AISettingsManager:
-    """Manages AI article generation settings"""
-    
-    def __init__(self, config_file=AI_CONFIG_FILE):
-        self.config_file = config_file
-        self.defaults = {
-            'include_front_matter': True,
-            'fetch_images': True,
-            'embedding_model': 'all-MiniLM-L6-v2',
-            'llm_model': 'LiquidAI/LFM2-1.2B-RAG',
-            'config_path': 'research_v3/article_config.json',
-            'database_path': 'research_v3/flora_data.db',
-            'device': 'cpu',
-            'load_in_8bit': False,
-            'max_articles_per_run': 1
-        }
-    
-    def load_settings(self):
-        """Load AI settings from file or return defaults"""
-        if os.path.exists(self.config_file):
-            try:
-                with open(self.config_file, 'r') as f:
-                    settings = json.load(f)
-                    # Merge with defaults to ensure all keys exist
-                    return {**self.defaults, **settings}
-            except Exception as e:
-                print(f"Error loading AI settings: {e}")
-                return self.defaults.copy()
-        return self.defaults.copy()
-    
-    def save_settings(self, settings):
-        """Save AI settings to file"""
-        try:
-            # Validate settings before saving
-            for key in settings:
-                if key not in self.defaults:
-                    continue
-            
-            with open(self.config_file, 'w') as f:
-                json.dump(settings, f, indent=2)
-            return True
-        except Exception as e:
-            print(f"Error saving AI settings: {e}")
-            return False
-    
-    def get_setting(self, key, default=None):
-        """Get a specific setting"""
-        settings = self.load_settings()
-        return settings.get(key, default or self.defaults.get(key))
-    
-    def update_setting(self, key, value):
-        """Update a single setting"""
-        settings = self.load_settings()
-        settings[key] = value
-        return self.save_settings(settings)
-
-# Initialize settings manager
-ai_settings = AISettingsManager()
 
 # ============================================================================
 # GITHUB INTEGRATION
@@ -332,7 +272,103 @@ def dashboard():
                          total_posts=len(posts))
 
 # ============================================================================
-# AI SETTINGS ROUTES
+# ============================================================================
+# AI SETTINGS MANAGEMENT
+# ============================================================================
+
+class AISettingsManager:
+    """Manages AI article generation settings"""
+    
+    def __init__(self, config_file=AI_CONFIG_FILE):
+        self.config_file = config_file
+        self.defaults = {
+            'include_front_matter': True,
+            'fetch_images': True,
+            'embedding_model': 'all-MiniLM-L6-v2',
+            'llm_model': 'LiquidAI/LFM2-1.2B-RAG',
+            'config_path': 'research_v3/article_config.json',
+            'database_path': 'research_v3/flora_data.db',
+            'device': 'cpu',
+            'load_in_8bit': False,
+            'max_articles_per_run': 1
+        }
+    
+    def load_settings(self):
+        """Load AI settings from file or return defaults"""
+        if os.path.exists(self.config_file):
+            try:
+                with open(self.config_file, 'r') as f:
+                    settings = json.load(f)
+                    # Merge with defaults to ensure all keys exist
+                    return {**self.defaults, **settings}
+            except Exception as e:
+                print(f"Error loading AI settings: {e}")
+                return self.defaults.copy()
+        return self.defaults.copy()
+    
+    def save_settings(self, settings):
+        """Save AI settings to file with proper validation and error handling"""
+        try:
+            # Ensure config directory exists
+            config_dir = os.path.dirname(self.config_file)
+            if config_dir and not os.path.exists(config_dir):
+                os.makedirs(config_dir, exist_ok=True)
+                print(f"Created directory: {config_dir}")
+            
+            # Validate all settings are present
+            validated_settings = {}
+            for key in self.defaults:
+                if key in settings:
+                    validated_settings[key] = settings[key]
+                else:
+                    # Use existing value or default if missing
+                    existing = self.load_settings()
+                    validated_settings[key] = existing.get(key, self.defaults[key])
+            
+            # Write to file
+            with open(self.config_file, 'w') as f:
+                json.dump(validated_settings, f, indent=2)
+            
+            print(f"✓ Settings saved successfully to {self.config_file}")
+            print(f"  Content: {validated_settings}")
+            
+            # Verify the file was written
+            if os.path.exists(self.config_file):
+                file_size = os.path.getsize(self.config_file)
+                print(f"  File size: {file_size} bytes")
+                return True
+            else:
+                print(f"✗ File not found after save: {self.config_file}")
+                return False
+                
+        except PermissionError as e:
+            print(f"✗ Permission denied writing to {self.config_file}: {e}")
+            return False
+        except IOError as e:
+            print(f"✗ IO Error saving AI settings: {e}")
+            return False
+        except Exception as e:
+            print(f"✗ Unexpected error saving AI settings: {e}")
+            return False
+    
+    def get_setting(self, key, default=None):
+        """Get a specific setting"""
+        settings = self.load_settings()
+        return settings.get(key, default or self.defaults.get(key))
+    
+    def update_setting(self, key, value):
+        """Update a single setting"""
+        settings = self.load_settings()
+        settings[key] = value
+        return self.save_settings(settings)
+
+
+# Initialize settings manager
+ai_settings = AISettingsManager()
+
+
+# ============================================================================
+# AI SETTINGS ROUTES (UPDATED)
 # ============================================================================
 
 @app.route('/ai-settings', methods=['GET', 'POST'])
@@ -341,40 +377,55 @@ def edit_ai_settings():
     """Edit AI article generation settings"""
     
     if request.method == 'POST':
-        # Collect settings from form
-        settings = {
-            'include_front_matter': 'include_front_matter' in request.form,  # Check if key exists
-            'fetch_images': 'fetch_images' in request.form,                   # Check if key exists
-            'embedding_model': request.form.get('embedding_model', 'all-MiniLM-L6-v2'),
-            'llm_model': request.form.get('llm_model', 'LiquidAI/LFM2-1.2B-RAG'),
-            'config_path': request.form.get('config_path', 'research_v3/article_config.json'),
-            'database_path': request.form.get('database_path', 'research_v3/flora_data.db'),
-            'device': request.form.get('device', 'cpu'),
-            'load_in_8bit': 'load_in_8bit' in request.form,                  # Check if key exists
-            'max_articles_per_run': int(request.form.get('max_articles_per_run', 1))
-        }
-        
-        # Validate settings
-        valid_devices = ['cpu', 'cuda', 'mps']
-        if settings['device'] not in valid_devices:
-            flash('Invalid device selected', 'error')
+        try:
+            # Collect settings from form - checkboxes use 'in' operator
+            settings = {
+                'include_front_matter': 'include_front_matter' in request.form,
+                'fetch_images': 'fetch_images' in request.form,
+                'embedding_model': request.form.get('embedding_model', 'all-MiniLM-L6-v2'),
+                'llm_model': request.form.get('llm_model', 'LiquidAI/LFM2-1.2B-RAG'),
+                'config_path': request.form.get('config_path', 'research_v3/article_config.json'),
+                'database_path': request.form.get('database_path', 'research_v3/flora_data.db'),
+                'device': request.form.get('device', 'cpu'),
+                'load_in_8bit': 'load_in_8bit' in request.form,
+                'max_articles_per_run': int(request.form.get('max_articles_per_run', 1))
+            }
+            
+            print(f"Form data received: {settings}")
+            
+            # Validate settings
+            valid_devices = ['cpu', 'cuda', 'mps']
+            if settings['device'] not in valid_devices:
+                flash('Invalid device selected', 'error')
+                return redirect(url_for('edit_ai_settings'))
+            
+            if not 1 <= settings['max_articles_per_run'] <= 10:
+                flash('Max articles per run must be between 1 and 10', 'error')
+                return redirect(url_for('edit_ai_settings'))
+            
+            # Save settings
+            if ai_settings.save_settings(settings):
+                flash('✓ AI settings updated successfully!', 'success')
+                return redirect(url_for('edit_ai_settings'))
+            else:
+                flash('✗ Error saving AI settings to file', 'error')
+                return redirect(url_for('edit_ai_settings'))
+                
+        except ValueError as e:
+            flash(f'Invalid input: {str(e)}', 'error')
             return redirect(url_for('edit_ai_settings'))
-        
-        if not 1 <= settings['max_articles_per_run'] <= 10:
-            flash('Max articles per run must be between 1 and 10', 'error')
+        except Exception as e:
+            print(f"Unexpected error in edit_ai_settings: {e}")
+            flash(f'Unexpected error: {str(e)}', 'error')
             return redirect(url_for('edit_ai_settings'))
-        
-        # Save settings
-        if ai_settings.save_settings(settings):
-            flash('AI settings updated successfully!', 'success')
-            return redirect(url_for('edit_ai_settings'))
-        else:
-            flash('Error saving AI settings', 'error')
     
     # GET request - load current settings
     current_settings = ai_settings.load_settings()
+    print(f"Loading settings for display: {current_settings}")
     
     return render_template('edit_ai_settings.html', config=current_settings)
+
+
 @app.route('/api/ai-settings')
 @login_required
 def get_ai_settings_api():
@@ -384,6 +435,7 @@ def get_ai_settings_api():
         'status': 'success',
         'settings': settings
     })
+
 
 @app.route('/api/ai-settings/<key>')
 @login_required
