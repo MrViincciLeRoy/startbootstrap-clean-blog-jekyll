@@ -14,29 +14,38 @@
     <!-- Font Awesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     
-    <!-- SimpleBar CSS (for scrollbars) -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/simplebar/6.2.8/simplebar.min.css" rel="stylesheet">
-    
-    <!-- Chart.js -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css" rel="stylesheet">
-    
     {% block extra_css %}{% endblock %}
     
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         :root {
-            --bs-primary: #0d6efd;
-            --bs-secondary: #6c757d;
-            --bs-success: #198754;
-            --bs-danger: #dc3545;
-            --bs-warning: #ffc107;
-            --bs-info: #0dcaf0;
-            --bs-light: #f8f9fa;
-            --bs-dark: #212529;
+            --primary: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --success: #198754;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #0dcaf0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray-200: #dee2e6;
+            --gray-600: #6c757d;
+        }
+        
+        html, body {
+            height: 100%;
+            background-color: #f5f7fa;
         }
         
         body {
-            background-color: #f8f9fa;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #333;
         }
         
         .wrapper {
@@ -45,46 +54,60 @@
             min-height: 100vh;
         }
         
+        /* Sidebar Styles */
         .sidebar {
-            width: 250px;
-            background: #fff;
-            border-right: 1px solid #dee2e6;
+            width: 260px;
+            background: white;
+            border-right: 1px solid var(--gray-200);
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             z-index: 1000;
-        }
-        
-        .main-content {
-            margin-left: 250px;
             display: flex;
             flex-direction: column;
-            flex: 1;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
         }
         
-        .header {
-            background-color: #fff;
-            border-bottom: 1px solid #dee2e6;
-            padding: 1rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            background: linear-gradient(135deg, var(--primary) 0%, #0b5ed7 100%);
+            color: white;
         }
         
-        .body {
-            flex: 1;
-            padding: 2rem 0;
+        .sidebar-header h5 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
         
-        .footer {
-            background-color: #fff;
-            border-top: 1px solid #dee2e6;
-            padding: 1rem;
-            margin-top: auto;
+        .sidebar-header i {
+            font-size: 1.25rem;
         }
         
         .sidebar-nav {
             list-style: none;
             padding: 1rem 0;
             margin: 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-title {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #999;
+            letter-spacing: 0.5px;
+            margin-top: 0.5rem;
         }
         
         .nav-item {
@@ -94,50 +117,188 @@
         .nav-link {
             display: flex;
             align-items: center;
+            gap: 0.75rem;
             padding: 0.75rem 1.5rem;
             color: #333;
             text-decoration: none;
             transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-left: 3px solid transparent;
         }
         
         .nav-link:hover {
             background-color: #f8f9fa;
-            color: var(--bs-primary);
+            color: var(--primary);
+            border-left-color: var(--primary);
         }
         
         .nav-link.active {
-            background-color: #e7f1ff;
-            color: var(--bs-primary);
-            border-left: 3px solid var(--bs-primary);
+            background: linear-gradient(90deg, rgba(13, 110, 253, 0.1) 0%, rgba(13, 110, 253, 0) 100%);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
         }
         
         .nav-icon {
             width: 20px;
-            margin-right: 1rem;
             text-align: center;
+            font-size: 1rem;
         }
         
-        .nav-title {
-            padding: 0.75rem 1.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: #999;
-            margin-top: 1rem;
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            background-color: #f8f9fa;
         }
         
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            gap: 1rem;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        #toggle-sidebar {
+            display: none;
+            width: 40px;
+            height: 40px;
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+        
+        /* Main Body */
+        .body {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .container-lg {
+            max-width: 1200px;
+        }
+        
+        /* Alerts */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        
+        .alert-info {
+            background-color: #cfe2ff;
+            color: #084298;
+        }
+        
+        /* Footer */
+        .footer {
+            background: white;
+            border-top: 1px solid var(--gray-200);
+            padding: 1.5rem 2rem;
+            margin-left: 260px;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .footer p {
+            margin: 0;
+        }
+        
+        /* Scrollbar Styling */
+        .sidebar::-webkit-scrollbar,
+        .body::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track,
+        .body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb,
+        .body::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover,
+        .body::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+        
+        /* Mobile Responsive */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
+                z-index: 1001;
+                height: 100vh;
             }
             
             .sidebar.show {
                 transform: translateX(0);
             }
             
-            .main-content {
+            .main-content,
+            .footer {
                 margin-left: 0;
+            }
+            
+            #toggle-sidebar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .body {
+                padding: 1rem;
             }
         }
     </style>
@@ -145,76 +306,95 @@
 <body>
     <div class="wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div style="padding: 1.5rem; border-bottom: 1px solid #dee2e6;">
-                <h5 class="mb-0"><strong>Blog Dashboard</strong></h5>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h5>
+                    <i class="fas fa-blog"></i>Blog Dashboard
+                </h5>
             </div>
             
             <ul class="sidebar-nav">
-                <li class="nav-title">Main</li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/">
-                        <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
-                        Dashboard
-                    </a>
+                <!-- Main Section -->
+                <li class="nav-section">
+                    <div class="nav-title">Main</div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
                 </li>
                 
-                <li class="nav-title">Content</li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/posts">
-                        <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
-                        Blog Posts
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/pages">
-                        <span class="nav-icon"><i class="fas fa-file"></i></span>
-                        Pages
-                    </a>
-                </li>
-                
-                <li class="nav-title">Settings</li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/config">
-                        <span class="nav-icon"><i class="fas fa-cog"></i></span>
-                        Blog Config
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/ai-settings">
-                        <span class="nav-icon"><i class="fas fa-robot"></i></span>
-                        AI Settings
-                    </a>
+                <!-- Content Section -->
+                <li class="nav-section">
+                    <div class="nav-title">Content</div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/posts">
+                            <span class="nav-icon"><i class="fas fa-newspaper"></i></span>
+                            <span>Blog Posts</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages">
+                            <span class="nav-icon"><i class="fas fa-layer-group"></i></span>
+                            <span>Pages</span>
+                        </a>
+                    </li>
                 </li>
                 
-                <li class="nav-title">Account</li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/logout">
-                        <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
-                        Logout
-                    </a>
+                <!-- Settings Section -->
+                <li class="nav-section">
+                    <div class="nav-title">Settings</div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/config">
+                            <span class="nav-icon"><i class="fas fa-cog"></i></span>
+                            <span>Blog Config</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ai-settings">
+                            <span class="nav-icon"><i class="fas fa-robot"></i></span>
+                            <span>AI Settings</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/edit-about-page">
+                            <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
+                            <span>About Page</span>
+                        </a>
+                    </li>
                 </li>
             </ul>
+            
+            <div class="sidebar-footer">
+                <a class="nav-link" href="/logout">
+                    <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
+                    <span>Logout</span>
+                </a>
+            </div>
         </aside>
         
         <!-- Main Content -->
         <div class="main-content">
             <!-- Header -->
             <header class="header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <button class="btn btn-light d-md-none" id="toggle-sidebar">
+                <div class="header-left">
+                    <button class="btn" id="toggle-sidebar" title="Toggle Sidebar">
                         <i class="fas fa-bars"></i>
                     </button>
                     <h5 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h5>
-                    <div>
-                        <span class="text-muted">Logged in</span>
+                </div>
+                <div class="header-right">
+                    <div class="header-user">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Logged in</span>
                     </div>
                 </div>
             </header>
             
             <!-- Body Content -->
             <div class="body">
-                <div class="container-lg px-4">
+                <div class="container-lg">
                     <!-- Flash Messages -->
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
@@ -237,53 +417,75 @@
             <footer class="footer">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <p class="text-muted small mb-0">&copy; 2025 Blog Dashboard. All rights reserved.</p>
+                        <p>&copy; 2025 Blog Dashboard. All rights reserved.</p>
                     </div>
                     <div class="col-md-6 text-end">
-                        <p class="text-muted small mb-0">Powered by <strong>Flask + GitHub</strong></p>
+                        <p>Powered by <strong>Flask + GitHub</strong></p>
                     </div>
                 </div>
             </footer>
         </div>
     </div>
     
-    <!-- Bootstrap 5 Bundle (includes Popper) -->
+    <!-- Bootstrap 5 Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- SimpleBar JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplebar/6.2.8/simplebar.min.js"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    
-    <!-- Font Awesome (already loaded via CSS, but JS version for animations) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
     
     <script>
         // Mobile sidebar toggle
         const toggleBtn = document.getElementById('toggle-sidebar');
-        const sidebar = document.querySelector('.sidebar');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
         
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 sidebar.classList.toggle('show');
             });
         }
         
-        // Close sidebar when clicking outside
+        // Close sidebar when clicking outside on mobile
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.sidebar') && !e.target.closest('#toggle-sidebar')) {
-                sidebar.classList.remove('show');
+            if (window.innerWidth <= 768) {
+                if (!e.target.closest('.sidebar') && !e.target.closest('#toggle-sidebar')) {
+                    sidebar.classList.remove('show');
+                }
             }
         });
         
-        // Set active nav link
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.nav-link').forEach(link => {
-            if (link.getAttribute('href') === currentPath) {
-                link.classList.add('active');
-            }
-        });
+        // Set active nav link based on current path
+        function setActiveNavLink() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                
+                // Exact match for dashboard
+                if (currentPath === '/' && href === '/') {
+                    link.classList.add('active');
+                }
+                // Starts with match for other routes
+                else if (currentPath !== '/' && href !== '/' && currentPath.startsWith(href)) {
+                    link.classList.add('active');
+                }
+                // Parent route match (e.g., /posts matches /post/...)
+                else if (href === '/posts' && currentPath.startsWith('/post')) {
+                    link.classList.add('active');
+                }
+                else if (href === '/pages' && currentPath.startsWith('/page')) {
+                    link.classList.add('active');
+                }
+                else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', setActiveNavLink);
+        
+        // Optional: Re-run on hash changes for SPAs
+        window.addEventListener('hashchange', setActiveNavLink);
     </script>
     
     {% block extra_js %}{% endblock %}
