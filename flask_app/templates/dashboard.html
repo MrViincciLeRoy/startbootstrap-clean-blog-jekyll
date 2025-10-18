@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,6 +32,45 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
+        }
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .action-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .action-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: inherit;
+        }
+        .action-card i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+        .action-card h6 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .action-card p {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin: 0;
         }
     </style>
 </head>
@@ -122,15 +160,47 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Quick Actions</h5>
-                        <div class="btn-group" role="group">
-                            <a href="{{ url_for('edit_config') }}" class="btn btn-outline-primary">
-                                <i class="fas fa-cog"></i> Edit Config
+                        <div class="action-grid">
+                            <!-- Edit Config -->
+                            <a href="{{ url_for('edit_config') }}" class="action-card">
+                                <i class="fas fa-cog"></i>
+                                <h6>Edit Config</h6>
+                                <p>Update site settings and metadata</p>
                             </a>
-                            <a href="https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/" class="btn btn-outline-primary">
-                                <i class="fas fa-file"></i> View Site 
+
+                            <!-- Edit Home About -->
+                            <a href="{{ url_for('edit_home_about') }}" class="action-card">
+                                <i class="fas fa-home"></i>
+                                <h6>Edit Homepage About</h6>
+                                <p>Update the about section on home page</p>
                             </a>
-                            <a href="{{ url_for('list_posts') }}" class="btn btn-outline-primary">
-                                <i class="fas fa-newspaper"></i> All Posts
+
+                            <!-- Edit About Page -->
+                            <a href="{{ url_for('edit_about_page') }}" class="action-card">
+                                <i class="fas fa-file-alt"></i>
+                                <h6>Edit About Page</h6>
+                                <p>Update the full about page content</p>
+                            </a>
+
+                            <!-- View Site -->
+                            <a href="https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/" class="action-card">
+                                <i class="fas fa-external-link-alt"></i>
+                                <h6>View Site</h6>
+                                <p>Visit your live blog site</p>
+                            </a>
+
+                            <!-- All Posts -->
+                            <a href="{{ url_for('list_posts') }}" class="action-card">
+                                <i class="fas fa-newspaper"></i>
+                                <h6>All Posts</h6>
+                                <p>Browse and manage all blog posts</p>
+                            </a>
+
+                            <!-- All Pages -->
+                            <a href="{{ url_for('list_pages') }}" class="action-card">
+                                <i class="fas fa-list"></i>
+                                <h6>All Pages</h6>
+                                <p>Browse and manage all pages</p>
                             </a>
                         </div>
                     </div>
