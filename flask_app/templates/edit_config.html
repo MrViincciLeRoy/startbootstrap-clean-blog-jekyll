@@ -140,6 +140,14 @@
                 <div class="help-text">Your Google Analytics tracking ID</div>
             </div>
 
+            <div class="section-title">Author Information</div>
+
+            <div class="form-group">
+                <label for="author">Author</label>
+                <input type="text" id="author" name="author" value="{{ config.get('author', '') or '' }}" placeholder="Your name or email">
+                <div class="help-text">Author name or email. Leave blank to auto-generate as HAA[B]</div>
+            </div>
+
             <div class="button-group">
                 <button type="submit" class="btn btn-primary">Save Configuration</button>
                 <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
@@ -154,4 +162,4 @@
         </div>
     </div>
 </body>
-  </html>
+    </html>
