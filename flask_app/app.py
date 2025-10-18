@@ -325,8 +325,15 @@ def view_post(post_path):
 
 @app.route('/post/<path:page_path>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_post(page_path):
+def edit_post(post_path):
     gh = get_github_manager()
+    page_path = gh.get_file_content(post_path)
+    
+    if not post_path:
+        flash('Post not found', 'error')
+        return redirect(url_for('list_posts'))
+    
+    #front_matter, body = gh.parse_front_matter(post_file['content'])
     
     if request.method == 'POST':
         title = request.form.get('title')
