@@ -381,56 +381,7 @@ def edit_page(page_path):
                          front_matter=front_matter,
                          body=body,
                          sha=page_file['sha'])
-#@app.route('/post/<path:post_path>/edit', methods=['GET', 'POST'])
-#@login_required
-def old_edit_post(post_path):
-    gh = get_github_manager()
-    
-    if request.method == 'POST':
-        # Get form data
-        title = request.form.get('title')
-        subtitle = request.form.get('subtitle')
-        content = request.form.get('content')
-        categories = request.form.get('categories', '').split(',')
-        tags = request.form.get('tags', '').split(',')
-        sha = request.form.get('sha')
-        
-        # Build front matter
-        front_matter = {
-            'layout': 'post',
-            'title': title,
-            'subtitle': subtitle,
-            'date': request.form.get('date', datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-            'background': request.form.get('background', '/img/posts/01.jpg'),
-            'categories': [cat.strip() for cat in categories if cat.strip()],
-            'tags': [tag.strip() for tag in tags if tag.strip()]
-        }
-        
-        # Create full content
-        full_content = gh.create_front_matter(front_matter, content)
-        
-        # Update file
-        commit_msg = f"Update post: {title} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-        if gh.update_file(post_path, full_content, commit_msg, sha):
-            flash('Post updated successfully!', 'success')
-            return redirect(url_for('view_post', post_path=post_path))
-        else:
-            flash('Error updating post', 'error')
-    
-    # GET request - load post for editing
-    post_file = gh.get_file_content(post_path)
-    
-    if not post_file:
-        flash('Post not found', 'error')
-        return redirect(url_for('list_posts'))
-    
-    front_matter, body = gh.parse_front_matter(post_file['content'])
-    
-    return render_template('edit_post.html',
-                         post_path=post_path,
-                         front_matter=front_matter,
-                         body=body,
-                         sha=post_file['sha'])
+
 
 @app.route('/post/<path:post_path>/delete', methods=['POST'])
 @login_required
