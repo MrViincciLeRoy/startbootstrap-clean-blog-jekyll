@@ -9,7 +9,6 @@ import pandas as pd
 from typing import List, Dict, Optional
 import logging
 
-from ConfigManager import ConfigManager
 
 logger = logging.getLogger(__name__)
 
@@ -301,8 +300,8 @@ class FloraDatabase:
 
 # Example usage
 if __name__ == "__main__":
-    config = ConfigManager(verbose=True)
-    config.print_summary()
+    #config = ConfigManager(verbose=True)
+    #config.print_summary()
     
     db = FloraDatabase(config)
 
