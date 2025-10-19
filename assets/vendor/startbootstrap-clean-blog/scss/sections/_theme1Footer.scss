@@ -1,0 +1,26 @@
+footer {
+    padding: 50px 0 65px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(125, 211, 232, 0.2);
+
+    .list-inline {
+        margin: 0;
+        padding: 0;
+    }
+
+    .copyright {
+        font-size: 14px;
+        margin-bottom: 0;
+        text-align: center;
+        color: $gray-600;
+    }
+
+    a {
+        color: $primary;
+
+        &:focus,
+        &:hover {
+            color: lighten($primary, 15%);
+        }
+    }
+}

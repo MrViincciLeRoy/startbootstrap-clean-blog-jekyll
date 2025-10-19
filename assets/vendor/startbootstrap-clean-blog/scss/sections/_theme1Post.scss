@@ -1,0 +1,59 @@
+// Styling for the dark theme post page
+
+.post-preview {
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(125, 211, 232, 0.1);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    > a {
+        color: $gray-900;
+
+        &:focus,
+        &:hover {
+            text-decoration: none;
+            color: $primary;
+        }
+
+        > .post-title {
+            font-size: 30px;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            color: $gray-900;
+        }
+
+        > .post-subtitle {
+            font-weight: 300;
+            margin: 0 0 10px;
+            color: $gray-600;
+        }
+    }
+
+    > .post-meta {
+        font-size: 18px;
+        font-style: italic;
+        margin-top: 0;
+        color: $gray-600;
+
+        > a {
+            text-decoration: none;
+            color: $primary;
+
+            &:focus,
+            &:hover {
+                text-decoration: underline;
+                color: lighten($primary, 15%);
+            }
+        }
+    }
+
+    @media only screen and (min-width: 768px) {
+        > a {
+            > .post-title {
+                font-size: 36px;
+            }
+        }
+    }
+}
