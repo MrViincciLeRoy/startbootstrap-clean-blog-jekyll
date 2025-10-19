@@ -1,6 +1,7 @@
 """
 Flask Dashboard for GitHub-Synced Jekyll Blog
 Edits files directly in GitHub repo, allows article generation to run via GH Actions
+Updated with theme configuration support
 """
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
@@ -27,7 +28,6 @@ REPO_NAME = os.getenv('REPO_NAME')  # e.g., "username/blog-repo"
 BRANCH = os.getenv('BRANCH', 'master')
 
 # AI Settings Configuration
-
 AI_CONFIG_FILE = os.getenv('AI_CONFIG_FILE', 'research_v3/.ai_settings.json')
 
 # Simple user storage (use database in production)
@@ -198,7 +198,6 @@ class GitHubRepoManager:
     
     def extract_content_section(self, content, section_id):
         """Extract a specific content section by ID (e.g., 'about', 'intro')"""
-        # Pattern to match <!-- Section Name --> content <!-- /Section Name -->
         pattern = rf'<!-- {section_id} -->(.*?)<!-- /{section_id} -->'
         match = re.search(pattern, content, re.DOTALL)
         if match:
@@ -273,11 +272,8 @@ def dashboard():
                          posts=posts[:10],  # Show last 10 posts
                          pages=pages,
                          total_posts=len(posts))
-        
-    
-    
-    
-    # ============================================================================
+
+# ============================================================================
 # AI SETTINGS MANAGEMENT
 # ============================================================================
 
@@ -288,7 +284,7 @@ class AISettingsManager:
         self.config_file = config_file
         ai_path = os.path.join('flask_app', 'research_v3', '.ai_settings.json')
 
-        self.github_path = ai_path # Path in GitHub repo
+        self.github_path = ai_path
         self.defaults = {
             'include_front_matter': True,
             'fetch_images': True,
@@ -307,7 +303,6 @@ class AISettingsManager:
             file_data = gh_manager.get_file_content(self.github_path)
             if file_data:
                 settings = json.loads(file_data['content'])
-                # Merge with defaults to ensure all keys exist
                 return {**self.defaults, **settings}, file_data
             else:
                 print(f"Settings file not found at {self.github_path}, using defaults")
@@ -331,7 +326,6 @@ class AISettingsManager:
     def save_settings_to_github(self, settings, gh_manager, file_data=None):
         """Save AI settings to GitHub repo"""
         try:
-            # Validate and prepare settings
             validated_settings = {}
             for key in self.defaults:
                 if key in settings:
@@ -339,14 +333,11 @@ class AISettingsManager:
                 else:
                     validated_settings[key] = self.defaults[key]
             
-            # Convert to JSON
             json_content = json.dumps(validated_settings, indent=2)
             
-            # Determine if creating new file or updating existing
             sha = file_data['sha'] if file_data else None
             commit_msg = f"Update AI settings - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
             
-            # Save to GitHub
             if gh_manager.update_file(self.github_path, json_content, commit_msg, sha):
                 print(f"✓ AI settings saved to GitHub: {self.github_path}")
                 return True
@@ -380,10 +371,7 @@ class AISettingsManager:
                 print(f"Error updating setting locally: {e}")
                 return False
 
-
-# Initialize settings manager
 ai_settings = AISettingsManager()
-
 
 # ============================================================================
 # AI SETTINGS ROUTES
@@ -397,7 +385,6 @@ def edit_ai_settings():
     
     if request.method == 'POST':
         try:
-            # Collect settings from form
             settings = {
                 'include_front_matter': 'include_front_matter' in request.form,
                 'fetch_images': 'fetch_images' in request.form,
@@ -412,7 +399,6 @@ def edit_ai_settings():
             
             print(f"[AI Settings] Form data received: {settings}")
             
-            # Validate settings
             valid_devices = ['cpu', 'cuda', 'mps']
             if settings['device'] not in valid_devices:
                 flash('Invalid device selected', 'error')
@@ -422,10 +408,8 @@ def edit_ai_settings():
                 flash('Max articles per run must be between 1 and 10', 'error')
                 return redirect(url_for('edit_ai_settings'))
             
-            # Load current file from GitHub to get SHA
             current_settings, file_data = ai_settings.load_settings_from_github(gh)
             
-            # Save settings to GitHub
             if ai_settings.save_settings_to_github(settings, gh, file_data):
                 flash('✓ AI settings updated and committed to repository!', 'success')
                 return redirect(url_for('edit_ai_settings'))
@@ -441,12 +425,10 @@ def edit_ai_settings():
             flash(f'Unexpected error: {str(e)}', 'error')
             return redirect(url_for('edit_ai_settings'))
     
-    # GET request - load current settings from GitHub
     current_settings, file_data = ai_settings.load_settings_from_github(gh)
     print(f"[AI Settings] Loaded for display: {current_settings}")
     
     return render_template('edit_ai_settings.html', config=current_settings)
-
 
 @app.route('/api/ai-settings')
 @login_required
@@ -458,7 +440,6 @@ def get_ai_settings_api():
         'status': 'success',
         'settings': settings
     })
-
 
 @app.route('/api/ai-settings/<key>')
 @login_required
@@ -481,9 +462,7 @@ def get_ai_setting_api(key):
         'key': key,
         'value': value
     })
-    
-    
-    
+
 # ============================================================================
 # CONFIGURATION ROUTES
 # ============================================================================
@@ -491,14 +470,14 @@ def get_ai_setting_api(key):
 @app.route('/config', methods=['GET', 'POST'])
 @login_required
 def edit_config():
+    """Edit blog configuration with theme support"""
     gh = get_github_manager()
     
     if request.method == 'POST':
-        # Get author field - if empty, use spaces for auto-generated
         author_input = request.form.get('author', '').strip()
         author_value = author_input if author_input else ' ' * 13 + 'HAA[B]'
         
-        # Build config dictionary from form
+        # Build base config
         config_dict = {
             'title': request.form.get('title'),
             'email': request.form.get('email'),
@@ -506,6 +485,9 @@ def edit_config():
             'baseurl': request.form.get('baseurl'),
             'url': request.form.get('url'),
             'author': author_value,
+            'phone': request.form.get('phone'),
+            'address': request.form.get('address'),
+            'active_theme': request.form.get('active_theme', 'default'),
             'twitter_username': request.form.get('twitter_username'),
             'github_username': request.form.get('github_username'),
             'facebook_username': request.form.get('facebook_username'),
@@ -517,8 +499,25 @@ def edit_config():
             'paginate_path': '/posts/page:num/'
         }
         
+        # Add theme1 customization if active
+        if request.form.get('active_theme') == 'theme1':
+            config_dict['theme1'] = {
+                'primary_color': request.form.get('theme1_primary_color', '#6366f1'),
+                'secondary_color': request.form.get('theme1_secondary_color', '#10b981'),
+                'accent_color': request.form.get('theme1_accent_color', '#f59e0b'),
+                'hero_overlay': float(request.form.get('theme1_hero_overlay', '0.6')),
+                'font_heading': request.form.get('theme1_font_heading', 'Ubuntu'),
+                'font_body': request.form.get('theme1_font_body', 'Roboto'),
+                'footer': {
+                    'newsletter_enabled': 'theme1_newsletter_enabled' in request.form,
+                    'newsletter_action': request.form.get('theme1_newsletter_action', ''),
+                    'show_wave': 'theme1_show_wave' in request.form,
+                    'show_social': 'theme1_show_social' in request.form
+                }
+            }
+        
         # Remove empty values
-        config_dict = {k: v for k, v in config_dict.items() if v}
+        config_dict = {k: v for k, v in config_dict.items() if v or k in ['active_theme', 'theme1']}
         
         if gh.update_config_yml(config_dict, f"Update config - {datetime.now().strftime('%Y-%m-%d %H:%M')}"):
             flash('Configuration updated successfully!', 'success')
@@ -526,7 +525,7 @@ def edit_config():
         else:
             flash('Error updating configuration', 'error')
     
-    # Get current config
+    # GET request - load current config
     config_file = gh.get_config_yml()
     if config_file:
         config = yaml.safe_load(config_file['content'])
@@ -553,7 +552,6 @@ def edit_home_about():
             flash('Could not load home layout', 'error')
             return redirect(url_for('dashboard'))
         
-        # Update the about section
         updated_content = gh.update_content_section(
             file_data['content'],
             'about-section',
@@ -567,7 +565,6 @@ def edit_home_about():
         else:
             flash('Error updating homepage', 'error')
     
-    # GET request - load current content
     file_data = gh.get_file_content('_layouts/home.html')
     if not file_data:
         flash('Could not load home layout', 'error')
@@ -575,7 +572,6 @@ def edit_home_about():
     
     about_content = gh.extract_content_section(file_data['content'], 'about-section')
     if not about_content:
-        # If section doesn't exist with markers, extract the About section manually
         about_match = re.search(r'<h1><u>About</u></h1>\s*<p>(.*?)</p>', file_data['content'], re.DOTALL)
         about_content = about_match.group(1) if about_match else ""
     
@@ -583,7 +579,6 @@ def edit_home_about():
                          content_type='Home About Section',
                          content=about_content,
                          file_type='home')
-
 
 @app.route('/edit-about-page', methods=['GET', 'POST'])
 @login_required
@@ -601,7 +596,6 @@ def edit_about_page():
             flash('Missing file information', 'error')
             return redirect(url_for('edit_about_page'))
         
-        # Build front matter
         front_matter = {
             'layout': 'page',
             'title': title,
@@ -609,10 +603,8 @@ def edit_about_page():
             'background': request.form.get('background', '/img/bg-about.jpg')
         }
         
-        # Create full content
         full_content = gh.create_front_matter(front_matter, new_content)
         
-        # Update file
         commit_msg = f"Update about page - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         if gh.update_file('about.html', full_content, commit_msg, sha):
             flash('About page updated successfully!', 'success')
@@ -620,7 +612,6 @@ def edit_about_page():
         else:
             flash('Error updating about page', 'error')
     
-    # GET request - load page for editing
     page_file = gh.get_file_content('about.html')
     
     if not page_file:
@@ -663,7 +654,6 @@ def view_post(post_path):
                          body=body,
                          sha=post_file['sha'])
 
-
 @app.route('/post/<path:post_path>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_post(post_path):
@@ -681,29 +671,24 @@ def edit_post(post_path):
         content = request.form.get('content')
         sha = request.form.get('sha')
         
-        # VALIDATION - Check if we have required fields
         if not title or not content or not sha:
             flash('Missing required fields (title, content, or sha)', 'error')
             return redirect(url_for('edit_post', post_path=post_path))
         
-        # Build front matter
         front_matter = {
             'layout': 'post',
             'title': title,
             'date': request.form.get('date', datetime.now().strftime('%Y-%m-%d')),
         }
         
-        # Add optional fields if provided
         if description:
             front_matter['description'] = description
         
         if request.form.get('categories'):
             front_matter['categories'] = request.form.get('categories')
         
-        # Create full content
         full_content = gh.create_front_matter(front_matter, content)
         
-        # Update file
         commit_msg = f"Update post: {title} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         if gh.update_file(post_path, full_content, commit_msg, sha):
             flash('Post updated successfully!', 'success')
@@ -712,10 +697,8 @@ def edit_post(post_path):
             flash('Error updating post', 'error')
             return redirect(url_for('edit_post', post_path=post_path))
     
-    # GET request - load post for editing
     front_matter, body = gh.parse_front_matter(post_file['content'])
     
-    # IMPORTANT: Make sure front_matter is a dict, not None
     if front_matter is None:
         front_matter = {}
     
@@ -724,7 +707,6 @@ def edit_post(post_path):
                          front_matter=front_matter,
                          body=body,
                          sha=post_file['sha'])
-
 
 @app.route('/post/<path:post_path>/delete', methods=['POST'])
 @login_required
@@ -761,7 +743,6 @@ def edit_page(page_path):
         content = request.form.get('content')
         sha = request.form.get('sha')
         
-        # Build front matter
         front_matter = {
             'layout': 'page',
             'title': title,
@@ -769,10 +750,8 @@ def edit_page(page_path):
             'background': request.form.get('background', '/img/bg-about.jpg')
         }
         
-        # Create full content
         full_content = gh.create_front_matter(front_matter, content)
         
-        # Update file
         commit_msg = f"Update page: {title} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         if gh.update_file(page_path, full_content, commit_msg, sha):
             flash('Page updated successfully!', 'success')
@@ -780,7 +759,6 @@ def edit_page(page_path):
         else:
             flash('Error updating page', 'error')
     
-    # GET request - load page for editing
     page_file = gh.get_file_content(page_path)
     
     if not page_file:
@@ -805,10 +783,8 @@ def trigger_generation():
     """Trigger GitHub Actions workflow with AI settings"""
     gh = get_github_manager()
     
-    # Get current AI settings
     settings = ai_settings.load_settings()
     
-    # Create a workflow config file that GitHub Actions can read
     try:
         workflow_config = {
             'timestamp': datetime.now().isoformat(),
@@ -816,7 +792,6 @@ def trigger_generation():
             'ai_settings': settings
         }
         
-        # Save config locally for GH Actions to read
         config_path = 'workflow_config.json'
         with open(config_path, 'w') as f:
             json.dump(workflow_config, f, indent=2)
