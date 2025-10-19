@@ -1,4 +1,4 @@
-active_theme: theme1
+active_theme: default
 address: South Africa
 author: Heritage Road Map Team
 description: Researching and documenting South African indigenous plants through  scientific
@@ -12,19 +12,6 @@ linkedin_username: your_linkedin
 markdown: kramdown
 paginate: 10
 paginate_path: /posts/page:num/
-phone: +27 XX XXX XXXX
-theme1:
-  accent_color: '#00ffff'
-  font_body: Roboto
-  font_heading: Ubuntu
-  footer:
-    newsletter_action: https://yoursite.us1.list-manage.com/subscribe/post
-    newsletter_enabled: false
-    show_social: true
-    show_wave: true
-  hero_overlay: 0.6
-  primary_color: '#00ff00'
-  secondary_color: '#000000'
 title: Heritage Road Map Foundation
 twitter_username: your_twitter
 url: https://yourdomain.com
