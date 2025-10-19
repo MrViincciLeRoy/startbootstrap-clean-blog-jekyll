@@ -469,8 +469,8 @@ def get_ai_setting_api(key):
 
 class V4ConfigManager:
     """Manages V4 JSON configuration files in GitHub repo"""
-    
-    V4_PATH = 'flask_app/research_v4'
+    _path = os.path.join('flask_app', 'research_v3')
+    V4_PATH = _path
     
     CONFIG_FILES = {
         'ai_settings': {
