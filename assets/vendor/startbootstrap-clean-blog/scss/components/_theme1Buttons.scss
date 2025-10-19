@@ -1,0 +1,42 @@
+.btn {
+    font-size: 14px;
+    font-weight: 800;
+    padding: 15px 25px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 0;
+    font-family: $headings-font-family;
+}
+
+.btn-primary {
+    background-color: $primary;
+    border-color: $primary;
+    color: #1a1a1a;
+
+    &:hover,
+    &:focus,
+    &:active {
+        color: #1a1a1a;
+        background-color: lighten($primary, 10%) !important;
+        border-color: lighten($primary, 10%) !important;
+    }
+}
+
+.btn-secondary {
+    background-color: $gray-600;
+    border-color: $gray-600;
+    color: $gray-900;
+
+    &:hover,
+    &:focus,
+    &:active {
+        color: $gray-900;
+        background-color: lighten($gray-600, 10%) !important;
+        border-color: lighten($gray-600, 10%) !important;
+    }
+}
+
+.btn-lg {
+    font-size: 16px;
+    padding: 25px 35px;
+}
