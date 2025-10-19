@@ -1,4 +1,9 @@
 {% if site.active_theme == 'theme1' %}
+{% include theme1-head.html %}
+
+<body>
+
+  {% include theme1-navbar.html %}
 
 <!-- Post Header -->
 <section class="post-header section gradient-background">
@@ -89,7 +94,9 @@
     </div>
   </div>
 </article>
-
+  {% include theme1-footer.html %}
+  {% include theme1-scripts.html %}
+  {% include google-analytics.html %}
 {% else %}
 <html>
 
