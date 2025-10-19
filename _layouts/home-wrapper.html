@@ -1,37 +1,95 @@
 
 {% if site.active_theme == 'theme1' %}
 
+
 <!DOCTYPE html>
-<html lang="en">
+
+<html>
+
 {% include theme1-head.html %}
 
-
-<body class="index-page">
+<body>
 
   {% include theme1-navbar.html %}
 
-  <main class="main">
-    {{ content }}
-    
-  </main>
+  {% if page.background %}
+  <header class="masthead" style="background-image: url('{{ page.background | prepend: site.baseurl | replace: '//', '/' }}')">
+  {% else %}
+  <header class="masthead">
+  {% endif %}
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="page-heading">
+            <h1>Theme1</h1>
+            <h1>{{ site.title }}</h1>
+            {% if site.description %}
+            <span class="subheading">{{ site.description }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        {{ content }}
+<div class="mb-5">
+          <h1><u>About</u></h1>
+          <p>The Heritage Road Map Foundation is committed to researching and documenting south african indigenous plants through scientific study and botanical research. Our blog serves as a comprehensive resource for medicinal plants knowledge and garden cultivation practices based on current botanical studies.</p>
+          
+          <p>We conduct in-depth studies examining plant structure, cellular biology, and the ecological importance of native species. Our research explores medicinal plants and their applications, the growth patterns of shrubs during winter, and how these organisms function within river ecosystems and broader environmental landscapes.</p>
+        </div>
+        <hr>
+        <h1><u>Articles</u></h1>
+        <hr>
+        <!-- Home Post List -->
+        {% for post in site.posts limit : 5 %}
+
+        <article class="post-preview">
+          <a href="{{ post.url | prepend: site.baseurl | replace: '//', '/' }}">
+            <h2 class="post-title">{{ post.title }}</h2>
+            {% if post.subtitle %}
+            <h3 class="post-subtitle">{{ post.subtitle }}</h3>
+            {% else %}
+            <h3 class="post-subtitle">{{ post.excerpt | strip_html | truncatewords: 15 }}</h3>
+            {% endif %}
+          </a>
+          <p class="post-meta">Posted by
+            {% if post.author %}
+            {{ post.author }}
+            {% else %}
+            {{ site.author }}
+            {% endif %}
+            on
+            {{ post.date | date: '%B %d, %Y' }} &middot; {% include read_time.html content=post.content %}            
+          </p>
+        </article>
+
+        <hr>
+
+        {% endfor %}
+
+        <!-- Pager -->
+        <div class="clearfix">
+          <a class="btn btn-primary float-right" href="{{"/posts" | relative_url }}">View All Posts &rarr;</a>
+        </div>
+
+      </div>
+    </div>
+          </div>
 
   {% include theme1-footer.html %}
-
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
-    <i class="bi bi-arrow-up-short"></i>
-  </a>
-
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
-
-  <script src="assets/js/theme1-main.js"></script>
+  {% include theme1-scripts.html %}
+  {% include google-analytics.html %}
 
 </body>
 
-</html>
+  </html>
 
 {% else %}
 
