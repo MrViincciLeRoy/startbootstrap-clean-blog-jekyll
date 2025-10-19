@@ -1,7 +1,7 @@
-// Global styling for this template
 body {
     font-size: 20px;
-    color: $white-900;
+    color: $gray-900;
+    background-color: $body-bg;
 }
 
 p {
@@ -20,28 +20,30 @@ h4,
 h5,
 h6 {
     font-weight: 800;
-    color: $black-600;
- 
+    color: $gray-900;
 }
 
 a {
-    color: $gray-900;
+    color: $primary;
 
     &:focus,
     &:hover {
-        color: $primary;
+        color: lighten($primary, 15%);
     }
 }
 
 blockquote {
     font-style: italic;
     color: $gray-600;
+    border-left: 4px solid $primary;
+    padding-left: 15px;
 }
 
 .section-heading {
     font-size: 36px;
     font-weight: 700;
     margin-top: 60px;
+    color: $gray-900;
 }
 
 .caption {
@@ -53,26 +55,28 @@ blockquote {
     text-align: center;
     border-bottom-right-radius: 5px;
     border-bottom-left-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: $gray-900;
 }
 
 ::-moz-selection {
-    color: $black;
+    color: #1a1a1a;
     background: $primary;
     text-shadow: none;
 }
 
 ::selection {
-    color: $black;
+    color: #1a1a1a;
     background: $primary;
     text-shadow: none;
 }
 
 img::selection {
-    color: $black;
+    color: #1a1a1a;
     background: transparent;
 }
 
 img::-moz-selection {
-    color: $white;
+    color: #1a1a1a;
     background: transparent;
 }

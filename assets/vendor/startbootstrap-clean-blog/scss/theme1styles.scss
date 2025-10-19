@@ -8,11 +8,11 @@
 @import "./theme1Global";
 
 // Components
-@import "./components/buttons";
+@import "./components/_theme1Buttons";
 @import "./components/theme1_dark_navbar";
 
 // Sections
-@import "./sections/contact";
-@import "./sections/footer";
-@import "./sections/masthead";
-@import "./sections/post";
+@import "./sections/theme1Contact";
+@import "./sections/theme1Footer";
+@import "./sections/theme1Masthead";
+@import "./sections/theme1Post";
