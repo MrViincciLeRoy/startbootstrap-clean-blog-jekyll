@@ -1,63 +1,79 @@
 {% if site.active_theme == 'theme1' %}
+---
+layout: theme1
+---
+<html> 
+{% include theme1-head.html %
+  {% include theme1-navbar.html %}
 
 <!-- Page Header -->
-<section class="page-header section {% if page.dark_header %}dark-background{% else %}gradient-background{% endif %}">
-  <div class="overlay"></div>
-  <div class="container position-relative">
-    <div class="row">
-      <div class="col-lg-10 mx-auto text-center">
-        <div class="page-heading" data-aos="fade-up">
-          {% if page.badge %}
-          <span class="section-badge animate-badge">
-            <i class="bi bi-star-fill"></i>
-            {{ page.badge }}
-          </span>
-          {% endif %}
-          
-          <h1 class="display-3 fw-bold mb-3">{{ page.title }}</h1>
-          
-          {% if page.description %}
-          <p class="lead text-white-75 mx-auto" style="max-width: 700px;">{{ page.description }}</p>
-          {% endif %}
-          
-          <nav aria-label="breadcrumb" class="mt-4">
-            <ol class="breadcrumb justify-content-center">
-              <li class="breadcrumb-item"><a href="{{ '/' | relative_url }}">Home</a></li>
-              {% if page.parent %}
-              <li class="breadcrumb-item"><a href="{{ page.parent_url | relative_url }}">{{ page.parent }}</a></li>
-              {% endif %}
-              <li class="breadcrumb-item active" aria-current="page">{{ page.title }}</li>
-            </ol>
-          </nav>
+{% if page.background %}
+<header class="masthead" style="background-image: url('{{ page.background | prepend: site.baseurl | replace: '//', '/' }}')">
+  {% else %}
+  <header class="masthead">
+    {% endif %}
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="page-heading">
+            <h1>{{ page.title }}</h1>
+            {% if page.description %}
+            <span class="subheading">{{ page.description }}</span>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
-    
-    <div class="header-decorations">
-      <div class="decoration-circle circle-1"></div>
-      <div class="decoration-circle circle-2"></div>
-      <div class="decoration-circle circle-3"></div>
-    </div>
-  </div>
-  
-  <div class="wave-divider">
-    <svg viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg">
-      <path fill="#ffffff" d="M0,50 C240,100 480,0 720,50 C960,100 1200,0 1440,50 L1440,100 L0,100 Z"></path>
-    </svg>
-  </div>
-</section>
+  </header>
 
-<section class="page-content section">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-10 mx-auto">
-        <div class="content-wrapper" data-aos="fade-up" data-aos-delay="100">
-          {{ content }}
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+{% for post in paginator.posts %}
+
+<article class="post-preview">
+  <a href="{{ post.url | prepend: site.baseurl | replace: '//', '/' }}">
+    <h2 class="post-title">{{ post.title }}</h2>
+    {% if post.subtitle %}
+    <h3 class="post-subtitle">{{ post.subtitle }}</h3>
+    {% else %}
+    <h3 class="post-subtitle">{{ post.excerpt | strip_html | truncatewords: 15 }}</h3>
+    {% endif %}
+  </a>
+  <p class="post-meta">Posted by
+    {% if post.author %}
+    {{ post.author }}
+    {% else %}
+    {{ site.author }}
+    {% endif %}
+    on {{ post.date | date: '%B %d, %Y' }} &middot; {% include read_time.html content=post.content %}
+  </p>
+</article>
+
+<hr>
+
+{% endfor %}
+<!-- Pager -->
+{% if paginator.total_pages > 1 %}
+
+<div class="clearfix">
+
+  {% if paginator.previous_page %}
+  <a class="btn btn-primary float-left" href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr;
+    Newer<span class="d-none d-md-inline"> Posts</span></a>
+  {% endif %}
+
+  {% if paginator.next_page %}
+  <a class="btn btn-primary float-right" href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older<span class="d-none d-md-inline"> Posts</span> &rarr;</a>
+  {% endif %}
+
+</div>
+
+{% endif %}
+  {% include theme1-footer.html %}
+  {% include theme1-scripts.html %}
+  {% include google-analytics.html %}
+
+</body>
+ </html>
 
 {% else %}
 ---
