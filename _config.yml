@@ -1,62 +1,30 @@
-# Site settings
-title: Heritage Road Map Foundation
-email: info@heritagemap.org
-description: >-
-  Researching and documenting South African indigenous plants through 
-  scientific study and botanical research.
+active_theme: theme1
+address: South Africa
 author: Heritage Road Map Team
-baseurl: ""
-url: "https://yourdomain.com"
-
-# Contact Information
-phone: "+27 XX XXX XXXX"
-address: "South Africa"
-
-# Theme Selection
-# Options: 'default' or 'theme1'
-active_theme: default 
-
-# Theme1 Customization
-theme1:
-  primary_color: "#6366f1"      # Indigo
-  secondary_color: "#10b981"    # Emerald
-  accent_color: "#f59e0b"       # Amber
-  hero_overlay: "0.6"           # Opacity for hero overlay
-  font_heading: "Ubuntu"        # Heading font family
-  font_body: "Roboto"          # Body text font family
-  
-  # Footer Settings
-  footer:
-    newsletter_enabled: true
-    newsletter_action: "https://yoursite.us1.list-manage.com/subscribe/post"
-    show_wave: true
-    show_social: true
-
-# Social Media Accounts
-twitter_username: your_twitter
-github_username: your_github
+description: Researching and documenting South African indigenous plants through  scientific
+  study and botanical research.
+email: info@heritagemap.org
 facebook_username: your_facebook
-linkedin_username: your_linkedin
-instagram_username: your_instagram
-
-# Google Analytics
+github_username: MrViincciLeRoy
 google_analytics: UA-XXXXXXXXX-X
-
-# Build settings
+instagram_username: your_instagram
+linkedin_username: your_linkedin
 markdown: kramdown
-plugins:
-  - jekyll-feed
-  - jekyll-paginate
-  - jekyll-sitemap
-
-paginate: 5
-paginate_path: "/posts/page:num/"
-
-# Exclude from processing
-exclude:
-  - node_modules
-  - vendor
-  - Gemfile
-  - Gemfile.lock
-  - README.md
-  - LICENSE
+paginate: 10
+paginate_path: /posts/page:num/
+phone: +27 XX XXX XXXX
+theme1:
+  accent_color: '#00ffff'
+  font_body: Roboto
+  font_heading: Ubuntu
+  footer:
+    newsletter_action: https://yoursite.us1.list-manage.com/subscribe/post
+    newsletter_enabled: false
+    show_social: true
+    show_wave: true
+  hero_overlay: 0.6
+  primary_color: '#00ff00'
+  secondary_color: '#000000'
+title: Heritage Road Map Foundation
+twitter_username: your_twitter
+url: https://yourdomain.com
