@@ -8,7 +8,7 @@ import sqlite3
 import pandas as pd
 from typing import List, Dict, Optional
 import logging
-
+from research_v4.ConfigManager import ConfigManager
 
 logger = logging.getLogger(__name__)
 

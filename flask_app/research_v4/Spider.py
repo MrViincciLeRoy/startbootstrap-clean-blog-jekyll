@@ -18,7 +18,7 @@ import PyPDF2
 import os
 import wikipediaapi
 
-#from ConfigManager import ConfigManager
+from research_v4.ConfigManager import ConfigManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

@@ -12,7 +12,7 @@ import torch
 from typing import List, Dict, Optional
 import logging
 
-#from ConfigManager import ConfigManager
+from research_v4.ConfigManager import ConfigManager
 
 logger = logging.getLogger(__name__)
 
