@@ -1,0 +1,38 @@
+{
+  "south_african": {
+    "up.ac.za": 0.98,
+    "uct.ac.za": 0.98,
+    "wits.ac.za": 0.98,
+    "sun.ac.za": 0.98,
+    "ru.ac.za": 0.97,
+    "ukzn.ac.za": 0.97,
+    "ufs.ac.za": 0.97,
+    "unisa.ac.za": 0.96,
+    "nwu.ac.za": 0.96,
+    "sanbi.org": 0.98,
+    "sanbi.org.za": 0.98,
+    "plantzafrica.com": 0.97,
+    "ispotnature.org": 0.95,
+    "biodiversityadvisor.sanbi.org": 0.97,
+    "redlist.sanbi.org": 0.97,
+    "pza.sanbi.org": 0.97
+  },
+  "international_botanical": {
+    "en.wikipedia.org": 0.93,
+    "kew.org": 0.95,
+    "powo.science.kew.org": 0.95,
+    "missouribotanicalgarden.org": 0.88,
+    "britannica.com": 0.87,
+    "rhs.org.uk": 0.86
+  },
+  "educational": {
+    "extension.wisc.edu": 0.80,
+    "ces.ncsu.edu": 0.80,
+    "extension.umn.edu": 0.80
+  },
+  "general_gardening": {
+    "thespruce.com": 0.70,
+    "plants.usda.gov": 0.85,
+    "plantnet.rbgsyd.nsw.gov.au": 0.82
+  }
+}

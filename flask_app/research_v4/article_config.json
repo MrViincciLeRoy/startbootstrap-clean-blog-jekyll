@@ -1,0 +1,35 @@
+{
+  "headings": [
+    {
+      "title": "The Complete Guide to {plant_name}",
+      "subtitle": "Discover the facts, care tips, and benefits of this remarkable plant"
+    },
+    {
+      "title": "Everything You Need to Know About {plant_name}",
+      "subtitle": "A comprehensive guide to growing and caring for this beautiful species"
+    },
+    {
+      "title": "{plant_name}: Nature's Hidden Treasure",
+      "subtitle": "Uncover the secrets of this extraordinary South African plant"
+    },
+    {
+      "title": "Growing {plant_name}: Expert Tips and Insights",
+      "subtitle": "Master the art of cultivating this stunning native plant"
+    },
+    {
+      "title": "{plant_name} Revealed",
+      "subtitle": "Explore the fascinating world of this unique botanical specimen"
+    }
+  ],
+  "image_settings": {
+    "width": 800,
+    "height": 600,
+    "default_fallback": "/img/posts/default-plant.jpg"
+  },
+  "content_cleaning": {
+    "remove_source_markers": true,
+    "remove_incomplete_paragraphs": true,
+    "min_paragraph_length": 50,
+    "remove_citations": true
+  }
+}
