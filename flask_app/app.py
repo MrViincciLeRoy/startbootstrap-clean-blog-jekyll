@@ -646,7 +646,78 @@ def edit_page(page_path):
                          front_matter=front_matter,
                          body=body,
                          sha=page_file['sha'])
+# #============================================================================
+# CONFIGURATION ROUTES
+# #============================================================================
 
+@app.route('/config', methods=['GET', 'POST'])
+@login_required
+def edit_config():
+    """Edit blog configuration with theme support"""
+    gh = get_github_manager()
+    
+    if request.method == 'POST':
+        author_input = request.form.get('author', '').strip()
+        author_value = author_input if author_input else ' ' * 13 + 'HAA[B]'
+        
+        # Build base config
+        config_dict = {
+            'title': request.form.get('title'),
+            'email': request.form.get('email'),
+            'description': request.form.get('description'),
+            'baseurl': request.form.get('baseurl'),
+            'url': request.form.get('url'),
+            'author': author_value,
+            'phone': request.form.get('phone'),
+            'address': request.form.get('address'),
+            'active_theme': request.form.get('active_theme', 'default'),
+            'twitter_username': request.form.get('twitter_username'),
+            'github_username': request.form.get('github_username'),
+            'facebook_username': request.form.get('facebook_username'),
+            'instagram_username': request.form.get('instagram_username'),
+            'linkedin_username': request.form.get('linkedin_username'),
+            'google_analytics': request.form.get('google_analytics'),
+            'markdown': 'kramdown',
+            'paginate': 10,
+            'paginate_path': '/posts/page:num/'
+        }
+        
+        # Add theme1 customization if active
+        if request.form.get('active_theme') == 'theme1':
+            config_dict['theme1'] = {
+                'primary_color': request.form.get('theme1_primary_color', '#6366f1'),
+                'secondary_color': request.form.get('theme1_secondary_color', '#10b981'),
+                'accent_color': request.form.get('theme1_accent_color', '#f59e0b'),
+                'hero_overlay': float(request.form.get('theme1_hero_overlay', '0.6')),
+                'font_heading': request.form.get('theme1_font_heading', 'Ubuntu'),
+                'font_body': request.form.get('theme1_font_body', 'Roboto'),
+                'footer': {
+                    'newsletter_enabled': 'theme1_newsletter_enabled' in request.form,
+                    'newsletter_action': request.form.get('theme1_newsletter_action', ''),
+                    'show_wave': 'theme1_show_wave' in request.form,
+                    'show_social': 'theme1_show_social' in request.form
+                }
+            }
+        
+        # Remove empty values
+        config_dict = {k: v for k, v in config_dict.items() if v or k in ['active_theme', 'theme1']}
+        
+        if gh.update_config_yml(config_dict, f"Update config - {datetime.now().strftime('%Y-%m-%d %H:%M')}"):
+            flash('Configuration updated successfully!', 'success')
+            return redirect(url_for('edit_config'))
+        else:
+            flash('Error updating configuration', 'error')
+    
+    # GET request - load current config
+    config_file = gh.get_config_yml()
+    if config_file:
+        config = yaml.safe_load(config_file['content'])
+    else:
+        config = {}
+    
+    return render_template('edit_config.html', config=config)
+
+#
 # WORKFLOW TRIGGER ROUTES
 #============================================================================
 
