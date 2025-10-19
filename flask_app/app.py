@@ -286,7 +286,7 @@ class AISettingsManager:
     
     def __init__(self, config_file=AI_CONFIG_FILE):
         self.config_file = config_file
-        ai_path = os.path.join(app.root_path, 'research_v3', '.ai_settings.json')
+        ai_path = os.path.join('flask_app', 'research_v3', '.ai_settings.json')
 
         self.github_path = ai_path # Path in GitHub repo
         self.defaults = {
