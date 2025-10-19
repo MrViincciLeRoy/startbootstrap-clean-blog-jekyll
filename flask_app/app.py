@@ -474,7 +474,7 @@ class V4ConfigManager:
     
     CONFIG_FILES = {
         'ai_settings': {
-            'path': os.path.join(V4_PATH,'.ai_settings.json') 
+            'path': os.path.join(V4_PATH,'.ai_settings.json'), 
             'label': 'AI Settings',
             'icon': 'fa-robot',
             'description': 'Configure embedding and LLM models, device settings, and generation parameters',
@@ -484,28 +484,28 @@ class V4ConfigManager:
             ]
         },
         'article_config': {
-            'path': os.path.join(V4_PATH,'article_config.json') 
+            'path': os.path.join(V4_PATH,'article_config.json'), 
             'label': 'Article Configuration',
             'icon': 'fa-newspaper',
             'description': 'Manage article templates, headings, image settings, and content cleaning rules',
             'editable_fields': ['headings', 'image_settings', 'content_cleaning']
         },
         'search_config': {
-            'path': os.path.join(V4_PATH,'search_config.json') 
+            'path': os.path.join(V4_PATH,'search_config.json'), 
             'label': 'Search Configuration',
             'icon': 'fa-search',
             'description': 'Configure search strategy, domains, and research questions for article generation',
             'editable_fields': ['search', 'supported_extensions', 'skip_domains', 'search_strategy', 'questions']
         },
         'config': {
-            'path': os.path.join(V4_PATH,'config.json') 
+            'path': os.path.join(V4_PATH,'config.json'), 
             'label': 'Application Config',
             'icon': 'fa-cogs',
             'description': 'API settings, scraping configuration, and output preferences',
             'editable_fields': ['api', 'scraping', 'output']
         },
         'domain_reliability': {
-            'path': os.path.join(V4_PATH,'domain_reliability.json') 
+            'path': os.path.join(V4_PATH,'domain_reliability.json'), 
             'label': 'Domain Reliability Scores',
             'icon': 'fa-globe',
             'description': 'Source reliability ratings for different domains and research sources',
