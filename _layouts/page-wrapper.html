@@ -1,7 +1,4 @@
-
 {% if site.active_theme == 'theme1' %}
-
-
 
 <!-- Page Header -->
 <section class="page-header section {% if page.dark_header %}dark-background{% else %}gradient-background{% endif %}">
@@ -63,35 +60,10 @@
 </section>
 
 {% else %}
+---
+layout: page
+---
 
-<!-- Page Header -->
-{% if page.background %}
-<header class="masthead" style="background-image: url('{{ page.background | prepend: site.baseurl | replace: '//', '/' }}')">
-  {% else %}
-  <header class="masthead">
-    {% endif %}
-    <div class="overlay"></div>
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="page-heading">
-            <h1>{{ page.title }}</h1>
-            {% if page.description %}
-            <span class="subheading">{{ page.description }}</span>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
+{{ content }}
 
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-
-        {{ content }}
-
-      </div>
-    </div>
-  </div>
-  {% endif %} 
+{% endif %}
