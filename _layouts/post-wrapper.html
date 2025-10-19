@@ -1,105 +1,67 @@
 {% if site.active_theme == 'theme1' %}
-{% include theme1-head.html %}
 
-<body>
+  {% include theme1-head.html %}
 
   {% include theme1-navbar.html %}
 
-<!-- Post Header -->
-<section class="post-header section gradient-background">
-  <div class="overlay"></div>
-  <div class="container position-relative">
-    <div class="row">
-      <div class="col-lg-10 mx-auto">
-        <div class="post-heading text-center" data-aos="fade-up">
-          
-          <div class="post-category mb-3">
-            {% if page.category %}
-              <span class="category-badge">
-                <i class="bi bi-tag"></i>
-                {{ page.category }}
-              </span>
-            {% else %}
-              <span class="category-badge">
-                <i class="bi bi-journal-medical"></i>
-                Research Article
-              </span>
+{% if page.background %}
+<header class="masthead" style="background-image: url('{{ page.background | prepend: site.baseurl | replace: '//', '/' }}')">
+{% else %}
+<header class="masthead">
+{% endif %}
+  <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>{{ page.title }}</h1>
+            {% if page.subtitle %}
+            <h2 class="subheading">{{ page.subtitle }}</h2>
             {% endif %}
+            <span class="meta">Posted by
+              <a href="#">{% if page.author %}{{ page.author }}{% else %}{{ site.author }}{% endif %}</a>
+              on {{ page.date | date: '%B %d, %Y' }} &middot; {% include read_time.html
+              content=page.content %}
+            </span>
           </div>
-          
-          <h1 class="display-4 fw-bold text-white mb-4">{{ page.title }}</h1>
-          
-          {% if page.subtitle %}
-          <p class="lead text-white-75 mb-4">{{ page.subtitle }}</p>
-          {% endif %}
-          
-          <div class="post-meta-info d-flex flex-wrap justify-content-center align-items-center gap-3">
-            <div class="meta-item">
-              <i class="bi bi-person-circle"></i>
-              <span>{% if page.author %}{{ page.author }}{% else %}{{ site.author }}{% endif %}</span>
-            </div>
-            <span class="meta-divider">•</span>
-            <div class="meta-item">
-              <i class="bi bi-calendar3"></i>
-              <span>{{ page.date | date: '%B %d, %Y' }}</span>
-            </div>
-            <span class="meta-divider">•</span>
-            <div class="meta-item">
-              <i class="bi bi-clock"></i>
-              <span>{% include read_time.html content=page.content %}</span>
-            </div>
-          </div>
-          
         </div>
       </div>
     </div>
-  </div>
-  
-  <div class="wave-divider">
-    <svg viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg">
-      <path fill="#ffffff" d="M0,50 C240,100 480,0 720,50 C960,100 1200,0 1440,50 L1440,100 L0,100 Z"></path>
-    </svg>
-  </div>
-</section>
+  </header>
 
-<article class="post-content section">
   <div class="container">
     <div class="row">
-      <div class="col-lg-10 col-xl-8 mx-auto">
-        
-        <div class="article-body" data-aos="fade-up" data-aos-delay="100">
-          {{ content }}
-        </div>
+      <div class="col-lg-8 col-md-10 mx-auto">
 
-        <hr class="my-5">
+        {{ content }}
 
-        <div class="alert alert-warning border-0 shadow-sm" role="alert" data-aos="fade-up">
-          <div class="d-flex align-items-start gap-3">
-            <div class="alert-icon">
-              <i class="bi bi-exclamation-triangle-fill"></i>
-            </div>
-            <div>
-              <h5 class="alert-heading mb-2">
-                <i class="bi bi-info-circle"></i> Research Disclaimer
-              </h5>
-              <p class="mb-0">
-                ⚠️ Our research might contain some errors as it's ongoing scientific study. Please double-check 
-                the information you find and consult with botanical experts for critical applications.
-              </p>
-            </div>
-          </div>
+        <hr>
+
+        <div class="clearfix">
+
+          {% if page.previous.url %}
+          <a class="btn btn-primary float-left" href="{{ page.previous.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ page.previous.title }}">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          {% endif %}
+          {% if page.next.url %}
+          <a class="btn btn-primary float-right" href="{{ page.next.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ page.next.title }}">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          {% endif %}
+
         </div>
 
       </div>
     </div>
   </div>
-</article>
   {% include theme1-footer.html %}
   {% include theme1-scripts.html %}
   {% include google-analytics.html %}
-{% else %}
-<html>
+</body>
 
+</html>
+{% else %} 
+     
+        
+  
 {% include head.html %}
 
 
