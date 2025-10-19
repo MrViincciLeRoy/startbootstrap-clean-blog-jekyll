@@ -1,22 +1,14 @@
-<header id="header" class="header d-flex align-items-center fixed-top">
-  <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="{{"/" | relative_url }}">{{ site.title | escape }}</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
 
-    <!-- Logo -->
-    <a href="{{ '/' | relative_url }}" class="logo d-flex align-items-center me-auto me-xl-0">
-      <!-- Uncomment and add your logo image if you have one -->
-      <!-- <img src="assets/img/logo.png" alt="{{ site.title }}"> -->
-      <div class="logo-icon">
-        <i class="bi bi-flower1"></i>
-      </div>
-      <div class="logo-text">
-        <h1 class="sitename mb-0">{{ site.title | truncatewords: 3 }}</h1>
-        <small class="tagline">Indigenous Plant Research</small>
-      </div>
-    </a>
-
-    <!-- Main Navigation -->
-    <nav id="navmenu" class="navmenu">
-      <ul>
+<ul>
         <li>
           <a href="{{ '/' | relative_url }}" class="{% if page.url == '/' %}active{% endif %}">
             <i class="bi bi-house-door"></i>
@@ -100,7 +92,6 @@
             </li>
           </ul>
         </li>
-        
         <!-- Community Dropdown -->
         <li class="dropdown">
           <a href="#">
@@ -155,86 +146,6 @@
           </a>
         </li>
       </ul>
-      
-      <!-- Mobile Navigation Toggle -->
-      <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-    </nav>
-
-    <!-- Header Actions -->
-    <div class="header-actions d-flex align-items-center">
-      
-      <!-- Search Button -->
-      <button class="search-btn" type="button" data-bs-toggle="modal" data-bs-target="#searchModal" aria-label="Search">
-        <i class="bi bi-search"></i>
-      </button>
-      
-      <!-- Theme Toggle (Optional) -->
-      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
-        <i class="bi bi-moon-stars"></i>
-      </button>
-      
-      <!-- Dashboard/Login Button -->
-      <a class="btn-getstarted" href="https://flask-dashboard-q9pv.onrender.com">
-        <i class="bi bi-speedometer2"></i>
-        <span>Dashboard</span>
-      </a>
-    </div>
-
-  </div>
-  
-  <!-- Progress Bar -->
-  <div class="reading-progress-bar" id="readingProgressBar"></div>
-</header>
-
-<!-- Search Modal -->
-<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header border-0">
-        <h5 class="modal-title" id="searchModalLabel">
-          <i class="bi bi-search"></i> Search Articles
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form action="{{ '/search' | relative_url }}" method="get" class="search-form">
-          <div class="input-group input-group-lg">
-            <span class="input-group-text bg-transparent border-end-0">
-              <i class="bi bi-search"></i>
-            </span>
-            <input type="search" name="q" class="form-control border-start-0" placeholder="Search for articles, plants, research topics..." required>
-            <button class="btn btn-primary" type="submit">Search</button>
-          </div>
-        </form>
-        
-        <!-- Quick Links -->
-        <div class="quick-links mt-4">
-          <h6 class="text-muted mb-3">Popular Topics</h6>
-          <div class="d-flex flex-wrap gap-2">
-            <a href="{{ '/tag/medicinal-plants' | relative_url }}" class="badge-link">Medicinal Plants</a>
-            <a href="{{ '/tag/conservation' | relative_url }}" class="badge-link">Conservation</a>
-            <a href="{{ '/tag/cultivation' | relative_url }}" class="badge-link">Cultivation</a>
-            <a href="{{ '/tag/ecology' | relative_url }}" class="badge-link">Ecology</a>
-            <a href="{{ '/tag/indigenous' | relative_url }}" class="badge-link">Indigenous Species</a>
-            <a href="{{ '/tag/research' | relative_url }}" class="badge-link">Research</a>
-          </div>
-        </div>
-        
-        <!-- Recent Articles -->
-        <div class="recent-searches mt-4">
-          <h6 class="text-muted mb-3">Recent Articles</h6>
-          <ul class="list-unstyled">
-            {% for post in site.posts limit: 3 %}
-            <li class="mb-2">
-              <a href="{{ post.url | prepend: site.baseurl | replace: '//', '/' }}" class="d-flex align-items-center text-decoration-none">
-                <i class="bi bi-journal-text text-primary me-2"></i>
-                <span>{{ post.title | truncate: 50 }}</span>
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
     </div>
   </div>
-</div>
+  </nav>
