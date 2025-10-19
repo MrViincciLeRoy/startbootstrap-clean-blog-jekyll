@@ -53,6 +53,7 @@
 
   <main class="main">
     {{ content }}
+    
   </main>
 
   {% include theme1-footer.html %}
@@ -110,7 +111,15 @@
       <div class="col-lg-8 col-md-10 mx-auto">
 
         {{ content }}
-
+<div class="mb-5">
+          <h1><u>About</u></h1>
+          <p>The Heritage Road Map Foundation is committed to researching and documenting south african indigenous plants through scientific study and botanical research. Our blog serves as a comprehensive resource for medicinal plants knowledge and garden cultivation practices based on current botanical studies.</p>
+          
+          <p>We conduct in-depth studies examining plant structure, cellular biology, and the ecological importance of native species. Our research explores medicinal plants and their applications, the growth patterns of shrubs during winter, and how these organisms function within river ecosystems and broader environmental landscapes.</p>
+        </div>
+        <hr>
+        <h1><u>Articles</u></h1>
+        <hr>
         <!-- Home Post List -->
         {% for post in site.posts limit : 5 %}
 
