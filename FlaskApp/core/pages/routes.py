@@ -4,7 +4,7 @@ Page management routes
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required
 from datetime import datetime
-from flask_app.services.github_manager import get_github_manager
+from FlaskApp.services.github_manager import get_github_manager
 
 def setup_pages_routes(bp):
     """Setup page routes"""
