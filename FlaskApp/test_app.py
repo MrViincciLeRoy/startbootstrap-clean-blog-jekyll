@@ -2,7 +2,7 @@
 Simple tests for the refactored application
 """
 import pytest
-from flask_app import create_app
+from FlaskApp import create_app
 
 @pytest.fixture
 def app():
