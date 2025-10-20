@@ -363,13 +363,13 @@
                     <small>{{ (post.size / 1024)|round(1) }} KB • {{ post.path }}</small>
                 </div>
                 <div class="post-actions">
-                    <a href="{{ url_for('view_post', post_path=post.path) }}" class="btn btn-sm btn-outline-info" title="View">
+                    <a href="{{ url_for('posts.view_post', post_path=post.path) }}" class="btn btn-sm btn-outline-info" title="View">
                         <i class="fas fa-eye"></i>
                     </a>
-                    <a href="{{ url_for('edit_post', post_path=post.path) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                    <a href="{{ url_for('posts.edit_post', post_path=post.path) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <form method="POST" action="{{ url_for('delete_post', post_path=post.path) }}" style="display: inline;" onclick="return confirm('Delete this post?');">
+                    <form method="POST" action="{{ url_for('posts.delete_post', post_path=post.path) }}" style="display: inline;" onclick="return confirm('Delete this post?');">
                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -386,7 +386,7 @@
 
     <!-- View All Posts Link -->
     <div class="text-center mt-3">
-        <a href="{{ url_for('list_posts') }}" class="btn btn-outline-primary">
+        <a href="{{ url_for('posts.list_posts') }}" class="btn btn-outline-primary">
             <i class="fas fa-arrow-right me-2"></i>View All Posts
         </a>
     </div>
