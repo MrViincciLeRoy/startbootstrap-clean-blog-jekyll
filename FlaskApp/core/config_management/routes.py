@@ -6,9 +6,9 @@ from flask_login import login_required, current_user
 from datetime import datetime
 import yaml
 import json
-from flask_app.services.github_manager import get_github_manager
-from flask_app.services.ai_settings_manager import AISettingsManager
-from flask_app.services.v4_config_manager import V4ConfigManager
+from FlaskApp.services.github_manager import get_github_manager
+from FlaskApp.services.ai_settings_manager import AISettingsManager
+from FlaskApp.services.v4_config_manager import V4ConfigManager
 
 ai_settings = AISettingsManager()
 
