@@ -1,0 +1,172 @@
+
+{% extends "base.html" %}
+
+{% block title %}Edit Config - Blog Management{% endblock %}
+{% block page_title %}Blog Configuration{% endblock %}
+
+{% block content %}
+<style>
+    .form-card { background: white; padding: 2rem; border-radius: 8px; }
+    .help-text { font-size: 0.875rem; color: #6c757d; margin-top: 0.5rem; }
+    .section-header { border-bottom: 1px solid #dee2e6; padding-bottom: 1rem; margin-bottom: 1.5rem; margin-top: 1.5rem; }
+    .section-header:first-child { margin-top: 0; }
+    .preview-box { background: #f8f9fa; padding: 1rem; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 0.85rem; max-height: 300px; overflow-y: auto; }
+</style>
+
+<div class="mb-4">
+    <h2 class="mb-1">Blog Configuration</h2>
+    <small class="text-muted">Edit your Jekyll _config.yml settings</small>
+</div>
+
+<div class="form-card">
+    <form method="POST">
+        <!-- Site Information -->
+        <div class="section-header">
+            <h5><i class="fas fa-globe me-2"></i>Site Information</h5>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="title" class="form-label"><strong>Site Title *</strong></label>
+                    <input type="text" class="form-control" id="title" name="title" 
+                           value="{{ config.get('title', '') or '' }}" required>
+                    <div class="help-text">The main title of your blog</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="email" class="form-label"><strong>Email Address</strong></label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           value="{{ config.get('email', '') or '' }}">
+                    <div class="help-text">Your contact email</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="description" class="form-label"><strong>Site Description</strong></label>
+            <textarea class="form-control" id="description" name="description" rows="3">{{ config.get('description', '') or '' }}</textarea>
+            <div class="help-text">Brief description of your blog for SEO</div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="baseurl" class="form-label"><strong>Base URL</strong></label>
+                    <input type="text" class="form-control" id="baseurl" name="baseurl" 
+                           value="{{ config.get('baseurl', '') or '' }}" placeholder="/blog">
+                    <div class="help-text">Subpath where your blog is hosted</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="url" class="form-label"><strong>Full Site URL</strong></label>
+                    <input type="url" class="form-control" id="url" name="url" 
+                           value="{{ config.get('url', '') or '' }}" placeholder="https://example.com">
+                    <div class="help-text">Complete URL of your site</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Media -->
+        <div class="section-header">
+            <h5><i class="fas fa-share-alt me-2"></i>Social Media</h5>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="twitter_username" class="form-label"><strong>Twitter Username</strong></label>
+                    <input type="text" class="form-control" id="twitter_username" name="twitter_username" 
+                           value="{{ config.get('twitter_username', '') or '' }}" placeholder="username">
+                    <div class="help-text">Your Twitter handle (without @)</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="github_username" class="form-label"><strong>GitHub Username</strong></label>
+                    <input type="text" class="form-control" id="github_username" name="github_username" 
+                           value="{{ config.get('github_username', '') or '' }}">
+                    <div class="help-text">Your GitHub profile username</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="facebook_username" class="form-label"><strong>Facebook Username</strong></label>
+                    <input type="text" class="form-control" id="facebook_username" name="facebook_username" 
+                           value="{{ config.get('facebook_username', '') or '' }}">
+                    <div class="help-text">Your Facebook page username</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="instagram_username" class="form-label"><strong>Instagram Username</strong></label>
+                    <input type="text" class="form-control" id="instagram_username" name="instagram_username" 
+                           value="{{ config.get('instagram_username', '') or '' }}" placeholder="username">
+                    <div class="help-text">Your Instagram handle (without @)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="linkedin_username" class="form-label"><strong>LinkedIn Profile</strong></label>
+            <input type="text" class="form-control" id="linkedin_username" name="linkedin_username" 
+                   value="{{ config.get('linkedin_username', '') or '' }}">
+            <div class="help-text">Your LinkedIn profile ID or URL</div>
+        </div>
+
+        <!-- Analytics -->
+        <div class="section-header">
+            <h5><i class="fas fa-chart-line me-2"></i>Analytics & Tracking</h5>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="google_analytics" class="form-label"><strong>Google Analytics ID</strong></label>
+            <input type="text" class="form-control" id="google_analytics" name="google_analytics" 
+                   value="{{ config.get('google_analytics', '') or '' }}" placeholder="UA-XXXXXXXXX-X">
+            <div class="help-text">Your Google Analytics tracking ID</div>
+        </div>
+
+        <!-- Author -->
+        <div class="section-header">
+            <h5><i class="fas fa-user me-2"></i>Author Information</h5>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="author" class="form-label"><strong>Author</strong></label>
+            <input type="text" class="form-control" id="author" name="author" 
+                   value="{{ config.get('author', '') or '' }}" placeholder="Your name or email">
+            <div class="help-text">Author name or email. Leave blank to auto-generate</div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Configuration
+            </button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Configuration Preview -->
+<div class="mt-4 p-3 bg-light rounded">
+    <h6 class="mb-2"><i class="fas fa-code"></i> Configuration Preview</h6>
+    <small class="text-muted d-block mb-2">This is how your _config.yml will be saved:</small>
+    <div class="preview-box">
+        {% if config %}
+            {% for key, value in config.items() %}{{ key }}: {{ value }}
+            {% endfor %}
+        {% else %}
+# Configuration will appear here after saving
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

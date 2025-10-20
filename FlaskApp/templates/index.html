@@ -1,0 +1,882 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CoreUI Admin{% endblock %}
+
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Cards Row -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body pb-0 d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fs-4 fw-semibold">26K <span class="fs-6 fw-normal">(-12.4%
+                        <i class="fas fa-arrow-down"></i>)</span></div>
+                    <div>Users</div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-transparent text-white p-0" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="height:70px; margin-top:10px;">
+                <canvas id="card-chart1"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card text-white bg-info">
+            <div class="card-body pb-0 d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fs-4 fw-semibold">$6.200 <span class="fs-6 fw-normal">(40.9%
+                        <i class="fas fa-arrow-up"></i>)</span></div>
+                    <div>Income</div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-transparent text-white p-0" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="height:70px; margin-top:10px;">
+                <canvas id="card-chart2"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body pb-0 d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fs-4 fw-semibold">2.49% <span class="fs-6 fw-normal">(84.7%
+                        <i class="fas fa-arrow-up"></i>)</span></div>
+                    <div>Conversion Rate</div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-transparent text-white p-0" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="height:70px; margin-top:10px;">
+                <canvas id="card-chart3"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body pb-0 d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="fs-4 fw-semibold">44K <span class="fs-6 fw-normal">(-23.6%
+                        <i class="fas fa-arrow-down"></i>)</span></div>
+                    <div>Sessions</div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-transparent text-white p-0" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="height:70px; margin-top:10px;">
+                <canvas id="card-chart4"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Traffic Chart -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h5 class="card-title mb-0">Traffic</h5>
+                <div class="small text-body-secondary">January - July 2025</div>
+            </div>
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="traffic" id="traffic-day" autocomplete="off">
+                <label class="btn btn-outline-secondary btn-sm" for="traffic-day">Day</label>
+
+                <input type="radio" class="btn-check" name="traffic" id="traffic-month" autocomplete="off" checked>
+                <label class="btn btn-outline-secondary btn-sm active" for="traffic-month">Month</label>
+
+                <input type="radio" class="btn-check" name="traffic" id="traffic-year" autocomplete="off">
+                <label class="btn btn-outline-secondary btn-sm" for="traffic-year">Year</label>
+            </div>
+        </div>
+        <div style="height:300px; position:relative;">
+            <canvas id="main-chart"></canvas>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-2 text-center">
+            <div class="col">
+                <div class="text-body-secondary small">Visits</div>
+                <div class="fw-semibold">29.703 Users (40%)</div>
+                <div class="progress progress-thin mt-2">
+                    <div class="progress-bar bg-success" style="width: 40%"></div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="text-body-secondary small">Unique</div>
+                <div class="fw-semibold">24.093 Users (20%)</div>
+                <div class="progress progress-thin mt-2">
+                    <div class="progress-bar bg-info" style="width: 20%"></div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="text-body-secondary small">Pageviews</div>
+                <div class="fw-semibold">78.706 Views (60%)</div>
+                <div class="progress progress-thin mt-2">
+                    <div class="progress-bar bg-warning" style="width: 60%"></div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="text-body-secondary small">New Users</div>
+                <div class="fw-semibold">22.123 Users (80%)</div>
+                <div class="progress progress-thin mt-2">
+                    <div class="progress-bar bg-danger" style="width: 80%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Social Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-lg-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <i class="fab fa-facebook-f fa-3x"></i>
+            </div>
+            <div class="card-body row text-center">
+                <div class="col">
+                    <div class="fs-5 fw-semibold">89k</div>
+                    <div class="text-uppercase text-body-secondary small">friends</div>
+                </div>
+                <div class="vr"></div>
+                <div class="col">
+                    <div class="fs-5 fw-semibold">459</div>
+                    <div class="text-uppercase text-body-secondary small">feeds</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white text-center py-4">
+                <i class="fab fa-twitter fa-3x"></i>
+            </div>
+            <div class="card-body row text-center">
+                <div class="col">
+                    <div class="fs-5 fw-semibold">973k</div>
+                    <div class="text-uppercase text-body-secondary small">followers</div>
+                </div>
+                <div class="vr"></div>
+                <div class="col">
+                    <div class="fs-5 fw-semibold">1.792</div>
+                    <div class="text-uppercase text-body-secondary small">tweets</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-4">
+        <div class="card">
+            <div class="card-header text-white text-center py-4" style="background-color: #4875b4;">
+                <i class="fab fa-linkedin fa-3x" style="color: white;"></i>
+            </div>
+            <div class="card-body row text-center">
+                <div class="col">
+                    <div class="fs-5 fw-semibold">500+</div>
+                    <div class="text-uppercase text-body-secondary small">contacts</div>
+                </div>
+                <div class="vr"></div>
+                <div class="col">
+                    <div class="fs-5 fw-semibold">292</div>
+                    <div class="text-uppercase text-body-secondary small">feeds</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Traffic & Sales Section -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Traffic &amp; Sales</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-sm-6">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="border-start border-start-4 border-start-info px-3 mb-3">
+                                    <div class="small text-body-secondary text-truncate">New Clients</div>
+                                    <div class="fs-5 fw-semibold">9.123</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-start border-start-4 border-start-danger px-3 mb-3">
+                                    <div class="small text-body-secondary text-truncate">Recurring Clients</div>
+                                    <div class="fs-5 fw-semibold">22.643</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="mt-0">
+
+                        <!-- Daily Progress -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-body-secondary small">Monday</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-info" style="width: 34%"></div>
+                            </div>
+                            <div class="progress progress-thin mt-1">
+                                <div class="progress-bar bg-danger" style="width: 78%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-body-secondary small">Tuesday</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-info" style="width: 56%"></div>
+                            </div>
+                            <div class="progress progress-thin mt-1">
+                                <div class="progress-bar bg-danger" style="width: 94%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-body-secondary small">Wednesday</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-info" style="width: 12%"></div>
+                            </div>
+                            <div class="progress progress-thin mt-1">
+                                <div class="progress-bar bg-danger" style="width: 67%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-body-secondary small">Thursday</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-info" style="width: 43%"></div>
+                            </div>
+                            <div class="progress progress-thin mt-1">
+                                <div class="progress-bar bg-danger" style="width: 91%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-body-secondary small">Friday</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-info" style="width: 22%"></div>
+                            </div>
+                            <div class="progress progress-thin mt-1">
+                                <div class="progress-bar bg-danger" style="width: 73%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-body-secondary small">Saturday</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-info" style="width: 53%"></div>
+                            </div>
+                            <div class="progress progress-thin mt-1">
+                                <div class="progress-bar bg-danger" style="width: 82%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-body-secondary small">Sunday</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-info" style="width: 9%"></div>
+                            </div>
+                            <div class="progress progress-thin mt-1">
+                                <div class="progress-bar bg-danger" style="width: 69%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-sm-6">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="border-start border-start-4 border-start-warning px-3 mb-3">
+                                    <div class="small text-body-secondary text-truncate">Pageviews</div>
+                                    <div class="fs-5 fw-semibold">78.623</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="border-start border-start-4 border-start-success px-3 mb-3">
+                                    <div class="small text-body-secondary text-truncate">Organic</div>
+                                    <div class="fs-5 fw-semibold">49.123</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="mt-0">
+
+                        <!-- Gender Distribution -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <i class="fas fa-user me-2"></i>
+                                    <span>Male</span>
+                                </div>
+                                <div class="fw-semibold">43%</div>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-warning" style="width: 43%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <i class="fas fa-user-female me-2"></i>
+                                    <span>Female</span>
+                                </div>
+                                <div class="fw-semibold">37%</div>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-warning" style="width: 37%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Traffic Sources -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <i class="fab fa-google me-2"></i>
+                                    <span>Organic Search</span>
+                                </div>
+                                <div>
+                                    <span class="fw-semibold me-2">191.235</span>
+                                    <span class="text-body-secondary small">(56%)</span>
+                                </div>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-success" style="width: 56%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <i class="fab fa-facebook-f me-2"></i>
+                                    <span>Facebook</span>
+                                </div>
+                                <div>
+                                    <span class="fw-semibold me-2">51.223</span>
+                                    <span class="text-body-secondary small">(15%)</span>
+                                </div>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-success" style="width: 15%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <i class="fab fa-twitter me-2"></i>
+                                    <span>Twitter</span>
+                                </div>
+                                <div>
+                                    <span class="fw-semibold me-2">37.564</span>
+                                    <span class="text-body-secondary small">(11%)</span>
+                                </div>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-success" style="width: 11%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <i class="fab fa-linkedin me-2"></i>
+                                    <span>LinkedIn</span>
+                                </div>
+                                <div>
+                                    <span class="fw-semibold me-2">27.319</span>
+                                    <span class="text-body-secondary small">(8%)</span>
+                                </div>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-success" style="width: 8%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Users Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">
+                                    <i class="fas fa-user"></i>
+                                </th>
+                                <th>User</th>
+                                <th class="text-center">Country</th>
+                                <th>Usage</th>
+                                <th class="text-center">Payment Method</th>
+                                <th>Activity</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">
+                                    <img src="https://ui-avatars.com/api/?name=Agapetus+Tadeas&background=random" alt="user" class="rounded-circle" width="32">
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">Agapetus Tadéáš</div>
+                                    <div class="small text-body-secondary">New | Registered: Jan 1, 2025</div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fas fa-flag me-1"></i>ES
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="fw-semibold">22%</div>
+                                        <div class="small text-body-secondary">Jun 11, 2025 - Jul 10, 2025</div>
+                                    </div>
+                                    <div class="progress progress-thin">
+                                        <div class="progress-bar bg-info" style="width: 22%"></div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fab fa-cc-apple-pay text-primary"></i>
+                                </td>
+                                <td>
+                                    <div class="small text-body-secondary">Last login</div>
+                                    <div class="fw-semibold">Last week</div>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-transparent p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="#">Info</a></li>
+                                            <li><a class="dropdown-item" href="#">Edit</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="text-center">
+                                    <img src="https://ui-avatars.com/api/?name=Friderik+David&background=random" alt="user" class="rounded-circle" width="32">
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">Friderik Dávid</div>
+                                    <div class="small text-body-secondary">New | Registered: Jan 1, 2025</div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fas fa-flag me-1"></i>PL
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="fw-semibold">43%</div>
+                                        <div class="small text-body-secondary">Jun 11, 2025 - Jul 10, 2025</div>
+                                    </div>
+                                    <div class="progress progress-thin">
+                                        <div class="progress-bar bg-success" style="width: 43%"></div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fab fa-cc-amex text-primary"></i>
+                                </td>
+                                <td>
+                                    <div class="small text-body-secondary">Last login</div>
+                                    <div class="fw-semibold">Yesterday</div>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-transparent p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="#">Info</a></li>
+                                            <li><a class="dropdown-item" href="#">Edit</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Chart configuration options
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    };
+
+    // Card Chart 1 - Line Chart
+    const cardCtx1 = document.getElementById('card-chart1')?.getContext('2d');
+    if (cardCtx1) {
+        new Chart(cardCtx1, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    data: [12, 19, 8, 15, 10, 20],
+                    borderColor: '#ffffff',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    borderCapStyle: 'round'
+                }]
+            },
+            options: chartOptions
+        });
+    }
+
+    // Card Chart 2 - Line Chart
+    const cardCtx2 = document.getElementById('card-chart2')?.getContext('2d');
+    if (cardCtx2) {
+        new Chart(cardCtx2, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    data: [5000, 5500, 6200, 5800, 6400, 6200],
+                    borderColor: '#ffffff',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    borderCapStyle: 'round'
+                }]
+            },
+            options: chartOptions
+        });
+    }
+
+    // Card Chart 3 - Line Chart
+    const cardCtx3 = document.getElementById('card-chart3')?.getContext('2d');
+    if (cardCtx3) {
+        new Chart(cardCtx3, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    data: [1.2, 1.8, 2.1, 2.3, 2.4, 2.49],
+                    borderColor: '#ffffff',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    borderCapStyle: 'round'
+                }]
+            },
+            options: chartOptions
+        });
+    }
+
+    // Card Chart 4 - Line Chart
+    const cardCtx4 = document.getElementById('card-chart4')?.getContext('2d');
+    if (cardCtx4) {
+        new Chart(cardCtx4, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    data: [55000, 52000, 48000, 45000, 44500, 44000],
+                    borderColor: '#ffffff',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    borderCapStyle: 'round'
+                }]
+            },
+            options: chartOptions
+        });
+    }
+
+    // Main Traffic Chart
+    const mainCtx = document.getElementById('main-chart')?.getContext('2d');
+    if (mainCtx) {
+        new Chart(mainCtx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'Traffic',
+                    data: [65000, 59000, 80000, 81000, 56000, 55000, 40000],
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#0d6efd',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value / 1000 + 'k';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Handle Traffic button toggle
+    document.querySelectorAll('input[name="traffic"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            // You can add functionality here to update chart data based on selection
+            console.log('Selected:', this.id);
+        });
+    });
+</script>
+{% endblock %}="https://ui-avatars.com/api/?name=Yiorgos+Avraamu&background=random" alt="user" class="rounded-circle" width="32">
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">Yiorgos Avraamu</div>
+                                    <div class="small text-body-secondary">New | Registered: Jan 1, 2025</div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fas fa-flag me-1"></i>US
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="fw-semibold">50%</div>
+                                        <div class="small text-body-secondary">Jun 11, 2025 - Jul 10, 2025</div>
+                                    </div>
+                                    <div class="progress progress-thin">
+                                        <div class="progress-bar bg-success" style="width: 50%"></div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fab fa-cc-mastercard text-primary"></i>
+                                </td>
+                                <td>
+                                    <div class="small text-body-secondary">Last login</div>
+                                    <div class="fw-semibold">10 sec ago</div>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-transparent p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="#">Info</a></li>
+                                            <li><a class="dropdown-item" href="#">Edit</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="text-center">
+                                    <img src="https://ui-avatars.com/api/?name=Avram+Tarasios&background=random" alt="user" class="rounded-circle" width="32">
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">Avram Tarasios</div>
+                                    <div class="small text-body-secondary">Recurring | Registered: Jan 1, 2025</div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fas fa-flag me-1"></i>BR
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="fw-semibold">10%</div>
+                                        <div class="small text-body-secondary">Jun 11, 2025 - Jul 10, 2025</div>
+                                    </div>
+                                    <div class="progress progress-thin">
+                                        <div class="progress-bar bg-info" style="width: 10%"></div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fab fa-cc-visa text-primary"></i>
+                                </td>
+                                <td>
+                                    <div class="small text-body-secondary">Last login</div>
+                                    <div class="fw-semibold">5 minutes ago</div>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-transparent p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="#">Info</a></li>
+                                            <li><a class="dropdown-item" href="#">Edit</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="text-center">
+                                    <img src="https://ui-avatars.com/api/?name=Quintin+Ed&background=random" alt="user" class="rounded-circle" width="32">
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">Quintin Ed</div>
+                                    <div class="small text-body-secondary">New | Registered: Jan 1, 2025</div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fas fa-flag me-1"></i>IN
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="fw-semibold">74%</div>
+                                        <div class="small text-body-secondary">Jun 11, 2025 - Jul 10, 2025</div>
+                                    </div>
+                                    <div class="progress progress-thin">
+                                        <div class="progress-bar bg-warning" style="width: 74%"></div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fab fa-cc-stripe text-primary"></i>
+                                </td>
+                                <td>
+                                    <div class="small text-body-secondary">Last login</div>
+                                    <div class="fw-semibold">1 hour ago</div>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-transparent p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="#">Info</a></li>
+                                            <li><a class="dropdown-item" href="#">Edit</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="text-center">
+                                    <img src="https://ui-avatars.com/api/?name=Eneas+Kwadwo&background=random" alt="user" class="rounded-circle" width="32">
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">Enéas Kwadwo</div>
+                                    <div class="small text-body-secondary">New | Registered: Jan 1, 2025</div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fas fa-flag me-1"></i>FR
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="fw-semibold">98%</div>
+                                        <div class="small text-body-secondary">Jun 11, 2025 - Jul 10, 2025</div>
+                                    </div>
+                                    <div class="progress progress-thin">
+                                        <div class="progress-bar bg-danger" style="width: 98%"></div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <i class="fab fa-cc-paypal text-primary"></i>
+                                </td>
+                                <td>
+                                    <div class="small text-body-secondary">Last login</div>
+                                    <div class="fw-semibold">Last month</div>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-transparent p-0" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="#">Info</a></li>
+                                            <li><a class="dropdown-item" href="#">Edit</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="text-center">
+                                    <img src

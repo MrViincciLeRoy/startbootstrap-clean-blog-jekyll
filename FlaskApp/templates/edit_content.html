@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ content_type }} - Blog Management{% endblock %}
+{% block page_title %}Edit {{ content_type }}{% endblock %}
+
+{% block content %}
+<style>
+    .form-card { background: white; padding: 2rem; border-radius: 8px; }
+    .help-text { font-size: 0.875rem; color: #6c757d; margin-top: 0.5rem; }
+    textarea { font-family: 'Courier New', monospace; min-height: 400px; }
+</style>
+
+<div class="mb-4">
+    <h2 class="mb-1">{{ content_type }}</h2>
+    <small class="text-muted">Edit and save your content</small>
+</div>
+
+<div class="form-card">
+    <form method="POST" id="contentForm">
+        <div class="form-group mb-3">
+            <label for="about_content" class="form-label"><strong>Content *</strong></label>
+            <textarea class="form-control" id="about_content" name="about_content" required 
+                      placeholder="Enter your content here...">{{ content }}</textarea>
+            <div class="help-text">
+                <i class="fas fa-info-circle"></i> You can use HTML tags: 
+                &lt;p&gt;, &lt;h3&gt;, &lt;h4&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;li&gt;, and more.
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Tips Section -->
+<div class="mt-4 p-3 bg-light rounded">
+    <h6 class="mb-2"><i class="fas fa-lightbulb"></i> Formatting Tips</h6>
+    <div class="help-text">
+        <p class="mb-2"><strong>Paragraphs:</strong> &lt;p&gt;Your text&lt;/p&gt;</p>
+        <p class="mb-2"><strong>Headings:</strong> &lt;h3&gt;Heading&lt;/h3&gt; or &lt;h4&gt;Subheading&lt;/h4&gt;</p>
+        <p class="mb-2"><strong>Bold:</strong> &lt;strong&gt;text&lt;/strong&gt;</p>
+        <p class="mb-2"><strong>Lists:</strong> &lt;ul&gt;&lt;li&gt;Item&lt;/li&gt;&lt;/ul&gt;</p>
+        <p class="mb-2"><strong>Horizontal line:</strong> &lt;hr&gt;</p>
+    </div>
+</div>
+
+{% endblock %}

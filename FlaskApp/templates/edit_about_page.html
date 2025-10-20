@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Edit About Page - Blog Management{% endblock %}
+{% block page_title %}Edit About Page{% endblock %}
+
+{% block content %}
+<style>
+    .form-card { background: white; padding: 2rem; border-radius: 8px; }
+    .help-text { font-size: 0.875rem; color: #6c757d; margin-top: 0.5rem; }
+    textarea { font-family: 'Courier New', monospace; min-height: 400px; }
+    .front-matter-preview {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+</style>
+
+<div class="mb-4">
+    <h2 class="mb-1">Edit About Page</h2>
+    <small class="text-muted">Manage about page content and metadata</small>
+</div>
+
+<div class="form-card">
+    <form method="POST" id="aboutForm">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="title" class="form-label"><strong>Page Title *</strong></label>
+                    <input type="text" class="form-control" id="title" name="title" 
+                           value="{{ front_matter.title if front_matter else 'About Our Blog' }}" required>
+                    <div class="help-text">The main title of the about page</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="background" class="form-label"><strong>Background Image URL</strong></label>
+                    <input type="text" class="form-control" id="background" name="background" 
+                           value="{{ front_matter.background if front_matter else '/img/bg-about.jpg' }}">
+                    <div class="help-text">Path to the background image</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="description" class="form-label"><strong>Meta Description</strong></label>
+            <input type="text" class="form-control" id="description" name="description" 
+                   value="{{ front_matter.description if front_matter else '' }}"
+                   placeholder="Brief description for SEO">
+            <div class="help-text">This appears in search engine results</div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="page_content" class="form-label"><strong>Page Content *</strong></label>
+            <textarea class="form-control" id="page_content" name="page_content" required 
+                      placeholder="Enter your page content here...">{{ body }}</textarea>
+            <div class="help-text">
+                <i class="fas fa-info-circle"></i> You can use HTML tags including paragraphs, headings, lists, etc.
+            </div>
+        </div>
+
+        <!-- Hidden Fields -->
+        <input type="hidden" name="sha" value="{{ sha }}">
+
+        <!-- Form Actions -->
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Front Matter Preview -->
+<div class="mt-4 p-3 bg-light rounded">
+    <h6 class="mb-2"><i class="fas fa-code"></i> Front Matter (Auto-generated)</h6>
+    <div class="front-matter-preview">---
+layout: page
+title: {{ front_matter.title if front_matter else 'About Our Blog' }}
+description: {{ front_matter.description if front_matter else '' }}
+background: {{ front_matter.background if front_matter else '/img/bg-about.jpg' }}
+---</div>
+</div>
+
+<!-- Formatting Tips -->
+<div class="mt-4 p-3 bg-light rounded">
+    <h6 class="mb-2"><i class="fas fa-lightbulb"></i> Formatting Tips</h6>
+    <div class="help-text">
+        <p class="mb-2"><strong>Paragraphs:</strong> &lt;p&gt;Your text here&lt;/p&gt;</p>
+        <p class="mb-2"><strong>Headings:</strong> &lt;h3&gt;Heading&lt;/h3&gt; or &lt;h4&gt;Subheading&lt;/h4&gt;</p>
+        <p class="mb-2"><strong>Bold:</strong> &lt;strong&gt;text&lt;/strong&gt;</p>
+        <p class="mb-2"><strong>Lists:</strong> &lt;ul&gt;&lt;li&gt;Item&lt;/li&gt;&lt;/ul&gt;</p>
+        <p class="mb-2"><strong>Horizontal line:</strong> &lt;hr&gt;</p>
+    </div>
+</div>
+
+{% endblock %}

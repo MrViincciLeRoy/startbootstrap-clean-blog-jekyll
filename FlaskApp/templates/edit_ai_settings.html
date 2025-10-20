@@ -1,0 +1,203 @@
+
+{% extends "base.html" %}
+
+{% block title %}Edit AI Settings - Blog Management{% endblock %}
+{% block page_title %}AI Article Generation Settings{% endblock %}
+
+{% block content %}
+<style>
+    .form-card { background: white; padding: 2rem; border-radius: 8px; }
+    .help-text { font-size: 0.875rem; color: #6c757d; margin-top: 0.5rem; }
+    .setting-card { background: #f8f9fa; border-left: 4px solid #0d6efd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+    .badge-info { background: #0d6efd; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; margin-left: 0.5rem; }
+    .model-selector { padding: 1rem; background: #e7f1ff; border-radius: 8px; border: 1px solid #0d6efd; margin-bottom: 1.5rem; }
+    .advanced-section { background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem; }
+    .preset-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .preset-btn { padding: 0.5rem 1rem; border: 1px solid #dee2e6; background: white; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+    .preset-btn:hover { background: #0d6efd; color: white; border-color: #0d6efd; }
+    .section-divider { border-bottom: 1px solid #dee2e6; padding-bottom: 0.8rem; margin-bottom: 1.5rem; }
+    .toggle-switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: 0.4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #198754; }
+    input:checked + .slider:before { transform: translateX(26px); }
+</style>
+
+<div class="mb-4">
+    <h2 class="mb-1">AI Article Generation Settings</h2>
+    <small class="text-muted">Configure how the AI generates plant articles</small>
+</div>
+
+<div class="form-card">
+    <form method="POST" id="aiSettingsForm">
+        <!-- Core Settings Section -->
+        <h5 class="mb-3"><i class="fas fa-cog me-2"></i>Core Generation Settings</h5>
+        <div class="section-divider"></div>
+
+        <!-- Include Front Matter -->
+        <div class="setting-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">
+                        <strong>Include Jekyll Front Matter</strong>
+                        <span class="badge-info">Recommended</span>
+                    </h6>
+                    <p class="help-text mb-0">Automatically adds YAML front matter (layout, title, date, etc.) to generated articles</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="include_front_matter" {% if config.get('include_front_matter', true) %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Fetch Images -->
+        <div class="setting-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">
+                        <strong>Fetch Plant Images</strong>
+                        <span class="badge-info">Recommended</span>
+                    </h6>
+                    <p class="help-text mb-0">Downloads images from Wikimedia Commons for each plant article</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="fetch_images" {% if config.get('fetch_images', true) %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Model Configuration Section -->
+        <h5 class="mb-3 mt-4"><i class="fas fa-brain me-2"></i>Language & Embedding Models</h5>
+        <div class="section-divider"></div>
+
+        <!-- Embedding Model -->
+        <div class="form-group mb-3">
+            <label for="embedding_model" class="form-label"><strong>Embedding Model</strong></label>
+            <div class="model-selector">
+                <small class="text-muted d-block mb-2">Used for converting text to vector embeddings for semantic search</small>
+            </div>
+            <select class="form-select" id="embedding_model" name="embedding_model">
+                <option value="all-MiniLM-L6-v2" {% if config.get('embedding_model') == 'all-MiniLM-L6-v2' %}selected{% endif %}>
+                    all-MiniLM-L6-v2 (Recommended) - Fast, 384 dimensions
+                </option>
+                <option value="all-mpnet-base-v2" {% if config.get('embedding_model') == 'all-mpnet-base-v2' %}selected{% endif %}>
+                    all-mpnet-base-v2 - Accurate, 768 dimensions
+                </option>
+            </select>
+            <div class="help-text"><i class="fas fa-info-circle"></i> Smaller models are faster but less accurate</div>
+        </div>
+
+        <!-- LLM Model -->
+        <div class="form-group mb-3">
+            <label for="llm_model" class="form-label"><strong>Language Model (LLM)</strong></label>
+            <div class="model-selector">
+                <small class="text-muted d-block mb-2">Used for generating article content from research data</small>
+            </div>
+            <select class="form-select" id="llm_model" name="llm_model">
+                <option value="LiquidAI/LFM2-1.2B-RAG" {% if config.get('llm_model') == 'LiquidAI/LFM2-1.2B-RAG' %}selected{% endif %}>
+                    LiquidAI/LFM2-1.2B-RAG (Current) - Optimized for RAG
+                </option>
+                <option value="meta-llama/Llama-2-7b" {% if config.get('llm_model') == 'meta-llama/Llama-2-7b' %}selected{% endif %}>
+                    meta-llama/Llama-2-7b - More capable, larger
+                </option>
+                <option value="mistralai/Mistral-7B" {% if config.get('llm_model') == 'mistralai/Mistral-7B' %}selected{% endif %}>
+                    mistralai/Mistral-7B - Fast and capable
+                </option>
+            </select>
+            <div class="help-text"><i class="fas fa-info-circle"></i> Larger models produce better content but require more resources</div>
+        </div>
+
+        <!-- Advanced Options Section -->
+        <h5 class="mb-3 mt-4"><i class="fas fa-sliders-h me-2"></i>Advanced Options</h5>
+        <div class="section-divider"></div>
+
+        <div class="advanced-section">
+            <!-- Config Path -->
+            <div class="form-group mb-3">
+                <label for="config_path" class="form-label"><strong>Article Config Path</strong></label>
+                <input type="text" class="form-control" id="config_path" name="config_path" 
+                       value="{{ config.get('config_path', 'research_v3/article_config.json') }}">
+                <div class="help-text">Path to JSON configuration file for article generation</div>
+            </div>
+
+            <!-- Database Path -->
+            <div class="form-group mb-3">
+                <label for="database_path" class="form-label"><strong>Flora Database Path</strong></label>
+                <input type="text" class="form-control" id="database_path" name="database_path" 
+                       value="{{ config.get('database_path', 'research_v3/flora_data.db') }}">
+                <div class="help-text">Path to SQLite database containing plant information</div>
+            </div>
+
+            <!-- Max Articles Per Run -->
+            <div class="form-group mb-3">
+                <label for="max_articles_per_run" class="form-label"><strong>Max Articles Per Run</strong></label>
+                <input type="number" class="form-control" id="max_articles_per_run" name="max_articles_per_run" 
+                       value="{{ config.get('max_articles_per_run', 1) }}" min="1" max="10">
+                <div class="help-text">Number of articles to generate in a single run (1-10 recommended)</div>
+            </div>
+
+            <!-- Device Settings -->
+            <div class="form-group mb-3">
+                <label for="device" class="form-label"><strong>Processing Device</strong></label>
+                <select class="form-select" id="device" name="device">
+                    <option value="cpu" {% if config.get('device', 'cpu') == 'cpu' %}selected{% endif %}>
+                        CPU - Slower but always available
+                    </option>
+                    <option value="cuda" {% if config.get('device') == 'cuda' %}selected{% endif %}>
+                        CUDA (NVIDIA GPU) - Much faster
+                    </option>
+                    <option value="mps" {% if config.get('device') == 'mps' %}selected{% endif %}>
+                        MPS (Apple Silicon) - Optimized for M1/M2 Macs
+                    </option>
+                </select>
+                <div class="help-text">Device used for model inference. GPU significantly speeds up generation</div>
+            </div>
+
+            <!-- Quantization Setting -->
+            <div class="setting-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1"><strong>8-bit Quantization</strong></h6>
+                        <p class="help-text mb-0">Reduces model memory usage by ~75%. Use if running out of memory</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="load_in_8bit" {% if config.get('load_in_8bit', false) %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Info Box -->
+<div class="mt-4 p-3 bg-light rounded">
+    <h6 class="mb-2"><i class="fas fa-circle-info"></i> About These Settings</h6>
+    <p class="help-text mb-0">
+        These settings control how the AI generates plant articles. Larger models produce better content but require more resources. 
+        Use CPU for testing, GPU for production. Enable 8-bit quantization if you run out of memory.
+    </p>
+</div>
+
+<script>
+    document.getElementById('aiSettingsForm').addEventListener('submit', function(e) {
+        const formData = new FormData(this);
+        formData.set('include_front_matter', document.querySelector('input[name="include_front_matter"]').checked);
+        formData.set('fetch_images', document.querySelector('input[name="fetch_images"]').checked);
+        formData.set('load_in_8bit', document.querySelector('input[name="load_in_8bit"]').checked);
+    });
+</script>
+{% endblock %}

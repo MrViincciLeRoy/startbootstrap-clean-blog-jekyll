@@ -1,0 +1,87 @@
+
+{% extends "base.html" %}
+
+{% block title %}Generate AI Post - Blog Management{% endblock %}
+{% block page_title %}Generate AI Blog Post{% endblock %}
+
+{% block content %}
+<style>
+    .form-card { background: white; padding: 2rem; border-radius: 8px; }
+    .help-text { font-size: 0.875rem; color: #6c757d; margin-top: 0.5rem; }
+    .article-preview { background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-top: 2rem; border-left: 4px solid #0d6efd; }
+    .article-content { background: white; padding: 1rem; border-radius: 6px; margin-top: 1rem; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.9rem; max-height: 500px; overflow-y: auto; }
+</style>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="mb-4">
+            <h2 class="mb-1">Generate AI Blog Post</h2>
+            <small class="text-muted">Research and generate content about rare South African plants</small>
+        </div>
+
+        <div class="form-card">
+            <form method="POST">
+                <div class="form-group mb-3">
+                    <label for="plant_name" class="form-label"><strong>Plant Name *</strong></label>
+                    <input type="text" class="form-control" id="plant_name" name="plant_name" 
+                           placeholder="e.g., King Protea, Red Disa, Ghost Orchid" required>
+                    <div class="help-text">Enter the common or scientific name of a rare South African plant</div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-magic me-2"></i>Research & Generate Article
+                    </button>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        {% if article %}
+        <div class="article-preview">
+            <h5><i class="fas fa-file-alt me-2"></i>Generated Article</h5>
+            <p class="text-muted mb-2">Plant: <strong>{{ plant_name }}</strong></p>
+            <div class="article-content">{{ article }}</div>
+            <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-sm btn-outline-primary" onclick="copyArticle()">
+                    <i class="fas fa-copy me-1"></i>Copy to Clipboard
+                </button>
+                <a href="{{ url_for('list_posts') }}" class="btn btn-sm btn-outline-success">
+                    <i class="fas fa-newspaper me-1"></i>View All Posts
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-lightbulb"></i> Tips</h6>
+            </div>
+            <div class="card-body">
+                <p class="small mb-2"><strong>Try these plants:</strong></p>
+                <ul class="small mb-0">
+                    <li>King Protea</li>
+                    <li>Red Disa</li>
+                    <li>Ghost Orchid</li>
+                    <li>Spiral Aloe</li>
+                    <li>Pincushion Flower</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyArticle() {
+        const content = document.querySelector('.article-content').textContent;
+        navigator.clipboard.writeText(content).then(() => {
+            alert('✓ Article copied to clipboard!');
+        });
+    }
+</script>
+
+{% endblock %}

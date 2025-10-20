@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{{ front_matter.title }} - Blog Management{% endblock %}
+{% block page_title %}{{ front_matter.title }}{% endblock %}
+
+{% block content %}
+<style>
+    .post-meta {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    .meta-item i {
+        color: #0d6efd;
+        width: 20px;
+    }
+    .content-preview {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        line-height: 1.8;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">{{ front_matter.title }}</h2>
+        <small class="text-muted">{{ post_path }}</small>
+    </div>
+    <div class="btn-group" role="group">
+        <a href="{{ url_for('edit_post', post_path=post_path) }}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        <button class="btn btn-danger" onclick="deletePost()">
+            <i class="fas fa-trash"></i> Delete
+        </button>
+    </div>
+</div>
+
+<!-- Post Metadata -->
+<div class="post-meta">
+    {% if front_matter %}
+        {% if front_matter.layout %}
+        <div class="meta-item">
+            <i class="fas fa-layer-group"></i>
+            <strong>Layout:</strong> {{ front_matter.layout }}
+        </div>
+        {% endif %}
+        {% if front_matter.date %}
+        <div class="meta-item">
+            <i class="fas fa-calendar"></i>
+            <strong>Date:</strong> {{ front_matter.date }}
+        </div>
+        {% endif %}
+        {% if front_matter.description %}
+        <div class="meta-item">
+            <i class="fas fa-align-left"></i>
+            <strong>Description:</strong> {{ front_matter.description }}
+        </div>
+        {% endif %}
+        {% if front_matter.categories %}
+        <div class="meta-item">
+            <i class="fas fa-tag"></i>
+            <strong>Categories:</strong> 
+            {% if front_matter.categories is iterable and front_matter.categories is not string %}
+                {{ front_matter.categories|join(', ') }}
+            {% else %}
+                {{ front_matter.categories }}
+            {% endif %}
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- Content Preview -->
+<div class="content-preview">
+    {{ body|safe }}
+</div>
+
+<script>
+    function deletePost() {
+        const title = "{{ front_matter.title|escape }}";
+        if (confirm(`Delete "${title}"?\n\nThis action will commit the deletion to GitHub.`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url_for("delete_post", post_path=post_path) }}';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
+{% endblock %}
