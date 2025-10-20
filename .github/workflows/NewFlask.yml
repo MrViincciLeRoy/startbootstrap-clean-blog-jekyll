@@ -42,15 +42,15 @@ jobs:
       - name: Check Flask app structure
         run: |
           echo "Checking Flask app structure..."
-          python -c "from flask_app import create_app; app = create_app('testing'); print('✓ App factory working')"
+          python -c "from FlaskApp import create_app; app = create_app('testing'); print('✓ App factory working')"
       
       - name: Verify imports
         run: |
           echo "Verifying module imports..."
-          python -c "from flask_app.config import config_by_name; print('✓ Config imports working')"
-          python -c "from flask_app.core.auth.models import User; print('✓ Auth models working')"
-          python -c "from flask_app.services.github_manager import get_github_manager; print('✓ GitHub manager working')"
-          python -c "from flask_app.services.ai_settings_manager import AISettingsManager; print('✓ AI settings manager working')"
+          python -c "from FlaskApp.config import config_by_name; print('✓ Config imports working')"
+          python -c "from FlaskApp.core.auth.models import User; print('✓ Auth models working')"
+          python -c "from FlaskApp.services.github_manager import get_github_manager; print('✓ GitHub manager working')"
+          python -c "from FlaskApp.services.ai_settings_manager import AISettingsManager; print('✓ AI settings manager working')"
       
       - name: Run pytest tests
         run: |
@@ -60,7 +60,7 @@ jobs:
       - name: Test Flask app startup
         run: |
           python -c "
-          from flask_app import create_app
+          from FlaskApp import create_app
           import sys
           
           try:
@@ -80,7 +80,7 @@ jobs:
       - name: Test route registration
         run: |
           python -c "
-          from flask_app import create_app
+          from FlaskApp import create_app
           
           app = create_app('testing')
           
