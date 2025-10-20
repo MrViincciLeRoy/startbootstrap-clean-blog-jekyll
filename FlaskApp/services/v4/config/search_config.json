@@ -1,0 +1,22 @@
+{
+  "search": {
+    "delay": 1.5,
+    "max_sources": 20,
+    "add_search_terms": false
+  },
+  "supported_extensions": [".html", ".htm", ".php", ".asp", ".aspx", ".pdf", ".txt"],
+  "unsupported_extensions": [".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".zip", ".rar", ".tar", ".gz", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".mp4", ".avi", ".mov", ".mp3", ".wav"],
+  "skip_domains": ["pinterest.com", "youtube.com", "amazon.com", "ebay.com"],
+  "search_strategy": {
+    "prioritize_sa": true,
+    "sa_domains_first": true,
+    "general_sa_second": true,
+    "international_last": true
+  },
+  "questions": [
+    "what are the benefits",
+    "interesting facts",
+    "care and cultivation guide",
+    "what does it look like physical description"
+  ]
+}

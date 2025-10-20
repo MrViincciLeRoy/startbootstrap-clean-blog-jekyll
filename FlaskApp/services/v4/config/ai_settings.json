@@ -1,0 +1,12 @@
+{
+  "include_front_matter": true,
+  "fetch_images": true,
+  "embedding_model": "all-MiniLM-L6-v2",
+  "llm_model": "LiquidAI/LFM2-1.2B-RAG",
+  "config_path": "research_v4/article_config.json",
+  "database_path": "research_v4/flora_data.db",
+  "device": "cpu",
+  "load_in_8bit": false,
+  "max_articles_per_run": 1,
+  "search_config_path": "research_v4/search_config.json"
+}
