@@ -2,7 +2,7 @@
 Main Flask application entry point
 """
 import os
-from flask_app import create_app
+from FlaskApp import create_app
 
 if __name__ == '__main__':
     config_name = os.getenv('FLASK_ENV', 'development')
