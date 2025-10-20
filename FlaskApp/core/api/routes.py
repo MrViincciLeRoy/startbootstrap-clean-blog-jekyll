@@ -5,8 +5,8 @@ from flask import jsonify
 from flask_login import login_required, current_user
 from datetime import datetime
 import json
-from flask_app.services.github_manager import get_github_manager
-from flask_app.services.ai_settings_manager import AISettingsManager
+from FlaskApp.services.github_manager import get_github_manager
+from FlaskApp.services.ai_settings_manager import AISettingsManager
 
 ai_settings = AISettingsManager()
 
