@@ -6,7 +6,7 @@ import base64
 import re
 import yaml
 from github import Github, GithubException
-from flask_app.config import Config
+from FlaskApp.config import Config
 
 def get_github_manager():
     """Factory function to get GitHub manager instance"""
