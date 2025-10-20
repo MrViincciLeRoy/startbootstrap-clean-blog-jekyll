@@ -3,7 +3,7 @@ User model and authentication
 """
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_app import login_manager
+from FlaskApp import login_manager
 import os
 
 # Simple user storage (use database in production)

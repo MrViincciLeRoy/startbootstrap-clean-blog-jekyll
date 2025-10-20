@@ -3,7 +3,7 @@ Authentication routes
 """
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
-from flask_app.core.auth.models import User, verify_credentials
+from FlaskApp.core.auth.models import User, verify_credentials
 
 def setup_auth_routes(bp):
     """Setup authentication routes"""
