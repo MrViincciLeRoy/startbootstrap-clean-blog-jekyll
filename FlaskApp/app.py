@@ -2,6 +2,11 @@
 Main Flask application entry point
 """
 import os
+import sys
+
+# Add the parent directory to Python path for imports to work
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from FlaskApp import create_app
 
 if __name__ == '__main__':
@@ -18,5 +23,8 @@ if __name__ == '__main__':
     print(f"Repository: {os.getenv('REPO_NAME')}")
     print(f"Branch: {os.getenv('BRANCH', 'master')}")
     
+    # Get port from environment (Render sets PORT)
+    port = int(os.getenv('PORT', 5001))
     debug = config_name == 'development'
-    app.run(debug=debug, host='0.0.0.0', port=5001)
+    
+    app.run(debug=debug, host='0.0.0.0', port=port)
