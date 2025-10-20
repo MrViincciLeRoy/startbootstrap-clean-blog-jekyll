@@ -4,7 +4,7 @@ AI settings management for article generation
 import os
 import json
 from datetime import datetime
-from flask_app.config import Config
+from FlaskApp.config import Config
 
 class AISettingsManager:
     """Manages AI article generation settings stored in GitHub repo"""
