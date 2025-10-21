@@ -1,7 +1,7 @@
 {
   "search": {
     "delay": 1.5,
-    "max_sources": 20,
+    "max_sources": 50,
     "add_search_terms": false
   },
   "supported_extensions": [
