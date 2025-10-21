@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block title %}Edit Config - Blog Management{% endblock %}
@@ -8,18 +7,29 @@
 <style>
     .form-card { background: white; padding: 2rem; border-radius: 8px; }
     .help-text { font-size: 0.875rem; color: #6c757d; margin-top: 0.5rem; }
-    .section-header { border-bottom: 1px solid #dee2e6; padding-bottom: 1rem; margin-bottom: 1.5rem; margin-top: 1.5rem; }
+    .section-header { border-bottom: 2px solid #dee2e6; padding-bottom: 1rem; margin-bottom: 1.5rem; margin-top: 1.5rem; }
     .section-header:first-child { margin-top: 0; }
     .preview-box { background: #f8f9fa; padding: 1rem; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 0.85rem; max-height: 300px; overflow-y: auto; }
+    .color-input-group { display: flex; align-items: center; gap: 0.5rem; }
+    .color-input-group input[type="color"] { width: 50px; height: 40px; border: 1px solid #dee2e6; border-radius: 4px; }
+    .theme-toggle { margin-bottom: 2rem; }
+    .theme-option { padding: 1rem; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; margin-bottom: 1rem; transition: all 0.2s; }
+    .theme-option input[type="radio"] { margin-right: 0.5rem; }
+    .theme-option.active { border-color: #0d6efd; background-color: #f0f6ff; }
+    .theme-section { display: none; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; margin-top: 1rem; }
+    .theme-section.active { display: block; }
+    .color-palette { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem; }
+    .color-item { text-align: center; }
+    .color-swatch { width: 100%; height: 80px; border-radius: 6px; border: 1px solid #dee2e6; margin-bottom: 0.5rem; }
 </style>
 
 <div class="mb-4">
     <h2 class="mb-1">Blog Configuration</h2>
-    <small class="text-muted">Edit your Jekyll _config.yml settings</small>
+    <small class="text-muted">Edit your Jekyll _config.yml settings and theme options</small>
 </div>
 
 <div class="form-card">
-    <form method="POST">
+    <form method="POST" id="configForm">
         <!-- Site Information -->
         <div class="section-header">
             <h5><i class="fas fa-globe me-2"></i>Site Information</h5>
@@ -65,6 +75,180 @@
                     <input type="url" class="form-control" id="url" name="url" 
                            value="{{ config.get('url', '') or '' }}" placeholder="https://example.com">
                     <div class="help-text">Complete URL of your site</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="phone" class="form-label"><strong>Phone</strong></label>
+                    <input type="tel" class="form-control" id="phone" name="phone" 
+                           value="{{ config.get('phone', '') or '' }}" placeholder="+27 XX XXX XXXX">
+                    <div class="help-text">Contact phone number</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label for="address" class="form-label"><strong>Address</strong></label>
+                    <input type="text" class="form-control" id="address" name="address" 
+                           value="{{ config.get('address', '') or '' }}" placeholder="South Africa">
+                    <div class="help-text">Your location</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme Selection -->
+        <div class="section-header">
+            <h5><i class="fas fa-palette me-2"></i>Theme Selection</h5>
+        </div>
+
+        <div class="theme-toggle">
+            <p class="mb-3"><strong>Choose a Theme:</strong></p>
+            
+            <div class="theme-option" data-theme="default">
+                <div>
+                    <input type="radio" name="active_theme" value="default" 
+                           {% if config.get('active_theme', 'default') == 'default' %}checked{% endif %}>
+                    <label class="form-check-label"><strong>Default Theme</strong> (Light Mode)</label>
+                </div>
+                <small class="text-muted d-block mt-2">Clean, minimalist light theme - perfect for professional blogs</small>
+            </div>
+
+            <div class="theme-option" data-theme="theme1">
+                <div>
+                    <input type="radio" name="active_theme" value="theme1" 
+                           {% if config.get('active_theme') == 'theme1' %}checked{% endif %}>
+                    <label class="form-check-label"><strong>Theme 1</strong> (Dark Mode / Custom Colors)</label>
+                </div>
+                <small class="text-muted d-block mt-2">Modern dark theme with customizable colors and typography</small>
+            </div>
+        </div>
+
+        <!-- Theme1 Customization Section -->
+        <div class="theme-section {% if config.get('active_theme') == 'theme1' %}active{% endif %}" id="theme1-section">
+            <h6 class="mb-3"><i class="fas fa-sliders-h me-2"></i>Theme 1 Customization</h6>
+
+            <!-- Colors -->
+            <div class="mb-4">
+                <h6 class="mb-3">Color Scheme</h6>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Primary Color</strong></label>
+                        <div class="color-input-group">
+                            <input type="color" class="form-control form-control-color" 
+                                   name="theme1_primary_color" id="theme1_primary_color"
+                                   value="{{ config.get('theme1', {}).get('primary_color', '#6366f1') }}">
+                            <span class="text-muted">{{ config.get('theme1', {}).get('primary_color', '#6366f1') }}</span>
+                        </div>
+                        <div class="help-text">Main brand color (Indigo by default)</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Secondary Color</strong></label>
+                        <div class="color-input-group">
+                            <input type="color" class="form-control form-control-color" 
+                                   name="theme1_secondary_color" id="theme1_secondary_color"
+                                   value="{{ config.get('theme1', {}).get('secondary_color', '#10b981') }}">
+                            <span class="text-muted">{{ config.get('theme1', {}).get('secondary_color', '#10b981') }}</span>
+                        </div>
+                        <div class="help-text">Accent/highlight color (Emerald by default)</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Accent Color</strong></label>
+                        <div class="color-input-group">
+                            <input type="color" class="form-control form-control-color" 
+                                   name="theme1_accent_color" id="theme1_accent_color"
+                                   value="{{ config.get('theme1', {}).get('accent_color', '#f59e0b') }}">
+                            <span class="text-muted">{{ config.get('theme1', {}).get('accent_color', '#f59e0b') }}</span>
+                        </div>
+                        <div class="help-text">Additional accent (Amber by default)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typography -->
+            <div class="mb-4">
+                <h6 class="mb-3">Typography</h6>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="theme1_font_heading" class="form-label"><strong>Heading Font</strong></label>
+                        <select class="form-select" id="theme1_font_heading" name="theme1_font_heading">
+                            {% set heading_font = config.get('theme1', {}).get('font_heading', 'Ubuntu') %}
+                            <option value="Ubuntu" {% if heading_font == 'Ubuntu' %}selected{% endif %}>Ubuntu</option>
+                            <option value="Playfair Display" {% if heading_font == 'Playfair Display' %}selected{% endif %}>Playfair Display</option>
+                            <option value="Montserrat" {% if heading_font == 'Montserrat' %}selected{% endif %}>Montserrat</option>
+                            <option value="Georgia" {% if heading_font == 'Georgia' %}selected{% endif %}>Georgia</option>
+                            <option value="Raleway" {% if heading_font == 'Raleway' %}selected{% endif %}>Raleway</option>
+                        </select>
+                        <div class="help-text">Font for headings and titles</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="theme1_font_body" class="form-label"><strong>Body Font</strong></label>
+                        <select class="form-select" id="theme1_font_body" name="theme1_font_body">
+                            {% set body_font = config.get('theme1', {}).get('font_body', 'Roboto') %}
+                            <option value="Roboto" {% if body_font == 'Roboto' %}selected{% endif %}>Roboto</option>
+                            <option value="Open Sans" {% if body_font == 'Open Sans' %}selected{% endif %}>Open Sans</option>
+                            <option value="Lato" {% if body_font == 'Lato' %}selected{% endif %}>Lato</option>
+                            <option value="Source Sans Pro" {% if body_font == 'Source Sans Pro' %}selected{% endif %}>Source Sans Pro</option>
+                            <option value="Inter" {% if body_font == 'Inter' %}selected{% endif %}>Inter</option>
+                        </select>
+                        <div class="help-text">Font for body text</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Section -->
+            <div class="mb-4">
+                <label for="theme1_hero_overlay" class="form-label"><strong>Hero Overlay Opacity</strong></label>
+                <div class="d-flex align-items-center gap-3">
+                    <input type="range" class="form-range" min="0" max="1" step="0.1" 
+                           id="theme1_hero_overlay" name="theme1_hero_overlay"
+                           value="{{ config.get('theme1', {}).get('hero_overlay', 0.6) }}">
+                    <span class="badge bg-primary" id="overlay-value">{{ config.get('theme1', {}).get('hero_overlay', 0.6) }}</span>
+                </div>
+                <div class="help-text">Darkness of the hero image overlay (0 = transparent, 1 = opaque)</div>
+            </div>
+
+            <!-- Footer Settings -->
+            <div class="mb-4">
+                <h6 class="mb-3">Footer Settings</h6>
+                
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="theme1_newsletter_enabled" 
+                           name="theme1_newsletter_enabled"
+                           {% if config.get('theme1', {}).get('footer', {}).get('newsletter_enabled') %}checked{% endif %}>
+                    <label class="form-check-label" for="theme1_newsletter_enabled">
+                        <strong>Enable Newsletter Signup</strong>
+                    </label>
+                </div>
+
+                <div class="form-group mb-3" id="newsletter-action-group" 
+                     style="display: {% if config.get('theme1', {}).get('footer', {}).get('newsletter_enabled') %}block{% else %}none{% endif %};">
+                    <label for="theme1_newsletter_action" class="form-label"><strong>Newsletter Form Action</strong></label>
+                    <input type="url" class="form-control" id="theme1_newsletter_action" name="theme1_newsletter_action" 
+                           value="{{ config.get('theme1', {}).get('footer', {}).get('newsletter_action', '') }}"
+                           placeholder="https://yoursite.us1.list-manage.com/subscribe/post">
+                    <div class="help-text">URL for newsletter service (Mailchimp, etc.)</div>
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="theme1_show_wave" 
+                           name="theme1_show_wave"
+                           {% if config.get('theme1', {}).get('footer', {}).get('show_wave') %}checked{% endif %}>
+                    <label class="form-check-label" for="theme1_show_wave">
+                        <strong>Show Wave Animation</strong>
+                    </label>
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="theme1_show_social" 
+                           name="theme1_show_social"
+                           {% if config.get('theme1', {}).get('footer', {}).get('show_social') %}checked{% endif %}>
+                    <label class="form-check-label" for="theme1_show_social">
+                        <strong>Show Social Media Links</strong>
+                    </label>
                 </div>
             </div>
         </div>
@@ -155,18 +339,54 @@
     </form>
 </div>
 
-<!-- Configuration Preview -->
-<div class="mt-4 p-3 bg-light rounded">
-    <h6 class="mb-2"><i class="fas fa-code"></i> Configuration Preview</h6>
-    <small class="text-muted d-block mb-2">This is how your _config.yml will be saved:</small>
-    <div class="preview-box">
-        {% if config %}
-            {% for key, value in config.items() %}{{ key }}: {{ value }}
-            {% endfor %}
-        {% else %}
-# Configuration will appear here after saving
-        {% endif %}
-    </div>
-</div>
+<script>
+    // Theme switching
+    document.querySelectorAll('.theme-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const themeValue = this.dataset.theme;
+            document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelector(`input[value="${themeValue}"]`).checked = true;
+            
+            // Show/hide theme1 section
+            const theme1Section = document.getElementById('theme1-section');
+            if (themeValue === 'theme1') {
+                theme1Section.classList.add('active');
+            } else {
+                theme1Section.classList.remove('active');
+            }
+        });
+    });
+
+    // Initialize active theme on page load
+    const activeTheme = document.querySelector('input[name="active_theme"]:checked').value;
+    if (activeTheme === 'theme1') {
+        document.querySelector('.theme-option[data-theme="theme1"]').classList.add('active');
+    } else {
+        document.querySelector('.theme-option[data-theme="default"]').classList.add('active');
+    }
+
+    // Color value display update
+    document.getElementById('theme1_primary_color').addEventListener('input', function() {
+        this.parentElement.querySelector('.text-muted').textContent = this.value;
+    });
+    document.getElementById('theme1_secondary_color').addEventListener('input', function() {
+        this.parentElement.querySelector('.text-muted').textContent = this.value;
+    });
+    document.getElementById('theme1_accent_color').addEventListener('input', function() {
+        this.parentElement.querySelector('.text-muted').textContent = this.value;
+    });
+
+    // Overlay opacity display
+    document.getElementById('theme1_hero_overlay').addEventListener('input', function() {
+        document.getElementById('overlay-value').textContent = this.value;
+    });
+
+    // Newsletter checkbox toggle
+    document.getElementById('theme1_newsletter_enabled').addEventListener('change', function() {
+        const actionGroup = document.getElementById('newsletter-action-group');
+        actionGroup.style.display = this.checked ? 'block' : 'none';
+    });
+</script>
 
 {% endblock %}
