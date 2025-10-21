@@ -127,17 +127,21 @@ def setup_config_routes(bp):
     @bp.route('/v4-config', methods=['GET'])
     @login_required
     def v4_config_list():
+        """List all V4 configuration files"""
         gh = get_github_manager()
         configs = []
         
-        for key, config_info in V4ConfigManager.CONFIG_FILES.items():
+        for key in V4ConfigManager.get_all_configs():
+            config_info = V4ConfigManager.get_config_schema(key)
             config_data, file_data = V4ConfigManager.load_config(gh, key)
+            
             configs.append({
                 'key': key,
                 'label': config_info['label'],
                 'icon': config_info['icon'],
                 'description': config_info['description'],
-                'status': 'loaded' if config_data else 'error'
+                'status': 'loaded' if config_data else 'error',
+                'has_data': config_data is not None
             })
         
         return render_template('v4_config_list.html', configs=configs)
@@ -145,8 +149,10 @@ def setup_config_routes(bp):
     @bp.route('/v4-config/<config_key>', methods=['GET', 'POST'])
     @login_required
     def edit_v4_config(config_key):
+        """Edit a specific V4 configuration file"""
         gh = get_github_manager()
         
+        # Validate config key
         schema = V4ConfigManager.get_config_schema(config_key)
         if not schema:
             flash('Configuration not found', 'error')
@@ -154,34 +160,56 @@ def setup_config_routes(bp):
         
         if request.method == 'POST':
             try:
+                # Get current file data for SHA
                 config_data, file_data = V4ConfigManager.load_config(gh, config_key)
                 
-                if not config_data:
-                    flash('Error loading configuration', 'error')
-                    return redirect(url_for('config_management.edit_v4_config', config_key=config_key))
-                
-                raw_data = request.form.get('json_data', '{}')
-                updated_data = json.loads(raw_data)
-                
-                if V4ConfigManager.save_config(gh, config_key, updated_data, file_data):
-                    flash(f'✓ {schema["label"]} updated and committed to repository!', 'success')
-                    return redirect(url_for('config_management.edit_v4_config', config_key=config_key))
-                else:
-                    flash('✗ Error saving configuration to repository', 'error')
+                if not file_data:
+                    flash('Error loading configuration file', 'error')
+                    return redirect(url_fo
+    
+    # API endpoints for V4 config
+    @bp.route('/api/v4-config/<config_key>', methods=['GET'])
+    @login_required
+    def get_v4_config_api(config_key):
+        """API endpoint to get V4 config"""
+        gh = get_github_manager()
+        config_data, _ = V4ConfigManager.load_config(gh, config_key)
+        
+        if config_data is None:
+            return jsonify({'status': 'error', 'message': 'Config not found'}), 404
+        
+        return jsonify({
+            'status': 'success',
+            'config_key': config_key,
+            'data': config_data
+        })
+    
+    @bp.route('/api/v4-config/<config_key>', methods=['POST'])
+    @login_required
+    def update_v4_config_api(config_key):
+        """API endpoint to update V4 config"""
+        gh = get_github_manager()
+        
+        try:
+            updated_data = request.get_json()
+            config_data, file_data = V4ConfigManager.load_config(gh, config_key)
             
-            except json.JSONDecodeError as e:
-                flash(f'Invalid JSON format: {str(e)}', 'error')
-            except Exception as e:
-                flash(f'Unexpected error: {str(e)}', 'error')
-        
-        config_data, file_data = V4ConfigManager.load_config(gh, config_key)
-        
-        if not config_data:
-            flash('Could not load configuration file', 'error')
-            return redirect(url_for('config_management.v4_config_list'))
-        
-        return render_template('edit_v4_config.html',
-                             config_key=config_key,
-                             config=config_data,
-                             schema=schema,
-                             json_str=json.dumps(config_data, indent=2))
+            if file_data is None:
+                return jsonify({'status': 'error', 'message': 'Config not found'}), 404
+            
+            if V4ConfigManager.save_config(gh, config_key, updated_data, file_data):
+                return jsonify({
+                    'status': 'success',
+                    'message': f'{config_key} updated successfully'
+                })
+            else:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Failed to save configuration'
+                }), 500
+                
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': str(e)
+            }), 500
