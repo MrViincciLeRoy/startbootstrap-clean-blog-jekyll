@@ -11,7 +11,7 @@ class AISettingsManager:
     
     def __init__(self, config_file=None):
         self.config_file = config_file or Config.AI_CONFIG_FILE
-        self.github_path = os.path.join('flask_app', 'research_v3', '.ai_settings.json')
+        self.github_path = os.path.join('FlaskApp','services', 'v4', '.ai_settings.json')
         self.defaults = {
             'include_front_matter': True,
             'fetch_images': True,
