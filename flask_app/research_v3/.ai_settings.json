@@ -1,6 +1,6 @@
 {
   "include_front_matter": true,
-  "fetch_images": false,
+  "fetch_images": true,
   "embedding_model": "all-MiniLM-L6-v2",
   "llm_model": "LiquidAI/LFM2-1.2B-RAG",
   "config_path": "research_v3/article_config.json",
