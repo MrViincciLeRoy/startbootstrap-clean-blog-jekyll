@@ -3,5 +3,5 @@ _site
 node_modules
 Gemfile.lock
 *.gem
-flask_app
+
 research_v3
