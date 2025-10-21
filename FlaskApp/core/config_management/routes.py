@@ -165,9 +165,43 @@ def setup_config_routes(bp):
                 
                 if not file_data:
                     flash('Error loading configuration file', 'error')
-                    return redirect(url_fo
+                    return redirect(url_for('config_management.edit_v4_config', config_key=config_key))
+                
+                # Parse JSON from form
+                raw_data = request.form.get('json_data', '{}')
+                
+                try:
+                    updated_data = json.loads(raw_data)
+                except json.JSONDecodeError as e:
+                    flash(f'Invalid JSON format: {str(e)}', 'error')
+                    return redirect(url_for('config_management.edit_v4_config', config_key=config_key))
+                
+                # Save to GitHub
+                if V4ConfigManager.save_config(gh, config_key, updated_data, file_data):
+                    flash(f'✓ {schema["label"]} updated and committed to repository!', 'success')
+                    return redirect(url_for('config_management.edit_v4_config', config_key=config_key))
+                else:
+                    flash('✗ Error saving configuration to repository', 'error')
+            
+            except Exception as e:
+                flash(f'Unexpected error: {str(e)}', 'error')
+                import traceback
+                traceback.print_exc()
+        
+        # Load configuration for display
+        config_data, file_data = V4ConfigManager.load_config(gh, config_key)
+        
+        if not config_data:
+            flash('Could not load configuration file', 'error')
+            return redirect(url_for('config_management.v4_config_list'))
+        
+        # Use the existing v4 config template with form and JSON editor
+        return render_template('edit_v4_config.html',
+                             config_key=config_key,
+                             config=config_data,
+                             schema=schema,
+                             json_str=json.dumps(config_data, indent=2))
     
-    # API endpoints for V4 config
     @bp.route('/api/v4-config/<config_key>', methods=['GET'])
     @login_required
     def get_v4_config_api(config_key):
