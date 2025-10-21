@@ -357,8 +357,8 @@
 <div class="breadcrumb-custom">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('v4_config_list') }}">V4 Configuration</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('config_management.v4_config_list') }}">V4 Configuration</a></li>
             <li class="breadcrumb-item active">{{ schema.label }}</li>
         </ol>
     </nav>
@@ -441,7 +441,7 @@
         {% for key, label, icon, desc in configs %}
             {% if key != config_key %}
             <div class="col-md-6 col-lg-4 mb-3">
-                <a href="{{ url_for('edit_v4_config', config_key=key) }}" class="text-decoration-none">
+                <a href="{{ url_for('config_management.v4_config_list', config_key=key) }}" class="text-decoration-none">
                     <div class="card h-100" style="transition: all 0.3s ease; border: 1px solid #dee2e6;">
                         <div class="card-body">
                             <h6 class="card-title">

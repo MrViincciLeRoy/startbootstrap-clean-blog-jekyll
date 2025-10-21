@@ -35,7 +35,7 @@
         <small class="text-muted">{{ post_path }}</small>
     </div>
     <div class="btn-group" role="group">
-        <a href="{{ url_for('edit_post', post_path=post_path) }}" class="btn btn-primary">
+        <a href="{{ url_for('posts.edit_post', post_path=post_path) }}" class="btn btn-primary">
             <i class="fas fa-edit"></i> Edit
         </a>
         <button class="btn btn-danger" onclick="deletePost()">

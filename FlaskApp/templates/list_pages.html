@@ -48,11 +48,11 @@
             </small>
         </div>
         <div class="btn-group btn-group-sm">
-            <a href="{{ url_for('edit_page', page_path=page.path) }}" 
+            <a href="{{ url_for('pages.edit_page', page_path=page.path) }}" 
                class="btn btn-outline-primary" title="Edit page">
                 <i class="fas fa-edit"></i> Edit
             </a>
-            <form method="POST" action="{{ url_for('delete_page', page_path=page.path) }}" 
+            <form method="POST" action="{{ url_for('pages.delete_page', page_path=page.path) }}" 
                   style="display: inline;" 
                   onsubmit="return confirm('Delete this page?');">
                 <button type="submit" class="btn btn-outline-danger" title="Delete page">

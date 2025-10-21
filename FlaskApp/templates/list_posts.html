@@ -48,11 +48,11 @@
                     </small>
                 </div>
                 <div class="btn-group btn-group-sm">
-                    <a href="{{ url_for('view_post', post_path=post.path) }}" 
+                    <a href="{{ url_for('posts.view_post', post_path=post.path) }}" 
                        class="btn btn-outline-info" title="View post">
                         <i class="fas fa-eye"></i>
                     </a>
-                    <a href="{{ url_for('edit_post', post_path=post.path) }}" 
+                    <a href="{{ url_for('posts.edit_post', post_path=post.path) }}" 
                        class="btn btn-outline-primary" title="Edit post">
                         <i class="fas fa-edit"></i>
                     </a>
