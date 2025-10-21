@@ -1,6 +1,7 @@
 active_theme: default
 address: South Africa
 author: Heritage Road Map Team
+baseurl: https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/
 description: Researching and documenting South African indigenous plants through  scientific
   study and botanical research.
 email: info@heritagemap.org
@@ -14,4 +15,4 @@ paginate: 10
 paginate_path: /posts/page:num/
 title: Heritage Road Map Foundation
 twitter_username: your_twitter
-url: https://yourdomain.com
+url: https://liquidfire.onrender.com
