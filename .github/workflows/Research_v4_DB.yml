@@ -1,8 +1,6 @@
 name: RV4 Flora Wikipedia Scraper
-
 on:
   workflow_dispatch: # Manual trigger only
-
 jobs:
   scrape-flora:
     runs-on: ubuntu-latest
@@ -22,26 +20,38 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4
+      
+      - name: Create db directory
+        run: |
+          mkdir -p FlaskApp/services/v4/db
           
       - name: Run Flora scraper
         run: |
-          cd flask_app/research_v4
+          cd FlaskApp/services/v4
           python FloraWikipediaScraper.py
+          
+      - name: Move database to db folder
+        run: |
+          if [ -f FlaskApp/services/v4/flora_data.db ]; then
+            mv FlaskApp/services/v4/flora_data.db FlaskApp/services/v4/db/flora_data.db
+            echo "Database moved to db folder"
+          else
+            echo "Database file not found"
+          fi
           
       - name: Check for database changes
         id: check_changes
         run: |
-          cd flask_app/research_v4
-          if [ -f flora_data.db ]; then
-            echo "Database file exists"
-            git add flora_data.db
+          if [ -f FlaskApp/services/v4/db/flora_data.db ]; then
+            echo "Database file exists in db folder"
+            git add FlaskApp/services/v4/db/flora_data.db
             if git diff --cached --quiet; then
               echo "changes=false" >> $GITHUB_OUTPUT
             else
               echo "changes=true" >> $GITHUB_OUTPUT
             fi
           else
-            echo "Database file not found"
+            echo "Database file not found in db folder"
             echo "changes=false" >> $GITHUB_OUTPUT
           fi
           
@@ -50,8 +60,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          cd flask_app/research_v4
-          git add flora_data.db
+          git add FlaskApp/services/v4/db/flora_data.db
           git commit -m "Update flora database - $(date +'%Y-%m-%d %H:%M:%S UTC')"
           git push
           
@@ -59,5 +68,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: flora-database-${{ github.run_number }}
-          path: flask_app/research_v4/flora_data.db
+          path: FlaskApp/services/v4/db/flora_data.db
           retention-days: 30
