@@ -52,13 +52,7 @@
                class="btn btn-outline-primary" title="Edit page">
                 <i class="fas fa-edit"></i> Edit
             </a>
-            <form method="POST" action="{{ url_for('posts.delete_post', page_path=page.path) }}" 
-                  style="display: inline;" 
-                  onsubmit="return confirm('Delete this page?');">
-                <button type="submit" class="btn btn-outline-danger" title="Delete page">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </form>
+            
         </div>
     </div>
     {% endfor %}
