@@ -1,0 +1,70 @@
+# Flask web framework
+Flask>=2.2.0
+Flask-SQLAlchemy>=3.0.0
+Werkzeug>=2.2.0
+#beautifulsoup4 
+PyPDF2 
+serpapi
+# AI/ML libraries for article generation
+transformers>=4.21.0
+torch>=1.12.0
+sentencepiece>=0.1.97
+
+# Wikipedia API for research
+wikipedia-api>=0.5.4
+
+# Web scraping and HTTP requests
+beautifulsoup4>=4.11.0
+requests>=2.28.0
+urllib3>=1.26.0
+
+# Data processing and utilities
+pandas>=1.5.0
+numpy>=1.21.0
+python-dateutil>=2.8.0
+# Core Dependencies
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Database
+pandas>=2.0.0
+#sqlite3; python_version >= '3.0'  # Built-in, but listed for clarity
+
+# Machine Learning & NLP
+torch>=2.0.0
+transformers>=4.35.0
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4  # Use faiss-gpu if CUDA available
+
+# Optional: For GPU acceleration (uncomment if needed)
+# faiss-gpu>=1.7.4
+# accelerate>=0.25.0
+# bitsandbytes>=0.41.0
+
+# Utilities
+numpy>=1.24.0
+python-dateutil>=2.8.0
+
+# Testing (optional)
+pytest>=7.4.0
+pytest-cov>=4.1.0
+# Text processing and matching
+xmldiff>=0.1.0
+
+# JSON and data serialization
+jsonschema>=4.16.0
+
+# Logging and monitoring
+colorama>=0.4.4
+
+# Development and testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Optional: Accelerated transformers (uncomment if using GPU)
+accelerate>=0.12.0
+
+# Optional: Additional NLP libraries for enhanced processing
+spacy>=3.4.0
+nltk>=3.7
