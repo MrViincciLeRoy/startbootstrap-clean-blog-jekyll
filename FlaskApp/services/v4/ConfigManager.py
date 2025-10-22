@@ -1,33 +1,3 @@
-# ============================================================================
-# FILE 1: FlaskApp/services/__init__.py
-# ============================================================================
-"""Services package initialization"""
-
-# ============================================================================
-# FILE 2: FlaskApp/services/v4/__init__.py
-# ============================================================================
-"""Research V4 package initialization"""
-
-from .ConfigManager import ConfigManager
-from .FloraDatabase import FloraDatabase
-from .Spider import EnhancedPlantSpider, search
-from .RagSys import RAGSystem
-from .ArtGenSys import EnhancedPlantArticleGenerator
-
-__all__ = [
-    'ConfigManager',
-    'FloraDatabase',
-    'EnhancedPlantSpider',
-    'search',
-    'RAGSystem',
-    'EnhancedPlantArticleGenerator'
-]
-
-__version__ = '4.0.0'
-
-# ============================================================================
-# FILE 3: FlaskApp/services/v4/ConfigManager.py
-# ============================================================================
 """
 ConfigManager.py - Centralized configuration management for Research V4
 Loads and provides access to all JSON configuration files
@@ -126,12 +96,12 @@ class ConfigManager:
             "fetch_images": True,
             "embedding_model": "all-MiniLM-L6-v2",
             "llm_model": "LiquidAI/LFM2-1.2B-RAG",
-            "config_path": "research_v4/article_config.json",
-            "database_path": "research_v4/flora_data.db",
+            "config_path": "v4/config/article_config.json",
+            "database_path": "v4/db/flora_data.db",
             "device": "cpu",
             "load_in_8bit": False,
             "max_articles_per_run": 1,
-            "search_config_path": "research_v4/search_config.json"
+            "search_config_path": "v4/config/search_config.json"
         }
         self._configs['ai_settings'] = self._load_config('ai_settings.json', ai_settings_default)
         
