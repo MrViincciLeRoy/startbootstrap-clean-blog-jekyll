@@ -40,7 +40,7 @@ jobs:
         pip install pytest pytest-cov pytest-mock flask
         pip install requests beautifulsoup4 lxml
         pip install faiss-cpu sentence-transformers transformers torch
-        pip install PyPDF2 wikipediaapi pandas
+        pip install PyPDF2 Wikipedia-API pandas
         pip install python-dotenv
     
     - name: Verify directory structure
