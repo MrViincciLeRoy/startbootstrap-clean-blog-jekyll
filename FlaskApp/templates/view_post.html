@@ -90,7 +90,7 @@
         if (confirm(`Delete "${title}"?\n\nThis action will commit the deletion to GitHub.`)) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ url_for("delete_post", post_path=post_path) }}';
+            form.action = '{{ url_for("posts.delete_post", post_path=post_path) }}';
             document.body.appendChild(form);
             form.submit();
         }
