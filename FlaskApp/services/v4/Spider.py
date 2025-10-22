@@ -18,7 +18,11 @@ import PyPDF2
 import os
 import wikipediaapi
 
-from services.v4.ConfigManager import ConfigManager
+try:
+    from .ConfigManager import ConfigManager
+except ImportError:
+    from FlaskApp.services.v4.ConfigManager import ConfigManager
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

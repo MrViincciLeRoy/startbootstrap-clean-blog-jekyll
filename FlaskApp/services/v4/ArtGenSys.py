@@ -12,7 +12,10 @@ from typing import List, Dict, Any
 from pathlib import Path
 import logging
 
-from services.v4.ConfigManager import ConfigManager
+try:
+    from .ConfigManager import ConfigManager
+except ImportError:
+    from FlaskApp.services.v4.ConfigManager import ConfigManager
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,37 @@
+# ============================================================================
+# FILE 1: FlaskApp/services/__init__.py
+# ============================================================================
+"""Services package initialization"""
+
+# ============================================================================
+# FILE 2: FlaskApp/services/v4/__init__.py
+# ============================================================================
+"""Research V4 package initialization"""
+
+from .ConfigManager import ConfigManager
+from .FloraDatabase import FloraDatabase
+from .Spider import EnhancedPlantSpider, search
+from .RagSys import RAGSystem
+from .ArtGenSys import EnhancedPlantArticleGenerator
+
+__all__ = [
+    'ConfigManager',
+    'FloraDatabase',
+    'EnhancedPlantSpider',
+    'search',
+    'RAGSystem',
+    'EnhancedPlantArticleGenerator'
+]
+
+__version__ = '4.0.0'
+
+# ============================================================================
+# FILE 3: FlaskApp/services/v4/ConfigManager.py
+# ============================================================================
 """
 ConfigManager.py - Centralized configuration management for Research V4
 Loads and provides access to all JSON configuration files
+CORRECTED VERSION with proper path handling
 """
 import json
 import os
@@ -14,19 +45,28 @@ class ConfigManager:
     All configuration is read-only to prevent accidental modifications.
     """
     
-    def __init__(self, config_dir: str = "services/v4/config", verbose: bool = False):
+    def __init__(self, config_dir: str = None, verbose: bool = False):
         """
         Initialize ConfigManager and load all configuration files.
         
         Args:
-            config_dir: Directory containing configuration files
+            config_dir: Directory containing configuration files (if None, uses default)
             verbose: Print debug information during loading
         """
-        self.config_dir = Path(config_dir)
         self.verbose = verbose
+        
+        # FIXED: Make config_dir relative to this module's location
+        if config_dir is None:
+            module_dir = Path(__file__).parent
+            self.config_dir = module_dir / "config"
+        else:
+            self.config_dir = Path(config_dir)
         
         # Create config directory if it doesn't exist
         self.config_dir.mkdir(parents=True, exist_ok=True)
+        
+        if self.verbose:
+            print(f"📁 Config directory: {self.config_dir.absolute()}")
         
         # Initialize all configurations
         self._configs = {}
@@ -60,7 +100,7 @@ class ConfigManager:
                 return default or {}
         else:
             if self.verbose:
-                print(f"⚠️  {filename} not found, using defaults")
+                print(f"⚠️  {filename} not found, creating with defaults")
             # Create default config if doesn't exist
             if default:
                 self._save_config(filename, default)
@@ -80,7 +120,7 @@ class ConfigManager:
     def _load_all_configs(self) -> None:
         """Load all configuration files with defaults."""
         
-        # AI Settings
+        # AI Settings - FIXED: Changed from .ai_settings.json to ai_settings.json
         ai_settings_default = {
             "include_front_matter": True,
             "fetch_images": True,
@@ -93,7 +133,7 @@ class ConfigManager:
             "max_articles_per_run": 1,
             "search_config_path": "research_v4/search_config.json"
         }
-        self._configs['ai_settings'] = self._load_config('.ai_settings.json', ai_settings_default)
+        self._configs['ai_settings'] = self._load_config('ai_settings.json', ai_settings_default)
         
         # Main Config
         config_default = {
@@ -319,6 +359,7 @@ class ConfigManager:
         print(f"\n📊 Application:")
         print(f"  Version: {self.get_app_version()}")
         print(f"  Debug: {self.is_debug()}")
+        print(f"  Config Dir: {self.config_dir.absolute()}")
         
         print(f"\n🤖 AI Settings:")
         print(f"  Embedding Model: {self.get_embedding_model()}")
@@ -334,6 +375,9 @@ class ConfigManager:
         print(f"\n📁 Output:")
         print(f"  Posts Directory: {self.get_posts_directory()}")
         print(f"  Enable Preview: {self.get_enable_preview()}")
+        
+        print(f"\n🔑 API:")
+        print(f"  API Key Set: {self.get_api_key() is not None}")
         
         print(f"\n📚 Domain Categories:")
         for category in self._configs['domain_reliability'].keys():

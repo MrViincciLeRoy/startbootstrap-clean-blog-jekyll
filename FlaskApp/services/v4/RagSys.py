@@ -11,8 +11,10 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
 from typing import List, Dict, Optional
 import logging
-
-from services.v4.ConfigManager import ConfigManager
+try:
+    from .ConfigManager import ConfigManager
+except ImportError:
+    from FlaskApp.services.v4.ConfigManager import ConfigManager
 
 logger = logging.getLogger(__name__)
 
