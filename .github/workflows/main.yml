@@ -1,0 +1,421 @@
+name: Generate Plant Blog Posts V4
+
+on:
+  # Run manually via workflow dispatch
+  workflow_dispatch:
+
+  # Run on schedule (weekly on Sundays)
+  schedule:
+    - cron: '0 10 * * 0'  # 10:00 AM UTC every Sunday
+
+  # Run on push to main branch (optional)
+  push:
+    branches: [ main ]
+    paths:
+      - 'FlaskApp/services/v4/**'
+      - 'FlaskApp/test_v4.py'
+
+env:
+  # Target repository for blog posts
+  TARGET_REPO: 'MrViincciLeRoy/startbootstrap-clean-blog-jekyll'
+  TARGET_BRANCH: 'master'
+
+jobs:
+  generate-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout source repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.BLOG_DEPLOY_TOKEN }}
+
+    - name: Free up disk space
+      run: |
+        echo "Available disk space before cleanup:"
+        df -h
+        
+        # Remove unnecessary tools and libraries
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/.ghcup
+        sudo rm -rf /usr/share/swift
+        
+        # Clean apt cache
+        sudo apt-get clean
+        
+        echo "Available disk space after cleanup:"
+        df -h
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-v4-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-v4-
+
+    - name: Cache Hugging Face models
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/huggingface
+        key: ${{ runner.os }}-huggingface-v4-${{ hashFiles('FlaskApp/services/v4/config/*.json') }}
+        restore-keys: |
+          ${{ runner.os }}-huggingface-v4-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        
+        # Install from requirements.txt if it exists
+        if [ -f FlaskApp/services/v4/requirements.txt ]; then
+          pip install --no-cache-dir -r FlaskApp/services/v4/requirements.txt
+        elif [ -f FlaskApp/requirements.txt ]; then
+          pip install --no-cache-dir -r FlaskApp/requirements.txt
+        else
+          # Install essential packages
+          pip install --no-cache-dir \
+            Flask \
+            transformers \
+            torch \
+            sentence-transformers \
+            faiss-cpu \
+            requests \
+            beautifulsoup4 \
+            lxml \
+            pandas \
+            numpy \
+            PyPDF2 \
+            wikipedia-api
+        fi
+        
+        echo "Disk space after installation:"
+        df -h
+
+    - name: Create _posts directory
+      run: mkdir -p _posts
+
+    - name: Verify V4 structure
+      run: |
+        echo "Checking V4 directory structure..."
+        ls -la FlaskApp/services/v4/
+        
+        echo ""
+        echo "Checking V4 config files..."
+        ls -la FlaskApp/services/v4/config/
+        
+        echo ""
+        echo "Checking database..."
+        if [ -f "FlaskApp/services/v4/db/flora_data.db" ]; then
+          echo "✓ Database found"
+        else
+          echo "⚠️ Database not found at FlaskApp/services/v4/db/flora_data.db"
+        fi
+
+    - name: Generate blog post using V4
+      env:
+        SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
+      run: |
+        cd FlaskApp
+        
+        echo "Current directory: $(pwd)"
+        echo "Python path:"
+        python -c "import sys; print('\n'.join(sys.path))"
+        
+        echo ""
+        echo "Running V4 article generator..."
+        
+        # Create a runner script that uses V4
+        cat > run_v4_generator.py << 'EOFPYTHON'
+import os
+import sys
+from datetime import datetime
+
+# Add FlaskApp to path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+print("="*80)
+print("V4 Article Generator - GitHub Actions")
+print("="*80)
+
+try:
+    # Import V4 modules
+    from services.v4.ConfigManager import ConfigManager
+    from services.v4.FloraDatabase import FloraDatabase
+    from services.v4.Spider import search
+    from services.v4.RagSys import RAGSystem
+    from services.v4.ArtGenSys import EnhancedPlantArticleGenerator
+    
+    print("✓ All V4 modules imported successfully")
+    
+    # Initialize configuration
+    config = ConfigManager(verbose=True)
+    config.print_summary()
+    
+    # Check API key
+    api_key = config.get_api_key()
+    if not api_key:
+        print("❌ SERP_API_KEY not set!")
+        sys.exit(1)
+    print(f"✓ API key configured")
+    
+    # Initialize database
+    db = FloraDatabase(config)
+    print("✓ Database connected")
+    
+    # Get incomplete plants
+    incomplete_plants = db.get_all_incomplete_plants()
+    print(f"✓ Found {len(incomplete_plants)} incomplete plants")
+    
+    if not incomplete_plants:
+        print("⚠️ No incomplete plants found")
+        sys.exit(0)
+    
+    # Process first incomplete plant
+    plant_data = incomplete_plants[0]
+    plant_id, title, sci_name, family, genus, url = plant_data
+    plant_name = sci_name or title
+    
+    print(f"\n🌿 Processing: {plant_name}")
+    print(f"   ID: {plant_id}")
+    print(f"   Family: {family}")
+    print(f"   Genus: {genus}")
+    
+    # Step 1: Search for plant information
+    print(f"\n📚 Step 1: Searching for {plant_name}...")
+    research_data = search(plant_name, config)
+    
+    if not research_data or len(research_data) < 3:
+        print(f"⚠️ Insufficient data for {plant_name} (found {len(research_data)} sources)")
+        db.mark_plant_complete(plant_name, complete=True)
+        print("Marked as complete and skipping...")
+        sys.exit(0)
+    
+    print(f"✓ Collected {len(research_data)} sources")
+    
+    # Step 2: Initialize RAG system
+    print("\n🤖 Step 2: Initializing RAG system...")
+    rag = RAGSystem(config)
+    
+    # Prepare texts and metadata
+    texts = [item['text'] for item in research_data]
+    metadata = [item['metadata'] for item in research_data]
+    
+    print(f"Building index with {len(texts)} documents...")
+    rag.build_index(texts, metadata)
+    
+    print("Loading LLM model...")
+    rag.load_llm(device='cpu', load_in_8bit=False)
+    print("✓ RAG system ready")
+    
+    # Step 3: Generate article
+    print("\n✍️ Step 3: Generating article...")
+    generator = EnhancedPlantArticleGenerator(
+        config=config,
+        rag_system=rag,
+        fetch_images=True
+    )
+    
+    article = generator.generate_full_article(
+        plant_name=plant_name,
+        research_data=research_data
+    )
+    
+    print(f"✓ Article generated ({len(article)} characters)")
+    
+    # Step 4: Save article
+    print("\n💾 Step 4: Saving article...")
+    date = datetime.now()
+    clean_name = plant_name.lower().replace(' ', '-')
+    clean_name = ''.join(c for c in clean_name if c.isalnum() or c == '-')
+    filename = f"{date.strftime('%Y-%m-%d')}-{clean_name}.html"
+    
+    # Save to _posts directory (one level up from FlaskApp)
+    posts_dir = os.path.join('..', '_posts')
+    os.makedirs(posts_dir, exist_ok=True)
+    filepath = os.path.join(posts_dir, filename)
+    
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(article)
+    
+    print(f"✓ Article saved: {filename}")
+    print(f"   Path: {filepath}")
+    print(f"   Size: {len(article):,} characters")
+    
+    # Step 5: Mark as complete
+    print(f"\n✅ Step 5: Marking {plant_name} as complete...")
+    db.mark_plant_complete(plant_name, complete=True)
+    
+    print("\n" + "="*80)
+    print("✅ SUCCESS! Article generation complete")
+    print("="*80)
+    
+except ImportError as e:
+    print(f"❌ Import error: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+except Exception as e:
+    print(f"❌ Error: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+EOFPYTHON
+        
+        # Run the generator
+        python run_v4_generator.py
+
+    - name: Verify generated posts
+      run: |
+        if [ ! -d "_posts" ] || [ -z "$(ls -A _posts 2>/dev/null)" ]; then
+          echo "ERROR: No blog posts were generated in _posts/!"
+          echo "Searching for any .html files..."
+          find . -type f -name "*.html" -exec ls -l {} \;
+          exit 1
+        fi
+
+        echo "Generated posts:"
+        ls -la _posts/
+        
+        echo ""
+        echo "Post contents preview:"
+        for file in _posts/*.html; do
+          echo "--- $file (first 20 lines) ---"
+          head -n 20 "$file"
+          echo ""
+        done
+
+    - name: Commit and push updated database
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        
+        # Add the database file if it has changes
+        if [ -f FlaskApp/services/v4/db/flora_data.db ]; then
+          git add FlaskApp/services/v4/db/flora_data.db
+          
+          # Check if there are changes to commit
+          if ! git diff --cached --quiet; then
+            git commit -m "Update V4 flora database - article generated $(date +'%Y-%m-%d %H:%M:%S UTC')"
+            git push
+            echo "✅ Database updated and pushed successfully!"
+          else
+            echo "ℹ️ No database changes to commit."
+          fi
+        else
+          echo "⚠️ Database file not found at FlaskApp/services/v4/db/flora_data.db"
+        fi
+
+    - name: Checkout target blog repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ env.TARGET_REPO }}
+        token: ${{ secrets.BLOG_DEPLOY_TOKEN }}
+        path: blog-repo
+        ref: ${{ env.TARGET_BRANCH }}
+        fetch-depth: 0
+
+    - name: Copy posts to blog repository
+      run: |
+        mkdir -p blog-repo/_posts
+        
+        if [ -d "_posts" ] && [ "$(ls -A _posts)" ]; then
+          cp _posts/*.html blog-repo/_posts/ 2>/dev/null || echo "No HTML files to copy"
+          cp _posts/*.md blog-repo/_posts/ 2>/dev/null || echo "No Markdown files to copy"
+          
+          echo "Copied to blog repo:"
+          ls -la blog-repo/_posts/
+        else
+          echo "⚠️ No posts directory or empty"
+        fi
+
+    - name: Configure Git and commit blog posts
+      run: |
+        cd blog-repo
+        git config user.name "Plant Bot V4"
+        git config user.email "miguelmehgoss@gmail.com"
+
+        git add _posts/
+
+        if [ -n "$(git status --porcelain)" ]; then
+          git commit -m "Add new plant blog post (V4)
+
+          Generated automatically by GitHub Actions V4
+          Workflow: ${{ github.workflow }}
+          Run: ${{ github.run_number }}
+          Timestamp: $(date -u)"
+          
+          git push origin ${{ env.TARGET_BRANCH }}
+          echo "✅ Successfully pushed new blog post!"
+        else
+          echo "ℹ️ No changes to commit."
+        fi
+
+    - name: Create summary
+      if: always()
+      run: |
+        echo "## V4 Blog Generation Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**System:** Research V4 (Configuration-Driven)" >> $GITHUB_STEP_SUMMARY
+        echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Target repo:** ${{ env.TARGET_REPO }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Branch:** ${{ env.TARGET_BRANCH }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ -d "_posts" ] && [ "$(ls -A _posts 2>/dev/null)" ]; then
+          echo "**Generated posts:**" >> $GITHUB_STEP_SUMMARY
+          for f in _posts/*; do
+            if [ -f "$f" ]; then
+              size=$(stat -c%s "$f" 2>/dev/null || stat -f%z "$f")
+              echo "- $(basename "$f") (${size} bytes)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+        else
+          echo "**❌ ERROR:** No posts generated!" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**🌐 Blog:** [View Site](https://${{ github.repository_owner }}.github.io/startbootstrap-clean-blog-jekyll/)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**📊 V4 Features:**" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Configuration-driven architecture" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Enhanced ConfigManager" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ RAG system with LLM" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Wikimedia Commons images" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Multi-source research (Web + AI + Wikipedia)" >> $GITHUB_STEP_SUMMARY
+
+  test-jekyll-build:
+    needs: generate-and-deploy
+    if: success()
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout blog repository
+      uses: actions/checkout@v4
+      with:
+        repository: MrViincciLeRoy/startbootstrap-clean-blog-jekyll
+        token: ${{ secrets.BLOG_DEPLOY_TOKEN }}
+        ref: master
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+        bundler-cache: true
+
+    - name: Install Jekyll and build site
+      run: |
+        bundle install
+        bundle exec jekyll build --verbose
+
+    - name: Confirm build success
+      run: |
+        echo "✅ Jekyll site built successfully!"
+        echo "Recent posts:"
+        find _site -path "*posts*" -name "*.html" | head -5
