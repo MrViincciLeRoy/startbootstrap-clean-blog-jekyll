@@ -8,7 +8,7 @@
   },
   "api": {
     "serpapi_key_env": "SERP_API_KEY",
-    "request_timeout": 30,
+    "request_timeout": 40,
     "retry_attempts": 3,
     "retry_delay": 2
   },
