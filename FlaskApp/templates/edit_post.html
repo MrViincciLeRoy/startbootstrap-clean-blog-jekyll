@@ -3,11 +3,79 @@
 {% block title %}Edit Post - Blog Management{% endblock %}
 {% block page_title %}Edit Blog Post{% endblock %}
 
+{% block extra_css %}
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+{% endblock %}
+
 {% block content %}
 <style>
-    .form-card { background: white; padding: 2rem; border-radius: 8px; }
-    .help-text { font-size: 0.875rem; color: #6c757d; margin-top: 0.5rem; }
-    textarea { font-family: 'Courier New', monospace; min-height: 400px; }
+    .form-card { 
+        background: white; 
+        padding: 2rem; 
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .help-text { 
+        font-size: 0.875rem; 
+        color: #6c757d; 
+        margin-top: 0.5rem; 
+    }
+    .editor-container {
+        margin-bottom: 1.5rem;
+    }
+    .editor-label {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: #212529;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .editor-toggle {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        background: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 6px;
+    }
+    .editor-toggle button {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+    }
+    .editor-toggle button.active {
+        background: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+    .editor-toggle button:hover:not(.active) {
+        background: #e9ecef;
+    }
+    #content {
+        display: none;
+    }
+    .html-editor {
+        font-family: 'Courier New', monospace;
+        min-height: 500px;
+        padding: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        resize: vertical;
+        display: none;
+    }
+    .html-editor:focus {
+        outline: none;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    }
     .front-matter-preview {
         background: #f8f9fa;
         padding: 1rem;
@@ -17,6 +85,34 @@
         white-space: pre-wrap;
         word-wrap: break-word;
     }
+    .info-badge {
+        background: #e7f1ff;
+        color: #0d6efd;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        border-left: 3px solid #0d6efd;
+    }
+    .form-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #212529;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .tox-tinymce {
+        border-radius: 6px !important;
+        border-color: #dee2e6 !important;
+    }
 </style>
 
 <div class="mb-4">
@@ -24,48 +120,87 @@
     <small class="text-muted">{{ post_path }}</small>
 </div>
 
+<!-- Info Badge -->
+<div class="info-badge">
+    <i class="fas fa-circle-info me-2"></i>
+    <strong>Visual Editor Enabled:</strong> Edit your content like a Word document. Switch to HTML mode for advanced editing.
+</div>
+
 <div class="form-card">
     <form method="POST" id="editPostForm">
-        <div class="row mb-3">
-            <div class="col-md-8">
-                <div class="form-group mb-3">
-                    <label for="title" class="form-label"><strong>Post Title *</strong></label>
-                    <input type="text" class="form-control" id="title" name="title" 
-                           value="{{ front_matter.get('title', '') or '' }}" required>
-                    <div class="help-text">The main title of your blog post</div>
+        <!-- Post Metadata Section -->
+        <div class="form-section">
+            <div class="form-section-title">
+                <i class="fas fa-info-circle"></i>
+                Post Information
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <div class="form-group mb-3">
+                        <label for="title" class="form-label"><strong>Post Title *</strong></label>
+                        <input type="text" class="form-control" id="title" name="title" 
+                               value="{{ front_matter.get('title', '') or '' }}" required>
+                        <div class="help-text">The main title of your blog post</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label for="date" class="form-label"><strong>Publication Date *</strong></label>
+                        <input type="date" class="form-control" id="date" name="date" 
+                               value="{{ front_matter.get('date', '') or '' }}" required>
+                        <div class="help-text">When this post was published</div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="form-group mb-3">
-                    <label for="date" class="form-label"><strong>Publication Date *</strong></label>
-                    <input type="date" class="form-control" id="date" name="date" 
-                           value="{{ front_matter.get('date', '') or '' }}" required>
-                    <div class="help-text">When this post was published</div>
-                </div>
+
+            <div class="form-group mb-3">
+                <label for="description" class="form-label"><strong>Description</strong></label>
+                <input type="text" class="form-control" id="description" name="description" 
+                       value="{{ front_matter.get('description', '') or '' }}"
+                       placeholder="Brief description for SEO">
+                <div class="help-text">This appears in search results and previews</div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="categories" class="form-label"><strong>Categories</strong></label>
+                <input type="text" class="form-control" id="categories" name="categories" 
+                       value="{{ front_matter.get('categories', '') or '' }}"
+                       placeholder="Separate with commas (e.g., Technology, Tutorial)">
+                <div class="help-text">Comma-separated list of categories</div>
             </div>
         </div>
 
-        <div class="form-group mb-3">
-            <label for="description" class="form-label"><strong>Description</strong></label>
-            <input type="text" class="form-control" id="description" name="description" 
-                   value="{{ front_matter.get('description', '') or '' }}"
-                   placeholder="Brief description for SEO">
-            <div class="help-text">This appears in search results and previews</div>
-        </div>
+        <!-- Content Editor Section -->
+        <div class="editor-container">
+            <div class="editor-label">
+                <i class="fas fa-file-alt"></i>
+                Post Content *
+            </div>
+            
+            <!-- Editor Mode Toggle -->
+            <div class="editor-toggle">
+                <button type="button" id="visualBtn" class="active" onclick="switchEditor('visual')">
+                    <i class="fas fa-eye me-1"></i> Visual Editor
+                </button>
+                <button type="button" id="htmlBtn" onclick="switchEditor('html')">
+                    <i class="fas fa-code me-1"></i> HTML Editor
+                </button>
+            </div>
 
-        <div class="form-group mb-3">
-            <label for="categories" class="form-label"><strong>Categories</strong></label>
-            <input type="text" class="form-control" id="categories" name="categories" 
-                   value="{{ front_matter.get('categories', '') or '' }}"
-                   placeholder="Separate with commas (e.g., Technology, Tutorial)">
-            <div class="help-text">Comma-separated list of categories</div>
-        </div>
+            <!-- TinyMCE Visual Editor -->
+            <div id="visualEditor">
+                <textarea id="content" name="content" required>{{ body or '' }}</textarea>
+            </div>
 
-        <div class="form-group mb-3">
-            <label for="content" class="form-label"><strong>Post Content *</strong></label>
-            <textarea class="form-control" id="content" name="content" required 
-                      placeholder="Enter your blog post content here...">{{ body or '' }}</textarea>
-            <div class="help-text">Supports HTML and Markdown formatting</div>
+            <!-- HTML Editor (hidden by default) -->
+            <textarea id="htmlEditor" class="html-editor">{{ body or '' }}</textarea>
+            
+            <div class="help-text">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Visual Editor:</strong> Format text like in Word. 
+                <strong>HTML Editor:</strong> Edit raw HTML for advanced users.
+            </div>
         </div>
 
         <!-- Hidden Fields -->
@@ -79,6 +214,9 @@
             <a href="{{ url_for('posts.list_posts') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-times"></i> Cancel
             </a>
+            <button type="button" class="btn btn-outline-info" onclick="previewPost()">
+                <i class="fas fa-eye"></i> Preview
+            </button>
         </div>
     </form>
 </div>
@@ -94,5 +232,112 @@ date: {{ front_matter.get('date', '2025-01-01') or '2025-01-01' }}
 {% endif %}{% if front_matter.get('categories') %}categories: {{ front_matter.get('categories') }}
 {% endif %}---</div>
 </div>
+
+<script>
+    let editor;
+    let currentMode = 'visual';
+
+    // Initialize TinyMCE
+    tinymce.init({
+        selector: '#content',
+        height: 600,
+        menubar: true,
+        plugins: [
+            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+            'insertdatetime', 'media', 'table', 'help', 'wordcount'
+        ],
+        toolbar: 'undo redo | blocks | bold italic underline strikethrough | ' +
+                 'alignleft aligncenter alignright alignjustify | ' +
+                 'bullist numlist outdent indent | link image | ' +
+                 'forecolor backcolor | removeformat | help',
+        content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; }',
+        block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6',
+        setup: function(ed) {
+            editor = ed;
+            ed.on('init', function() {
+                console.log('TinyMCE initialized');
+            });
+        }
+    });
+
+    // Switch between Visual and HTML editor
+    function switchEditor(mode) {
+        if (mode === 'visual') {
+            // Switch to Visual mode
+            if (currentMode === 'html') {
+                const htmlContent = document.getElementById('htmlEditor').value;
+                tinymce.get('content').setContent(htmlContent);
+            }
+            
+            document.getElementById('visualEditor').style.display = 'block';
+            document.getElementById('htmlEditor').style.display = 'none';
+            document.getElementById('visualBtn').classList.add('active');
+            document.getElementById('htmlBtn').classList.remove('active');
+            currentMode = 'visual';
+        } else {
+            // Switch to HTML mode
+            const visualContent = tinymce.get('content').getContent();
+            document.getElementById('htmlEditor').value = visualContent;
+            
+            document.getElementById('visualEditor').style.display = 'none';
+            document.getElementById('htmlEditor').style.display = 'block';
+            document.getElementById('visualBtn').classList.remove('active');
+            document.getElementById('htmlBtn').classList.add('active');
+            currentMode = 'html';
+        }
+    }
+
+    // Before form submission, sync content
+    document.getElementById('editPostForm').addEventListener('submit', function(e) {
+        if (currentMode === 'visual') {
+            // Content is already in the textarea managed by TinyMCE
+            tinymce.triggerSave();
+        } else {
+            // Copy from HTML editor to main textarea
+            const htmlContent = document.getElementById('htmlEditor').value;
+            tinymce.get('content').setContent(htmlContent);
+            tinymce.triggerSave();
+        }
+    });
+
+    // Preview function
+    function previewPost() {
+        let content;
+        if (currentMode === 'visual') {
+            content = tinymce.get('content').getContent();
+        } else {
+            content = document.getElementById('htmlEditor').value;
+        }
+        
+        const previewWindow = window.open('', 'Preview', 'width=800,height=600');
+        previewWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Preview: ${document.getElementById('title').value}</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        padding: 2rem;
+                        line-height: 1.6;
+                    }
+                    h1 { color: #333; }
+                    img { max-width: 100%; height: auto; }
+                </style>
+            </head>
+            <body>
+                <h1>${document.getElementById('title').value}</h1>
+                <p><em>${document.getElementById('date').value}</em></p>
+                <hr>
+                ${content}
+            </body>
+            </html>
+        `);
+        previewWindow.document.close();
+    }
+</script>
 
 {% endblock %}
