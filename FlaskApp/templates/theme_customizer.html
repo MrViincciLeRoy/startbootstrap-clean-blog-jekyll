@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Customizer - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0085A1;
+            --sidebar-width: 280px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #e3e6ed;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem;
+        }
+        
+        .color-picker-group {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .color-input-wrapper input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: 2px solid #e3e6ed;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .color-input-wrapper input[type="text"] {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e3e6ed;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .theme-preset-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .theme-preset-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .theme-preset-card.active {
+            border-color: var(--primary);
+        }
+        
+        .theme-colors-preview {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .theme-color-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .preview-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        #preview-frame {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #e3e6ed;
+            border-radius: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background: #006d84;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #2d3748;
+        }
+        
+        .nav-tabs {
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #718096;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            margin-right: 0.5rem;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .range-slider {
+            width: 100%;
+        }
+        
+        .font-select {
+            padding: 0.5rem;
+            border: 1px solid #e3e6ed;
+            border-radius: 8px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="p-4">
+                <h4 class="mb-4">
+                    <i class="fas fa-palette"></i> Theme Customizer
+                </h4>
+                
+                <div class="mb-4">
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+                
+                <div class="list-group list-group-flush">
+                    <a href="#colors" class="list-group-item list-group-item-action" data-bs-toggle="pill">
+                        <i class="fas fa-palette me-2"></i> Colors
+                    </a>
+                    <a href="#typography" class="list-group-item list-group-item-action" data-bs-toggle="pill">
+                        <i class="fas fa-font me-2"></i> Typography
+                    </a>
+                    <a href="#presets" class="list-group-item list-group-item-action" data-bs-toggle="pill">
+                        <i class="fas fa-swatchbook me-2"></i> Theme Presets
+                    </a>
+                    <a href="#preview" class="list-group-item list-group-item-action" data-bs-toggle="pill">
+                        <i class="fas fa-eye me-2"></i> Live Preview
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <form method="POST" action="{{ url_for('config_management.apply_theme') }}" id="themeForm">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Customize Your Theme</h2>
+                    <div>
+                        <button type="button" class="btn btn-outline-primary me-2" onclick="resetToDefaults()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Apply Theme
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="tab-content">
+                    <!-- Colors Tab -->
+                    <div class="tab-pane fade show active" id="colors">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="color-picker-group">
+                                    <h5 class="section-title">Brand Colors</h5>
+                                    
+                                    <div class="color-input-wrapper">
+                                        <input type="color" name="primary_color" id="primary_color" 
+                                               value="{{ theme_colors.primary_color }}">
+                                        <div class="flex-fill">
+                                            <label class="small text-muted mb-1">Primary Color</label>
+                                            <input type="text" class="form-control" id="primary_color_text" 
+                                                   value="{{ theme_colors.primary_color }}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="color-input-wrapper">
+                                        <input type="color" name="secondary_color" id="secondary_color" 
+                                               value="{{ theme_colors.secondary_color }}">
+                                        <div class="flex-fill">
+                                            <label class="small text-muted mb-1">Secondary Color</label>
+                                            <input type="text" class="form-control" id="secondary_color_text" 
+                                                   value="{{ theme_colors.secondary_color }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="color-picker-group">
+                                    <h5 class="section-title">Background & Text</h5>
+                                    
+                                    <div class="color-input-wrapper">
+                                        <input type="color" name="background_color" id="background_color" 
+                                               value="{{ theme_colors.background_color }}">
+                                        <div class="flex-fill">
+                                            <label class="small text-muted mb-1">Background Color</label>
+                                            <input type="text" class="form-control" id="background_color_text" 
+                                                   value="{{ theme_colors.background_color }}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="color-input-wrapper">
+                                        <input type="color" name="text_color" id="text_color" 
+                                               value="{{ theme_colors.text_color }}">
+                                        <div class="flex-fill">
+                                            <label class="small text-muted mb-1">Text Color</label>
+                                            <input type="text" class="form-control" id="text_color_text" 
+                                                   value="{{ theme_colors.text_color }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                                <div class="color-picker-group">
+                                    <h5 class="section-title">Navigation</h5>
+                                    
+                                    <div class="color-input-wrapper">
+                                        <input type="color" name="navbar_bg" id="navbar_bg" 
+                                               value="{{ theme_colors.navbar_bg }}">
+                                        <div class="flex-fill">
+                                            <label class="small text-muted mb-1">Navbar Background</label>
+                                            <input type="text" class="form-control" id="navbar_bg_text" 
+                                                   value="{{ theme_colors.navbar_bg }}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="color-input-wrapper">
+                                        <input type="color" name="navbar_text" id="navbar_text" 
+                                               value="{{ theme_colors.navbar_text }}">
+                                        <div class="flex-fill">
+                                            <label class="small text-muted mb-1">Navbar Text</label>
+                                            <input type="text" class="form-control" id="navbar_text_text" 
+                                                   value="{{ theme_colors.navbar_text }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="color-picker-group">
+                                    <h5 class="section-title">Footer</h5>
+                                    
+                                    <div class="color-input-wrapper">
+                                        <input type="color" name="footer_bg" id="footer_bg" 
+                                               value="{{ theme_colors.footer_bg }}">
+                                        <div class="flex-fill">
+                                            <label class="small text-muted mb-1">Footer Background</label>
+                                            <input type="text" class="form-control" id="footer_bg_text" 
+                                                   value="{{ theme_colors.footer_bg }}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="color-input-wrapper">
+                                        <input type="color" name="footer_text" id="footer_text" 
+                                               value="{{ theme_colors.footer_text }}">
+                                        <div class="flex-fill">
+                                            <label class="small text-muted mb-1">Footer Text</label>
+                                            <input type="text" class="form-control" id="footer_text_text" 
+                                                   value="{{ theme_colors.footer_text }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="color-picker-group">
+                                    <h5 class="section-title">Links & Effects</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="color-input-wrapper">
+                                                <input type="color" name="link_color" id="link_color" 
+                                                       value="{{ theme_colors.link_color }}">
+                                                <div class="flex-fill">
+                                                    <label class="small text-muted mb-1">Link Color</label>
+                                                    <input type="text" class="form-control" id="link_color_text" 
+                                                           value="{{ theme_colors.link_color }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="color-input-wrapper">
+                                                <input type="color" name="link_hover" id="link_hover" 
+                                                       value="{{ theme_colors.link_hover }}">
+                                                <div class="flex-fill">
+                                                    <label class="small text-muted mb-1">Link Hover</label>
+                                                    <input type="text" class="form-control" id="link_hover_text" 
+                                                           value="{{ theme_colors.link_hover }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <label class="small text-muted mb-1">Masthead Overlay Opacity</label>
+                                        <input type="range" class="range-slider" name="masthead_overlay" 
+                                               id="masthead_overlay" min="0" max="1" step="0.1" 
+                                               value="{{ theme_colors.get('masthead_overlay', 0.5) }}">
+                                        <div class="text-end">
+                                            <span id="overlay_value">{{ theme_colors.get('masthead_overlay', 0.5) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Typography Tab -->
+                    <div class="tab-pane fade" id="typography">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="color-picker-group">
+                                    <h5 class="section-title">Body Font</h5>
+                                    <label class="small text-muted mb-2">Font Family</label>
+                                    <select name="font_family_base" class="font-select" id="font_family_base">
+                                        <optgroup label="Serif Fonts">
+                                            {% for font in available_fonts.serif %}
+                                            <option value="{{ font }}" {% if theme_colors.get('font_family_base') == font %}selected{% endif %}>
+                                                {{ font }}
+                                            </option>
+                                            {% endfor %}
+                                        </optgroup>
+                                        <optgroup label="Sans-Serif Fonts">
+                                            {% for font in available_fonts['sans-serif'] %}
+                                            <option value="{{ font }}" {% if theme_colors.get('font_family_base') == font %}selected{% endif %}>
+                                                {{ font }}
+                                            </option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    </select>
+                                    
+                                    <div class="mt-3 p-3 border rounded" style="font-family: var(--font-family-base, 'Lora')">
+                                        <p class="mb-0">The quick brown fox jumps over the lazy dog. 0123456789</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="color-picker-group">
+                                    <h5 class="section-title">Headings Font</h5>
+                                    <label class="small text-muted mb-2">Font Family</label>
+                                    <select name="font_family_headings" class="font-select" id="font_family_headings">
+                                        <optgroup label="Sans-Serif Fonts">
+                                            {% for font in available_fonts['sans-serif'] %}
+                                            <option value="{{ font }}" {% if theme_colors.get('font_family_headings') == font %}selected{% endif %}>
+                                                {{ font }}
+                                            </option>
+                                            {% endfor %}
+                                        </optgroup>
+                                        <optgroup label="Serif Fonts">
+                                            {% for font in available_fonts.serif %}
+                                            <option value="{{ font }}" {% if theme_colors.get('font_family_headings') == font %}selected{% endif %}>
+                                                {{ font }}
+                                            </option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    </select>
+                                    
+                                    <div class="mt-3 p-3 border rounded" style="font-family: var(--font-family-headings, 'Open Sans')">
+                                        <h1 class="mb-2">Heading 1</h1>
+                                        <h3 class="mb-0">Heading 3</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Presets Tab -->
+                    <div class="tab-pane fade" id="presets">
+                        <div class="mb-4">
+                            <h5 class="section-title">Quick Theme Presets</h5>
+                            <p class="text-muted">Click on a preset to apply it instantly</p>
+                        </div>
+                        
+                        <div class="row g-3">
+                            {% for key, theme in all_themes.items() %}
+                            <div class="col-md-4">
+                                <div class="theme-preset-card" onclick="loadThemePreset('{{ key }}')">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0">{{ theme.name }}</h6>
+                                        {% if theme.custom %}
+                                        <span class="badge bg-primary">Custom</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="theme-colors-preview">
+                                        <div class="theme-color-dot" style="background: {{ theme.primary_color }}"></div>
+                                        <div class="theme-color-dot" style="background: {{ theme.secondary_color }}"></div>
+                                        <div class="theme-color-dot" style="background: {{ theme.background_color }}"></div>
+                                        <div class="theme-color-dot" style="background: {{ theme.text_color }}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mt-4">
+                            <div class="color-picker-group">
+                                <h5 class="section-title">Save Current as Custom Theme</h5>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="save_as_custom" 
+                                           placeholder="Enter theme name...">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-save"></i> Save Custom Theme
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview Tab -->
+                    <div class="tab-pane fade" id="preview">
+                        <div class="preview-section">
+                            <h5 class="section-title">Live Preview</h5>
+                            <p class="text-muted">See how your theme will look</p>
+                            <iframe id="preview-frame" srcdoc="
+                                <html>
+                                <head>
+                                    <style>
+                                        body { 
+                                            font-family: var(--font-family-base, 'Lora'), serif; 
+                                            color: var(--text-color, #212529);
+                                            background: var(--background-color, #ffffff);
+                                            padding: 2rem;
+                                        }
+                                        h1, h2, h3 { 
+                                            font-family: var(--font-family-headings, 'Open Sans'), sans-serif; 
+                                            color: var(--text-color, #212529);
+                                        }
+                                        a { color: var(--link-color, #0085A1); }
+                                        a:hover { color: var(--link-hover, #006d84); }
+                                        .navbar { 
+                                            background: var(--navbar-bg, #ffffff); 
+                                            color: var(--navbar-text, #212529);
+                                            padding: 1rem;
+                                            margin-bottom: 2rem;
+                                        }
+                                        .btn-primary {
+                                            background: var(--primary-color, #0085A1);
+                                            color: white;
+                                            padding: 0.5rem 1rem;
+                                            border: none;
+                                            border-radius: 4px;
+                                        }
+                                    </style>
+                                </head>
+                                <body>
+                                    <div class='navbar'>Navigation Bar</div>
+                                    <h1>Sample Heading</h1>
+                                    <p>This is a sample paragraph to show how your content will look with the selected theme. The text color, background, and fonts are all customizable.</p>
+                                    <p><a href='#'>This is a sample link</a> to show link colors.</p>
+                                    <button class='btn-primary'>Primary Button</button>
+                                </body>
+                                </html>
+                            "></iframe>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sync color picker with text input
+        document.querySelectorAll('input[type="color"]').forEach(picker => {
+            const textInput = document.getElementById(picker.id + '_text');
+            
+            picker.addEventListener('input', function() {
+                textInput.value = this.value;
+                updatePreview();
+            });
+            
+            textInput.addEventListener('input', function() {
+                picker.value = this.value;
+                updatePreview();
+            });
+        });
+        
+        // Update overlay value display
+        document.getElementById('masthead_overlay').addEventListener('input', function() {
+            document.getElementById('overlay_value').textContent = this.value;
+            updatePreview();
+        });
+        
+        // Update preview on font change
+        document.getElementById('font_family_base').addEventListener('change', updatePreview);
+        document.getElementById('font_family_headings').addEventListener('change', updatePreview);
+        
+        function updatePreview() {
+            const colors = {
+                '--primary-color': document.getElementById('primary_color').value,
+                '--secondary-color': document.getElementById('secondary_color').value,
+                '--background-color': document.getElementById('background_color').value,
+                '--text-color': document.getElementById('text_color').value,
+                '--navbar-bg': document.getElementById('navbar_bg').value,
+                '--navbar-text': document.getElementById('navbar_text').value,
+                '--link-color': document.getElementById('link_color').value,
+                '--link-hover': document.getElementById('link_hover').value,
+                '--font-family-base': `'${document.getElementById('font_family_base').value}', serif`,
+                '--font-family-headings': `'${document.getElementById('font_family_headings').value}', sans-serif`
+            };
+            
+            // Apply to root for immediate visual feedback
+            Object.keys(colors).forEach(key => {
+                document.documentElement.style.setProperty(key, colors[key]);
+            });
+        }
+        
+        function loadThemePreset(themeName) {
+            fetch(`{{ url_for('config_management.load_theme', theme_name='') }}${themeName}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const theme = data.theme;
+                        
+                        // Update all color inputs
+                        document.getElementById('primary_color').value = theme.primary_color;
+                        document.getElementById('primary_color_text').value = theme.primary_color;
+                        
+                        document.getElementById('secondary_color').value = theme.secondary_color;
+                        document.getElementById('secondary_color_text').value = theme.secondary_color;
+                        
+                        document.getElementById('background_color').value = theme.background_color;
+                        document.getElementById('background_color_text').value = theme.background_color;
+                        
+                        document.getElementById('text_color').value = theme.text_color;
+                        document.getElementById('text_color_text').value = theme.text_color;
+                        
+                        document.getElementById('navbar_bg').value = theme.navbar_bg;
+                        document.getElementById('navbar_bg_text').value = theme.navbar_bg;
+                        
+                        document.getElementById('navbar_text').value = theme.navbar_text;
+                        document.getElementById('navbar_text_text').value = theme.navbar_text;
+                        
+                        document.getElementById('footer_bg').value = theme.footer_bg;
+                        document.getElementById('footer_bg_text').value = theme.footer_bg;
+                        
+                        document.getElementById('footer_text').value = theme.footer_text;
+                        document.getElementById('footer_text_text').value = theme.footer_text;
+                        
+                        document.getElementById('link_color').value = theme.link_color;
+                        document.getElementById('link_color_text').value = theme.link_color;
+                        
+                        document.getElementById('link_hover').value = theme.link_hover;
+                        document.getElementById('link_hover_text').value = theme.link_hover;
+                        
+                        document.getElementById('masthead_overlay').value = theme.masthead_overlay || 0.5;
+                        document.getElementById('overlay_value').textContent = theme.masthead_overlay || 0.5;
+                        
+                        document.getElementById('font_family_base').value = theme.font_family_base || 'Lora';
+                        document.getElementById('font_family_headings').value = theme.font_family_headings || 'Open Sans';
+                        
+                        updatePreview();
+                    }
+                });
+        }
+        
+        function resetToDefaults() {
+            loadThemePreset('default');
+        }
+        
+        // Initial preview update
+        updatePreview();
+    </script>
+</body>
+</html>
