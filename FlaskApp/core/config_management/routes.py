@@ -1,249 +1,162 @@
 """
-Configuration management routes
+Theme management routes
+Add these to FlaskApp/core/config_management/routes.py
 """
 from flask import render_template, request, redirect, url_for, flash, jsonify
-from flask_login import login_required, current_user
+from flask_login import login_required
 from datetime import datetime
-import yaml
-import json
 from FlaskApp.services.github_manager import get_github_manager
-from FlaskApp.services.ai_settings_manager import AISettingsManager
-from FlaskApp.services.v4_config_manager import V4ConfigManager
+from FlaskApp.services.theme_manager import ThemeManager
 
-ai_settings = AISettingsManager()
+theme_manager = ThemeManager()
 
-def setup_config_routes(bp):
-    """Setup configuration routes"""
+def setup_theme_routes(bp):
+    """Setup theme management routes"""
     
-    @bp.route('/config', methods=['GET', 'POST'])
+    @bp.route('/theme-customizer', methods=['GET'])
     @login_required
-    def edit_config():
+    def theme_customizer():
+        """Theme customizer interface"""
         gh = get_github_manager()
         
-        if request.method == 'POST':
-            author_input = request.form.get('author', '').strip()
-            author_value = author_input if author_input else ' ' * 13 + 'HAA[B]'
-            
-            config_dict = {
-                'title': request.form.get('title'),
-                'email': request.form.get('email'),
-                'description': request.form.get('description'),
-                'baseurl': request.form.get('baseurl'),
-                'url': request.form.get('url'),
-                'author': author_value,
-                'phone': request.form.get('phone'),
-                'address': request.form.get('address'),
-                'active_theme': request.form.get('active_theme', 'default'),
-                'twitter_username': request.form.get('twitter_username'),
-                'github_username': request.form.get('github_username'),
-                'facebook_username': request.form.get('facebook_username'),
-                'instagram_username': request.form.get('instagram_username'),
-                'linkedin_username': request.form.get('linkedin_username'),
-                'google_analytics': request.form.get('google_analytics'),
-                'markdown': 'kramdown',
-                'paginate': 10,
-                'paginate_path': '/posts/page:num/'
-            }
-            
-            if request.form.get('active_theme') == 'theme1':
-                config_dict['theme1'] = {
-                    'primary_color': request.form.get('theme1_primary_color', '#6366f1'),
-                    'secondary_color': request.form.get('theme1_secondary_color', '#10b981'),
-                    'accent_color': request.form.get('theme1_accent_color', '#f59e0b'),
-                    'hero_overlay': float(request.form.get('theme1_hero_overlay', '0.6')),
-                    'font_heading': request.form.get('theme1_font_heading', 'Ubuntu'),
-                    'font_body': request.form.get('theme1_font_body', 'Roboto'),
-                    'footer': {
-                        'newsletter_enabled': 'theme1_newsletter_enabled' in request.form,
-                        'newsletter_action': request.form.get('theme1_newsletter_action', ''),
-                        'show_wave': 'theme1_show_wave' in request.form,
-                        'show_social': 'theme1_show_social' in request.form
-                    }
-                }
-            
-            config_dict = {k: v for k, v in config_dict.items() if v or k in ['active_theme', 'theme1']}
-            
-            if gh.update_config_yml(config_dict, f"Update config - {datetime.now().strftime('%Y-%m-%d %H:%M')}"):
-                flash('Configuration updated successfully!', 'success')
-                return redirect(url_for('config_management.edit_config'))
-            else:
-                flash('Error updating configuration', 'error')
-        
+        # Get current theme from config
+        import yaml
         config_file = gh.get_config_yml()
+        current_theme = 'default'
+        theme_colors = None
+        
         if config_file:
             config = yaml.safe_load(config_file['content'])
-        else:
-            config = {}
+            current_theme = config.get('active_theme', 'default')
+            theme_colors = config.get('theme_colors', None)
         
-        return render_template('edit_config.html', config=config)
+        # Get all available themes
+        all_themes = theme_manager.get_all_themes()
+        
+        # If no custom colors, use theme defaults
+        if not theme_colors:
+            theme_colors = theme_manager.get_theme(current_theme)
+        
+        return render_template('theme_customizer.html',
+                             current_theme=current_theme,
+                             theme_colors=theme_colors,
+                             all_themes=all_themes,
+                             available_fonts=theme_manager.AVAILABLE_FONTS)
     
-    @bp.route('/ai-settings', methods=['GET', 'POST'])
+    @bp.route('/theme-customizer/preview', methods=['POST'])
     @login_required
-    def edit_ai_settings():
-        gh = get_github_manager()
-        
-        if request.method == 'POST':
-            try:
-                settings = {
-                    'include_front_matter': 'include_front_matter' in request.form,
-                    'fetch_images': 'fetch_images' in request.form,
-                    'embedding_model': request.form.get('embedding_model', 'all-MiniLM-L6-v2'),
-                    'llm_model': request.form.get('llm_model', 'LiquidAI/LFM2-1.2B-RAG'),
-                    'config_path': request.form.get('config_path', 'research_v3/article_config.json'),
-                    'database_path': request.form.get('database_path', 'research_v3/flora_data.db'),
-                    'device': request.form.get('device', 'cpu'),
-                    'load_in_8bit': 'load_in_8bit' in request.form,
-                    'max_articles_per_run': int(request.form.get('max_articles_per_run', 1))
-                }
-                
-                valid_devices = ['cpu', 'cuda', 'mps']
-                if settings['device'] not in valid_devices:
-                    flash('Invalid device selected', 'error')
-                    return redirect(url_for('config_management.edit_ai_settings'))
-                
-                if not 1 <= settings['max_articles_per_run'] <= 10:
-                    flash('Max articles per run must be between 1 and 10', 'error')
-                    return redirect(url_for('config_management.edit_ai_settings'))
-                
-                current_settings, file_data = ai_settings.load_settings_from_github(gh)
-                
-                if ai_settings.save_settings_to_github(settings, gh, file_data):
-                    flash('✓ AI settings updated and committed to repository!', 'success')
-                    return redirect(url_for('config_management.edit_ai_settings'))
-                else:
-                    flash('✗ Error saving AI settings to repository', 'error')
-                    return redirect(url_for('config_management.edit_ai_settings'))
-                    
-            except ValueError as e:
-                flash(f'Invalid input: {str(e)}', 'error')
-                return redirect(url_for('config_management.edit_ai_settings'))
-            except Exception as e:
-                flash(f'Unexpected error: {str(e)}', 'error')
-                return redirect(url_for('config_management.edit_ai_settings'))
-        
-        current_settings, file_data = ai_settings.load_settings_from_github(gh)
-        return render_template('edit_ai_settings.html', config=current_settings)
-    
-    @bp.route('/v4-config', methods=['GET'])
-    @login_required
-    def v4_config_list():
-        """List all V4 configuration files"""
-        gh = get_github_manager()
-        configs = []
-        
-        for key in V4ConfigManager.get_all_configs():
-            config_info = V4ConfigManager.get_config_schema(key)
-            config_data, file_data = V4ConfigManager.load_config(gh, key)
-            
-            configs.append({
-                'key': key,
-                'label': config_info['label'],
-                'icon': config_info['icon'],
-                'description': config_info['description'],
-                'status': 'loaded' if config_data else 'error',
-                'has_data': config_data is not None
-            })
-        
-        return render_template('v4_config_list.html', configs=configs)
-    
-    @bp.route('/v4-config/<config_key>', methods=['GET', 'POST'])
-    @login_required
-    def edit_v4_config(config_key):
-        """Edit a specific V4 configuration file"""
-        gh = get_github_manager()
-        
-        # Validate config key
-        schema = V4ConfigManager.get_config_schema(config_key)
-        if not schema:
-            flash('Configuration not found', 'error')
-            return redirect(url_for('config_management.v4_config_list'))
-        
-        if request.method == 'POST':
-            try:
-                # Get current file data for SHA
-                config_data, file_data = V4ConfigManager.load_config(gh, config_key)
-                
-                if not file_data:
-                    flash('Error loading configuration file', 'error')
-                    return redirect(url_for('config_management.edit_v4_config', config_key=config_key))
-                
-                # Parse JSON from form
-                raw_data = request.form.get('json_data', '{}')
-                
-                try:
-                    updated_data = json.loads(raw_data)
-                except json.JSONDecodeError as e:
-                    flash(f'Invalid JSON format: {str(e)}', 'error')
-                    return redirect(url_for('config_management.edit_v4_config', config_key=config_key))
-                
-                # Save to GitHub
-                if V4ConfigManager.save_config(gh, config_key, updated_data, file_data):
-                    flash(f'✓ {schema["label"]} updated and committed to repository!', 'success')
-                    return redirect(url_for('config_management.edit_v4_config', config_key=config_key))
-                else:
-                    flash('✗ Error saving configuration to repository', 'error')
-            
-            except Exception as e:
-                flash(f'Unexpected error: {str(e)}', 'error')
-                import traceback
-                traceback.print_exc()
-        
-        # Load configuration for display
-        config_data, file_data = V4ConfigManager.load_config(gh, config_key)
-        
-        if not config_data:
-            flash('Could not load configuration file', 'error')
-            return redirect(url_for('config_management.v4_config_list'))
-        
-        # Use the existing v4 config template with form and JSON editor
-        return render_template('edit_v4_config.html',
-                             config_key=config_key,
-                             config=config_data,
-                             schema=schema,
-                             json_str=json.dumps(config_data, indent=2))
-    
-    @bp.route('/api/v4-config/<config_key>', methods=['GET'])
-    @login_required
-    def get_v4_config_api(config_key):
-        """API endpoint to get V4 config"""
-        gh = get_github_manager()
-        config_data, _ = V4ConfigManager.load_config(gh, config_key)
-        
-        if config_data is None:
-            return jsonify({'status': 'error', 'message': 'Config not found'}), 404
-        
-        return jsonify({
-            'status': 'success',
-            'config_key': config_key,
-            'data': config_data
-        })
-    
-    @bp.route('/api/v4-config/<config_key>', methods=['POST'])
-    @login_required
-    def update_v4_config_api(config_key):
-        """API endpoint to update V4 config"""
-        gh = get_github_manager()
-        
+    def preview_theme():
+        """Generate preview CSS for theme"""
         try:
-            updated_data = request.get_json()
-            config_data, file_data = V4ConfigManager.load_config(gh, config_key)
+            theme_config = {
+                'primary_color': request.form.get('primary_color'),
+                'secondary_color': request.form.get('secondary_color'),
+                'background_color': request.form.get('background_color'),
+                'text_color': request.form.get('text_color'),
+                'navbar_bg': request.form.get('navbar_bg'),
+                'navbar_text': request.form.get('navbar_text'),
+                'footer_bg': request.form.get('footer_bg'),
+                'footer_text': request.form.get('footer_text'),
+                'link_color': request.form.get('link_color'),
+                'link_hover': request.form.get('link_hover'),
+                'masthead_overlay': float(request.form.get('masthead_overlay', 0.5)),
+                'font_family_base': request.form.get('font_family_base', 'Lora'),
+                'font_family_headings': request.form.get('font_family_headings', 'Open Sans')
+            }
             
-            if file_data is None:
-                return jsonify({'status': 'error', 'message': 'Config not found'}), 404
+            css = theme_manager.generate_css_variables(theme_config)
             
-            if V4ConfigManager.save_config(gh, config_key, updated_data, file_data):
-                return jsonify({
-                    'status': 'success',
-                    'message': f'{config_key} updated successfully'
-                })
-            else:
-                return jsonify({
-                    'status': 'error',
-                    'message': 'Failed to save configuration'
-                }), 500
-                
+            return jsonify({
+                'status': 'success',
+                'css': css
+            })
+            
         except Exception as e:
             return jsonify({
                 'status': 'error',
                 'message': str(e)
             }), 500
+    
+    @bp.route('/theme-customizer/apply', methods=['POST'])
+    @login_required
+    def apply_theme():
+        """Apply theme to site configuration"""
+        gh = get_github_manager()
+        
+        try:
+            theme_config = {
+                'primary_color': request.form.get('primary_color'),
+                'secondary_color': request.form.get('secondary_color'),
+                'background_color': request.form.get('background_color'),
+                'text_color': request.form.get('text_color'),
+                'navbar_bg': request.form.get('navbar_bg'),
+                'navbar_text': request.form.get('navbar_text'),
+                'footer_bg': request.form.get('footer_bg'),
+                'footer_text': request.form.get('footer_text'),
+                'link_color': request.form.get('link_color'),
+                'link_hover': request.form.get('link_hover'),
+                'masthead_overlay': float(request.form.get('masthead_overlay', 0.5)),
+                'font_family_base': request.form.get('font_family_base', 'Lora'),
+                'font_family_headings': request.form.get('font_family_headings', 'Open Sans')
+            }
+            
+            # Save as custom theme if name provided
+            custom_name = request.form.get('save_as_custom')
+            if custom_name:
+                theme_config['name'] = custom_name
+                if theme_manager.save_custom_theme(custom_name, theme_config):
+                    flash(f'✓ Custom theme "{custom_name}" saved successfully!', 'success')
+            
+            # Apply to GitHub config
+            if theme_manager.apply_theme_to_config(gh, theme_config):
+                flash('✓ Theme applied successfully! Changes will be visible after Jekyll rebuild.', 'success')
+                return redirect(url_for('config_management.theme_customizer'))
+            else:
+                flash('✗ Error applying theme to configuration', 'error')
+                
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'error')
+        
+        return redirect(url_for('config_management.theme_customizer'))
+    
+    @bp.route('/theme-customizer/load/<theme_name>', methods=['GET'])
+    @login_required
+    def load_theme(theme_name):
+        """Load a theme configuration"""
+        theme = theme_manager.get_theme(theme_name)
+        return jsonify({
+            'status': 'success',
+            'theme': theme
+        })
+    
+    @bp.route('/theme-customizer/delete/<theme_name>', methods=['POST'])
+    @login_required
+    def delete_theme(theme_name):
+        """Delete a custom theme"""
+        # Don't allow deleting default themes
+        if theme_name in theme_manager.DEFAULT_THEMES:
+            return jsonify({
+                'status': 'error',
+                'message': 'Cannot delete default themes'
+            }), 400
+        
+        if theme_manager.delete_custom_theme(theme_name):
+            return jsonify({
+                'status': 'success',
+                'message': f'Theme "{theme_name}" deleted successfully'
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to delete theme'
+            }), 500
+    
+    @bp.route('/api/themes', methods=['GET'])
+    @login_required
+    def get_themes_api():
+        """API endpoint to get all themes"""
+        all_themes = theme_manager.get_all_themes()
+        return jsonify({
+            'status': 'success',
+            'themes': all_themes
+        })
