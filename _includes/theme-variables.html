@@ -1,0 +1,277 @@
+<!-- _includes/theme-variables.html -->
+<style>
+:root {
+  /* Theme colors from config */
+  --primary-color: {{ site.theme_colors.primary | default: '#0085A1' }};
+  --secondary-color: {{ site.theme_colors.secondary | default: '#6c757d' }};
+  --background-color: {{ site.theme_colors.background | default: '#ffffff' }};
+  --text-color: {{ site.theme_colors.text | default: '#212529' }};
+  --navbar-bg: {{ site.theme_colors.navbar_bg | default: '#ffffff' }};
+  --navbar-text: {{ site.theme_colors.navbar_text | default: '#212529' }};
+  --footer-bg: {{ site.theme_colors.footer_bg | default: '#f8f9fa' }};
+  --footer-text: {{ site.theme_colors.footer_text | default: '#6c757d' }};
+  --link-color: {{ site.theme_colors.link | default: '#0085A1' }};
+  --link-hover: {{ site.theme_colors.link_hover | default: '#006d84' }};
+  
+  /* Typography */
+  --font-family-base: '{{ site.theme_settings.font_family_base | default: "Lora" }}', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-headings: '{{ site.theme_settings.font_family_headings | default: "Open Sans" }}', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  /* Other settings */
+  --masthead-overlay: {{ site.theme_settings.masthead_overlay | default: 0.5 }};
+}
+
+/* Apply theme colors to body */
+body {
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+  font-family: var(--font-family-base) !important;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color) !important;
+  font-family: var(--font-family-headings) !important;
+}
+
+/* Links */
+a {
+  color: var(--link-color) !important;
+}
+
+a:hover,
+a:focus {
+  color: var(--link-hover) !important;
+}
+
+/* Navigation bar - fixed position */
+#mainNav {
+  background-color: var(--navbar-bg) !important;
+  border-bottom-color: var(--navbar-text) !important;
+}
+
+#mainNav .navbar-brand {
+  color: var(--navbar-text) !important;
+}
+
+#mainNav .navbar-toggler {
+  color: var(--navbar-text) !important;
+  border-color: var(--navbar-text) !important;
+}
+
+#mainNav .navbar-nav > li.nav-item > a {
+  color: var(--navbar-text) !important;
+}
+
+/* Navigation when scrolled (fixed) */
+#mainNav.is-fixed {
+  background-color: var(--navbar-bg) !important;
+}
+
+#mainNav.is-fixed .navbar-brand,
+#mainNav.is-fixed .navbar-nav > li.nav-item > a {
+  color: var(--navbar-text) !important;
+}
+
+#mainNav.is-fixed .navbar-brand:hover,
+#mainNav.is-fixed .navbar-brand:focus,
+#mainNav.is-fixed .navbar-nav > li.nav-item > a:hover,
+#mainNav.is-fixed .navbar-nav > li.nav-item > a:focus {
+  color: var(--link-hover) !important;
+}
+
+/* Navigation on large screens (transparent) */
+@media only screen and (min-width: 992px) {
+  #mainNav {
+    background: transparent !important;
+  }
+  
+  #mainNav .navbar-brand,
+  #mainNav .navbar-nav > li.nav-item > a {
+    color: white !important;
+  }
+  
+  #mainNav.is-fixed {
+    background-color: var(--navbar-bg) !important;
+  }
+  
+  #mainNav.is-fixed .navbar-brand,
+  #mainNav.is-fixed .navbar-nav > li.nav-item > a {
+    color: var(--navbar-text) !important;
+  }
+}
+
+/* Footer */
+footer {
+  background-color: var(--footer-bg) !important;
+  color: var(--footer-text) !important;
+}
+
+footer a {
+  color: var(--link-color) !important;
+}
+
+footer a:hover,
+footer a:focus {
+  color: var(--link-hover) !important;
+}
+
+footer .copyright {
+  color: var(--footer-text) !important;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--link-hover) !important;
+  border-color: var(--link-hover) !important;
+}
+
+/* Masthead overlay */
+header.masthead .overlay {
+  opacity: var(--masthead-overlay) !important;
+}
+
+/* Masthead text remains white for readability */
+header.masthead .page-heading,
+header.masthead .post-heading,
+header.masthead .site-heading {
+  color: white !important;
+}
+
+header.masthead .page-heading h1,
+header.masthead .site-heading h1,
+header.masthead .post-heading h1 {
+  color: white !important;
+}
+
+header.masthead .subheading,
+header.masthead .meta {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Post preview */
+.post-preview > a {
+  color: var(--text-color) !important;
+}
+
+.post-preview > a:hover,
+.post-preview > a:focus {
+  color: var(--link-color) !important;
+}
+
+.post-preview > a > .post-title {
+  color: var(--text-color) !important;
+}
+
+.post-preview > .post-meta {
+  color: var(--footer-text) !important;
+}
+
+.post-preview > .post-meta > a {
+  color: var(--text-color) !important;
+}
+
+/* Blockquotes */
+blockquote {
+  color: var(--footer-text) !important;
+  border-left-color: var(--primary-color) !important;
+}
+
+/* Form inputs for dark themes */
+input,
+textarea,
+select {
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--footer-text) !important;
+}
+
+/* Contact form specific */
+.floating-label-form-group {
+  border-bottom-color: var(--footer-text) !important;
+}
+
+.floating-label-form-group input,
+.floating-label-form-group textarea {
+  color: var(--text-color) !important;
+}
+
+.floating-label-form-group label {
+  color: var(--footer-text) !important;
+}
+
+.floating-label-form-group-with-focus label {
+  color: var(--primary-color) !important;
+}
+
+/* Selection colors */
+::selection {
+  background: var(--primary-color) !important;
+  color: white !important;
+}
+
+::-moz-selection {
+  background: var(--primary-color) !important;
+  color: white !important;
+}
+
+/* Pagination */
+.pagination .page-link {
+  color: var(--link-color) !important;
+  background-color: var(--background-color) !important;
+  border-color: var(--footer-text) !important;
+}
+
+.pagination .page-link:hover {
+  color: var(--link-hover) !important;
+  background-color: var(--footer-bg) !important;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+/* Cards and content sections */
+.card {
+  background-color: var(--background-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--footer-text) !important;
+}
+
+/* Alert messages */
+.alert {
+  background-color: var(--footer-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--footer-text) !important;
+}
+
+/* Horizontal rules */
+hr {
+  border-color: var(--footer-text) !important;
+  opacity: 0.3;
+}
+
+/* Text utilities - ensure they use theme colors */
+.text-muted {
+  color: var(--footer-text) !important;
+}
+
+/* Social links in footer */
+.fa-stack {
+  color: var(--footer-text) !important;
+}
+
+.fa-stack:hover {
+  color: var(--link-hover) !important;
+}
+</style>

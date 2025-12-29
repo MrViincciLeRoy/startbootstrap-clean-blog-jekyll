@@ -13,9 +13,22 @@
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
 
+  <!-- Load custom fonts if specified in theme settings -->
+  {% if site.theme_settings.font_family_base and site.theme_settings.font_family_base != 'Lora' %}
+  <link href='https://fonts.googleapis.com/css?family={{ site.theme_settings.font_family_base | replace: " ", "+" }}:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  {% endif %}
+  
+  {% if site.theme_settings.font_family_headings and site.theme_settings.font_family_headings != 'Open Sans' %}
+  <link href='https://fonts.googleapis.com/css?family={{ site.theme_settings.font_family_headings | replace: " ", "+" }}:300,400,600,700,800' rel='stylesheet' type='text/css'>
+  {% endif %}
+
   <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
 
   <link rel="stylesheet" href="{{"/assets/main.css" | relative_url }}">
+  
+  <!-- Theme customization CSS -->
+  {% include theme-variables.html %}
+  
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{ "/feed.xml" | relative_url }}">
 
