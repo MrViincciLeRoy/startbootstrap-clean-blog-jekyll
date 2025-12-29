@@ -13,6 +13,21 @@ linkedin_username: your_linkedin
 markdown: kramdown
 paginate: 10
 paginate_path: /posts/page:num/
+theme_colors:
+  background: '#ff00ff'
+  footer_bg: '#f8f9fa'
+  footer_text: '#6c757d'
+  link: '#0085a1'
+  link_hover: '#006d84'
+  navbar_bg: '#ffffff'
+  navbar_text: '#212529'
+  primary: '#0085a1'
+  secondary: '#6c757d'
+  text: '#212529'
+theme_settings:
+  font_family_base: Lora
+  font_family_headings: Open Sans
+  masthead_overlay: 0.5
 title: Heritage Road Map Foundation
 twitter_username: your_twitter
 url: https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/
