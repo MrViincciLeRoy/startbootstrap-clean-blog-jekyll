@@ -14,16 +14,16 @@ markdown: kramdown
 paginate: 10
 paginate_path: /posts/page:num/
 theme_colors:
-  background: '#faf5ff'
-  footer_bg: '#f5f3ff'
-  footer_text: '#6d28d9'
-  link: '#8b5cf6'
-  link_hover: '#7c3aed'
+  background: '#f0f9ff'
+  footer_bg: '#e0f2fe'
+  footer_text: '#0369a1'
+  link: '#0ea5e9'
+  link_hover: '#0284c7'
   navbar_bg: '#ffffff'
-  navbar_text: '#5b21b6'
-  primary: '#8b5cf6'
-  secondary: '#a78bfa'
-  text: '#4c1d95'
+  navbar_text: '#075985'
+  primary: '#0ea5e9'
+  secondary: '#06b6d4'
+  text: '#0c4a6e'
 theme_settings:
   font_family_base: Lora
   font_family_headings: Open Sans
