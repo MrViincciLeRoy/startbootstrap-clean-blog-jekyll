@@ -1,0 +1,599 @@
+{% extends "base.html" %}
+
+{% block title %}AI Chat - Ask About Posts{% endblock %}
+
+{% block page_title %}AI Chat - Ask Questions About Posts{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .chat-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+    
+    .chat-header h2 {
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+    }
+    
+    .chat-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    .status-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .status-badge.success {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .status-badge.warning {
+        background: #fff3cd;
+        color: #664d03;
+    }
+    
+    .status-badge.error {
+        background: #f8d7da;
+        color: #842029;
+    }
+    
+    .chat-interface {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .chat-messages {
+        padding: 2rem;
+        min-height: 400px;
+        max-height: 600px;
+        overflow-y: auto;
+        background: #f8f9fa;
+    }
+    
+    .message {
+        margin-bottom: 1.5rem;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .message-user {
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .message-user .message-content {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 18px 18px 4px 18px;
+        max-width: 70%;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .message-assistant {
+        display: flex;
+        justify-content: flex-start;
+    }
+    
+    .message-assistant .message-content {
+        background: white;
+        color: #212529;
+        padding: 1rem 1.5rem;
+        border-radius: 18px 18px 18px 4px;
+        max-width: 70%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid #667eea;
+    }
+    
+    .message-sources {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e9ecef;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .message-sources strong {
+        color: #495057;
+    }
+    
+    .message-source-item {
+        display: inline-block;
+        background: #e9ecef;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        margin-right: 0.5rem;
+        margin-top: 0.25rem;
+        font-size: 0.8rem;
+    }
+    
+    .chat-input-area {
+        padding: 1.5rem;
+        background: white;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .input-group {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+    
+    .query-input {
+        flex: 1;
+        padding: 1rem;
+        border: 2px solid #dee2e6;
+        border-radius: 12px;
+        font-size: 1rem;
+        resize: none;
+        min-height: 60px;
+        transition: all 0.3s ease;
+    }
+    
+    .query-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .send-btn {
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+    
+    .send-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    }
+    
+    .send-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 0.75rem;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+    
+    .quick-questions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .quick-question {
+        background: white;
+        border: 2px solid #e9ecef;
+        padding: 1rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+    }
+    
+    .quick-question:hover {
+        border-color: #667eea;
+        background: #f8f9fa;
+        transform: translateY(-2px);
+    }
+    
+    .quick-question i {
+        color: #667eea;
+        margin-right: 0.5rem;
+    }
+    
+    .settings-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .settings-row select {
+        padding: 0.5rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        flex: 1;
+    }
+    
+    .index-btn {
+        padding: 0.75rem 1.5rem;
+        background: #10b981;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .index-btn:hover:not(:disabled) {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <!-- Header -->
+    <div class="chat-header">
+        <h2><i class="fas fa-robot me-2"></i>AI Chat Assistant</h2>
+        <p>Ask questions about your blog posts using advanced AI and semantic search</p>
+    </div>
+
+    <!-- Status Card -->
+    <div class="status-card">
+        <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>System Status</h5>
+        <div id="status-container">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                Checking system status...
+            </div>
+        </div>
+        
+        <div class="settings-row mt-3" id="settings-row" style="display: none;">
+            <select id="model-select" class="form-select">
+                <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Best Quality)</option>
+                <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fastest)</option>
+                <option value="mixtral-8x7b-32768">Mixtral 8x7B (Long Context)</option>
+            </select>
+            
+            <select id="context-select" class="form-select">
+                <option value="3" selected>3 Context Chunks</option>
+                <option value="5">5 Context Chunks</option>
+                <option value="7">7 Context Chunks</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-interface">
+        <div class="chat-messages" id="chat-messages">
+            <div class="empty-state">
+                <i class="fas fa-comments"></i>
+                <h5>Start a conversation</h5>
+                <p>Ask me anything about your blog posts!</p>
+                
+                <div class="quick-questions">
+                    <div class="quick-question" onclick="askQuickQuestion('What plants are discussed in the blog?')">
+                        <i class="fas fa-leaf"></i>
+                        <strong>What plants are discussed?</strong>
+                    </div>
+                    <div class="quick-question" onclick="askQuickQuestion('How do I care for Aloe plants?')">
+                        <i class="fas fa-droplet"></i>
+                        <strong>Aloe plant care tips?</strong>
+                    </div>
+                    <div class="quick-question" onclick="askQuickQuestion('What are the benefits of South African plants?')">
+                        <i class="fas fa-heart"></i>
+                        <strong>Plant benefits?</strong>
+                    </div>
+                    <div class="quick-question" onclick="askQuickQuestion('Tell me about Agapanthus')">
+                        <i class="fas fa-flower"></i>
+                        <strong>About Agapanthus?</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-area">
+            <div class="input-group">
+                <textarea 
+                    id="query-input" 
+                    class="query-input" 
+                    placeholder="Ask a question about your blog posts..."
+                    rows="2"
+                ></textarea>
+                <button id="send-btn" class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane me-2"></i>Send
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let hasGroq = {{ has_groq|tojson }};
+let hasCollection = false;
+let isIndexing = false;
+
+// Check status on load
+document.addEventListener('DOMContentLoaded', () => {
+    checkStatus();
+    
+    // Enter to send
+    document.getElementById('query-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+});
+
+async function checkStatus() {
+    try {
+        const response = await fetch('/api/ai-chat/status');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            const status = data.data;
+            hasGroq = status.has_groq;
+            hasCollection = status.has_collection;
+            
+            let html = '<div>';
+            
+            // Groq status
+            if (hasGroq) {
+                html += '<span class="status-badge success"><i class="fas fa-check-circle"></i>Groq AI: Enabled</span>';
+            } else {
+                html += '<span class="status-badge warning"><i class="fas fa-exclamation-triangle"></i>Groq AI: Not Configured</span>';
+            }
+            
+            // Collection status
+            if (hasCollection) {
+                html += `<span class="status-badge success"><i class="fas fa-database"></i>Indexed: ${status.indexed_chunks || 0} chunks</span>`;
+            } else {
+                html += '<span class="status-badge error"><i class="fas fa-database"></i>Posts Not Indexed</span>';
+            }
+            
+            // Embedding model
+            html += `<span class="status-badge success"><i class="fas fa-brain"></i>${status.embedding_model}</span>`;
+            
+            html += '</div>';
+            
+            // Add index button if needed
+            if (!hasCollection && !isIndexing) {
+                html += '<button class="index-btn mt-3" onclick="indexPosts()"><i class="fas fa-sync me-2"></i>Index Blog Posts</button>';
+            }
+            
+            document.getElementById('status-container').innerHTML = html;
+            
+            // Show settings if Groq is available
+            if (hasGroq) {
+                document.getElementById('settings-row').style.display = 'flex';
+            }
+        }
+    } catch (error) {
+        console.error('Error checking status:', error);
+        document.getElementById('status-container').innerHTML = 
+            '<span class="status-badge error"><i class="fas fa-times-circle"></i>Error checking status</span>';
+    }
+}
+
+async function indexPosts() {
+    if (isIndexing) return;
+    
+    isIndexing = true;
+    document.getElementById('status-container').innerHTML = 
+        '<div class="loading"><div class="loading-spinner"></div>Indexing blog posts... This may take a minute.</div>';
+    
+    try {
+        const response = await fetch('/api/ai-chat/index', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showFlash('✓ Successfully indexed ' + data.total_posts + ' posts!', 'success');
+            checkStatus();
+        } else {
+            showFlash('✗ Error indexing posts: ' + data.message, 'error');
+        }
+    } catch (error) {
+        showFlash('✗ Error: ' + error.message, 'error');
+    } finally {
+        isIndexing = false;
+    }
+}
+
+function askQuickQuestion(question) {
+    document.getElementById('query-input').value = question;
+    sendMessage();
+}
+
+async function sendMessage() {
+    const input = document.getElementById('query-input');
+    const query = input.value.trim();
+    
+    if (!query) return;
+    
+    if (!hasCollection) {
+        showFlash('Please index the blog posts first!', 'warning');
+        return;
+    }
+    
+    // Clear input
+    input.value = '';
+    
+    // Hide empty state
+    const emptyState = document.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
+    
+    // Add user message
+    addMessage('user', query);
+    
+    // Show loading
+    addMessage('loading', 'Thinking...');
+    
+    // Disable send button
+    const sendBtn = document.getElementById('send-btn');
+    sendBtn.disabled = true;
+    
+    try {
+        let response;
+        
+        if (hasGroq) {
+            // Use AI Q&A
+            const model = document.getElementById('model-select').value;
+            const nContext = parseInt(document.getElementById('context-select').value);
+            
+            response = await fetch('/api/ai-chat/ask', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ query, model, n_context: nContext })
+            });
+        } else {
+            // Use vector search only
+            response = await fetch('/api/ai-chat/search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ query, n_results: 3 })
+            });
+        }
+        
+        const data = await response.json();
+        
+        // Remove loading
+        removeLoadingMessage();
+        
+        if (data.status === 'success') {
+            if (hasGroq) {
+                addMessage('assistant', data.answer, data.sources);
+            } else {
+                // Format search results
+                let text = 'Found these relevant posts:\n\n';
+                data.results.forEach((result, i) => {
+                    text += `${i+1}. ${result.title}\n${result.text}\n\n`;
+                });
+                addMessage('assistant', text);
+            }
+        } else {
+            addMessage('assistant', '❌ Error: ' + data.message);
+        }
+    } catch (error) {
+        removeLoadingMessage();
+        addMessage('assistant', '❌ Error: ' + error.message);
+    } finally {
+        sendBtn.disabled = false;
+        input.focus();
+    }
+}
+
+function addMessage(type, content, sources = null) {
+    const messagesDiv = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message message-${type}`;
+    
+    if (type === 'loading') {
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    ${content}
+                </div>
+            </div>
+        `;
+        messageDiv.id = 'loading-message';
+    } else {
+        let html = `<div class="message-content">${content.replace(/\n/g, '<br>')}</div>`;
+        
+        if (sources && sources.length > 0) {
+            html = `
+                <div class="message-content">
+                    ${content.replace(/\n/g, '<br>')}
+                    <div class="message-sources">
+                        <strong>Sources:</strong><br>
+                        ${sources.map(s => `<span class="message-source-item">${s}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        messageDiv.innerHTML = html;
+    }
+    
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function removeLoadingMessage() {
+    const loading = document.getElementById('loading-message');
+    if (loading) loading.remove();
+}
+
+function showFlash(message, type) {
+    // You can implement this to show flash messages
+    alert(message);
+}
+</script>
+{% endblock %}
