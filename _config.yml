@@ -1,28 +1,16 @@
-active_theme: theme1
+active_theme: default
 address: South Africa
 author: Heritage Road Map Team
 baseurl: https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/
 description: Researching and documenting South African indigenous plants through  scientific
   study and botanical research.
-email: info@heritagemap.org
+email: Viincci@proton.me
 facebook_username: your_facebook
 github_username: MrViincciLeRoy
 google_analytics: UA-XXXXXXXXX-X
 instagram_username: your_instagram
 linkedin_username: your_linkedin
 phone: ''
-theme1:
-  accent_color: '#f59e0b'
-  font_body: Roboto
-  font_heading: Ubuntu
-  footer:
-    newsletter_action: ''
-    newsletter_enabled: false
-    show_social: false
-    show_wave: false
-  hero_overlay: 0.6
-  primary_color: '#6366f1'
-  secondary_color: '#10b981'
-title: Heritage Road Map Foundation
+title: Memoir of Viincci
 twitter_username: your_twitter
 url: https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/
