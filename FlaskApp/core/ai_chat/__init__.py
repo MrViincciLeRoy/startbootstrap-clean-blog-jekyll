@@ -12,11 +12,9 @@ def create_app(config_name='development'):
     """Create and configure Flask application"""
     app = Flask(__name__)
     
-    # Configuration
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
-    app.config['GITHUB_TOKEN'] = os.getenv('GITHUB_TOKEN')
-    app.config['REPO_NAME'] = os.getenv('REPO_NAME')
-    app.config['BRANCH'] = os.getenv('BRANCH', 'master')
+    # Load configuration
+    from FlaskApp.config import config_by_name
+    app.config.from_object(config_by_name[config_name])
     
     # Initialize extensions
     login_manager.init_app(app)
