@@ -27,8 +27,12 @@ class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
 
-config = {
+# Export as config_by_name to match existing app structure
+config_by_name = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
     'default': DevelopmentConfig
 }
+
+# Also export as config for backwards compatibility
+config = config_by_name
