@@ -1,4 +1,4 @@
-active_theme: default
+active_theme: theme1
 address: South Africa
 author: Heritage Road Map Team
 baseurl: https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/
@@ -10,24 +10,19 @@ github_username: MrViincciLeRoy
 google_analytics: UA-XXXXXXXXX-X
 instagram_username: your_instagram
 linkedin_username: your_linkedin
-markdown: kramdown
-paginate: 10
-paginate_path: /posts/page:num/
-theme_colors:
-  background: '#000000'
-  footer_bg: '#e0f2fe'
-  footer_text: '#0369a1'
-  link: '#000000'
-  link_hover: '#0284c7'
-  navbar_bg: '#ffffff'
-  navbar_text: '#075985'
-  primary: '#000000'
-  secondary: '#000000'
-  text: '#000000'
-theme_settings:
-  font_family_base: Lora
-  font_family_headings: Open Sans
-  masthead_overlay: 0.5
+phone: ''
+theme1:
+  accent_color: '#f59e0b'
+  font_body: Roboto
+  font_heading: Ubuntu
+  footer:
+    newsletter_action: ''
+    newsletter_enabled: false
+    show_social: false
+    show_wave: false
+  hero_overlay: 0.6
+  primary_color: '#6366f1'
+  secondary_color: '#10b981'
 title: Heritage Road Map Foundation
 twitter_username: your_twitter
 url: https://mrviinccileroy.github.io/startbootstrap-clean-blog-jekyll/
